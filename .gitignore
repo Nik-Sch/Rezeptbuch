@@ -1,0 +1,8 @@
+images/*
+*~
+*.swp
+db.env
+selfsigned
+redisStorage/
+**/*.env
+**/*.vscode

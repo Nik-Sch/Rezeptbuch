@@ -1,0 +1,65 @@
+.recipe-menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 15px;
+  min-height: 110px;
+
+  .filter-recipes {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-self: stretch;
+    min-width: 30%;
+    max-width: 50%;
+    margin: 0 20px;
+    > * {
+      width: 100%;
+    }
+    .search-recipes {
+      margin-bottom: 5px;
+    }
+  }
+
+  .sort-recipes-wrapper {
+    align-self: flex-end;
+    .sort-button {
+      white-space: nowrap;
+    }
+  }
+
+  .add-recipe {
+    align-self: flex-start;
+  }
+
+  .spacer {
+    flex: 1 0;
+  }
+}
+
+.drawer {
+  .settings {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    .spacer {
+      flex-grow: 1;
+    }
+    .logout-button {
+      margin-left: 10px;
+    }
+  }
+
+  .control {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    .sort-recipes-wrapper {
+      margin-left: 15px;
+    }
+
+    .filter-categories {
+      max-width: calc(100% - 135px);
+    }
+  }
+}

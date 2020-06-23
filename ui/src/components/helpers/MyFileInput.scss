@@ -1,0 +1,10 @@
+label.my-file-input {
+  input[type="file"] {
+    display: none;
+  }
+  display: flex;
+  flex-direction: row;
+  .text {
+    margin-right: 0;
+  }
+}

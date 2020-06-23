@@ -1,0 +1,85 @@
+version: '3'
+
+services:
+
+  db:
+    image: mariadb
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    env_file:
+      - db.env
+    networks:
+      - rezeptbuch
+
+  redis:
+    image: redis
+    command: --appendonly yes
+    volumes:
+      - redisStorage:/data
+    restart: always
+    networks:
+      - rezeptbuch
+
+  api:
+    build: ./api
+    restart: always
+    volumes:
+      - ./api:/usr/src/app # only for debugging
+    environment:
+      - MYSQL_HOST=db
+      - IMAGE_DIRECTORY=/usr/src/app/images
+    env_file:
+      - db.env
+      - api/.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - rezeptbuch
+
+  ui:
+    build: ./ui
+    restart: always
+    depends_on:
+      - api
+    networks:
+      - rezeptbuch
+
+  rezeptbuch:
+    build: ./proxy
+    container_name: rezeptbuch
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - ./selfsigned:/certs:ro
+    depends_on:
+      - ui
+    networks:
+      - rezeptbuch
+      # - system-proxy_default
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 81:80
+    environment:
+      - PMA_HOST=db
+    depends_on:
+      - db
+    networks:
+      - rezeptbuch
+
+volumes:
+  images:
+  db:
+  redisStorage:
+
+
+networks:
+  rezeptbuch:
+    driver: bridge
+  # system-proxy_default:
+  #   external: true

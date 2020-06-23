@@ -1,0 +1,64 @@
+@import "../util/variables.scss";
+@import "~@blueprintjs/core/lib/scss/variables";
+
+.login {
+  max-width: 450px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  .form-group,
+  .login-button {
+    margin: 10px 20px;
+    width: calc(100% - 40px);
+  }
+
+  .fade-enter {
+    opacity: 0.01;
+    height: 0px;
+  }
+  .fade-enter-active {
+    opacity: 1;
+    height: 65px;
+    transition: all 300ms;
+  }
+  .fade-exit {
+    opacity: 1;
+    height: 65px;
+  }
+  .fade-exit-active {
+    opacity: 0.01;
+    height: 0px;
+    transition: all 300ms;
+  }
+
+  .toggle-login {
+    padding: 0 20px;
+    display: flex;
+    justify-content: flex-end;
+    .toggle-button {
+      margin-left: 5px;
+    }
+    .toggle-button:hover {
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  }
+}
+.error-callout {
+  margin: 0 auto;
+  margin-top: 20px;
+  max-width: 450px;
+  .error-callout-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+.card-wrapper {
+  padding: 0 20px;
+}
+
+.login-header.Desktop-header {
+  max-width: 500px;
+  margin: 20px auto;
+}

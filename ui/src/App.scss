@@ -1,0 +1,41 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+@import "util/variables";
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,500;0,600;1,500&family=Ubuntu:wght@400;700&display=swap');
+
+body,
+.bp3-button,
+.bp3-input,
+.bp3-input-ghost {
+  font-family: "Ubuntu", sans-serif;
+}
+
+.App {
+  padding: 10px;
+  text-align: center;
+  width: 100%;
+  min-height: 100vh;
+  height: inherit;
+}
+
+.bp3-dark {
+  background-color: $background-dark;
+  .bp3-card {
+    background-color: $background-dark-card;
+  }
+}
+
+.bp3-dialog {
+  margin: 30px 20px;
+}
+
+:focus {
+  outline: none !important;
+}
+button::-moz-focus-inner {
+  border: 0;
+}
+
+.mobile-menu-item {
+  font-size: larger;
+  line-height: 1.5em;
+}

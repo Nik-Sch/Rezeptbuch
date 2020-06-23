@@ -1,0 +1,286 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+.recipe-container {
+  margin: 20px;
+
+  .recipe {
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: justify;
+    text-justify: inter-word;
+    overflow: hidden;
+
+    .edit-container {
+      align-self: flex-end;
+
+      .bp3-button-group {
+        margin: 0 20px;
+      }
+    }
+
+    .bp3-editable-text {
+      width: 100%;
+    }
+
+    .bp3-editable-text-content {
+      // chrome is strange
+      overflow: hidden !important;
+    }
+
+    .text-image-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin: 10px 0;
+
+      .text-wrapper {
+        flex: 1 1 0;
+        padding-right: 20px;
+        .category-select {
+          max-width: 23ch;
+        }
+      }
+    }
+    .title-wrapper {
+      width: 100%;
+      .title {
+        margin-top: 20px;
+        font-family: "Montserrat Alternates", sans-serif;
+      }
+    }
+    .user {
+      margin-top: 20px;
+    }
+    .ingredients-title,
+    .description-title {
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+
+    .ingredients-title {
+      margin-top: 30px;
+    }
+
+    .description,
+    .ingredients-line,
+    .no-ingredients {
+      margin-left: 20px;
+      max-width: calc(100% - 20px);
+    }
+
+    .description {
+      margin-top: 3px;
+      line-height: 1.5;
+      width: 100%;
+    }
+
+    .image {
+      cursor: pointer;
+      flex: 1 1 auto;
+      margin: 0 20px;
+      max-width: 35%;
+      img {
+        max-width: 100%;
+        max-height: 50vh;
+        object-fit: cover;
+        border-radius: 6px;
+        box-shadow: $pt-dark-elevation-shadow-2;
+      }
+      img:hover {
+        box-shadow: $pt-dark-elevation-shadow-3;
+      }
+    }
+
+    .image,
+    label {
+      flex: 0 1 auto;
+      align-self: center;
+    }
+    .category-select,
+    .category-select .bp3-input {
+      font-family: "Montserrat Alternates", sans-serif;
+      font-style: italic;
+    }
+
+    .ingredients-line {
+      display: flex;
+      align-items: flex-start;
+      margin-top: 3px;
+      margin-bottom: 3px;
+      .bp3-icon {
+        margin-right: 5px;
+        padding: 1px 0;
+      }
+      .ingredients-line-cross:hover {
+        cursor: pointer;
+        box-shadow: $pt-dark-elevation-shadow-3;
+      }
+    }
+  }
+
+  .title.bp3-skeleton {
+    height: 35px;
+    width: 300px;
+  }
+
+  .category-select.bp3-skeleton {
+    display: inline-block;
+    height: 20px;
+    width: 250px;
+  }
+
+  .ingredients-line .ingredients-line-text.bp3-skeleton {
+    display: inline-block;
+    width: 250px;
+    height: 1em;
+  }
+  .description.bp3-skeleton {
+    width: 800px;
+    height: 4.8em;
+  }
+
+  .no-ingredients {
+    color: rgba($gray1, 0.6);
+  }
+}
+.bp3-dark .no-ingredients {
+  color: rgba($gray4, 0.6);
+}
+.popover-button-container {
+  display: flex;
+  .popover-left {
+    margin-right: 15px;
+  }
+}
+
+.description.bp3-editable-text {
+  width: 100%;
+  .bp3-popover-wrapper,
+  .bp3-popover-target {
+    display: block;
+    width: 100%;
+  }
+}
+.description .bp3-editable-text-content {
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.recipe-container-mobile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: justify;
+  text-justify: inter-word;
+  overflow: hidden;
+
+  .title {
+    font-family: "Montserrat Alternates", sans-serif;
+    text-align: center;
+    width: 100%;
+    .bp3-input {
+      font-family: "Montserrat Alternates", sans-serif;
+    }
+  }
+
+  .category-select {
+    font-family: "Montserrat Alternates", sans-serif;
+    font-style: italic;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    .bp3-button {
+      font-family: "Montserrat Alternates", sans-serif;
+      font-style: italic;
+    }
+  }
+
+  .ingredients-title,
+  .description-title {
+    margin-top: 10px;
+    margin-bottom: 5px;
+  }
+
+  .ingredients-title {
+    margin-top: 30px;
+  }
+
+  // .description,
+  .ingredients-line {
+    margin-left: 20px;
+    max-width: calc(100% - 40px);
+  }
+
+  .ingredients-edit,
+  .description {
+    margin-left: 15px;
+    margin-top: 5px;
+    width: calc(100vw - 60px);
+  }
+
+  .description {
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .text-wrapper {
+    margin: 15px;
+    width: calc(100% - 30px);
+  }
+
+  .image {
+    cursor: pointer;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 30vh;
+    img {
+      width: 100%;
+      max-height: 30vh;
+      object-fit: cover;
+    }
+  }
+  .image-button {
+    display: block;
+    margin: 0 auto;
+    margin-top: 15px;
+  }
+
+  .title.bp3-skeleton {
+    height: 30px;
+    width: 90vw;
+    margin: 0 auto;
+    margin-bottom: 15px;
+  }
+
+  .category-select.bp3-skeleton {
+    height: 20px;
+    width: 60vw;
+    margin: 0 auto;
+  }
+
+  .ingredients-line-text.bp3-skeleton {
+    display: inline-block;
+    width: 40vw;
+    height: 1em;
+  }
+  .description.bp3-skeleton {
+    width: 90vw;
+    height: 4.8em;
+  }
+  .user {
+    margin-top: 15px;
+  }
+}
+.edit-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}

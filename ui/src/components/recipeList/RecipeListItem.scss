@@ -1,0 +1,130 @@
+@import "../../util/variables";
+
+.recipe-list-item {
+  display: flex;
+  margin: 10px 15px;
+  height: 150px;
+
+  .thumbnail {
+    width: 110px;
+    height: 110px;
+    min-width: 110px;
+    min-height: 110px;
+    border-radius: 5px;
+    .recipe-image {
+      width: 110px;
+      height: 110px;
+      object-fit: cover;
+    }
+  }
+  .recipe-text-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    padding-left: 20px;
+
+    .title-category-wrapper {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      font-family: "Montserrat Alternates", sans-serif;
+      .recipe-category {
+        flex-shrink: 0;
+        font-style: italic;
+        margin-left: 20px;
+      }
+    }
+
+    .info-wrapper {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+
+      .recipe-description {
+        max-width: 80%;
+        white-space: pre-wrap;
+        max-height: 3.6em;
+        line-height: 1.2em;
+      }
+      .recipe-date {
+        align-self: flex-end;
+      }
+    }
+  }
+
+  .recipe-title.bp3-skeleton {
+    height: 25px;
+    width: 300px;
+  }
+  .recipe-category.bp3-skeleton {
+    height: 20px;
+    width: 250px;
+  }
+  .recipe-description.bp3-skeleton {
+    height: 3.6em;
+    width: 450px;
+  }
+}
+
+.ellipsis {
+  overflow: hidden;
+  position: relative;
+}
+
+.ellipsis::after {
+  content: "";
+  text-align: right;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 70%;
+  height: 1.2em;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7) 50%);
+}
+.bp3-dark .ellipsis::after {
+  background: linear-gradient(to right, rgba($background-dark-card, 0), rgba($background-dark-card, 0.7) 50%);
+}
+
+.mobile {
+  .recipe-list-item {
+    margin: 15px;
+    .recipe-text-wrapper {
+      max-width: calc(100vw - 200px);
+      flex-direction: column;
+      padding-left: 20px;
+
+      .title-category-wrapper {
+        flex-direction: column;
+        .recipe-title {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-height: 2.4em;
+          line-height: 1.2em;
+        }
+        .recipe-category {
+          margin-left: inherit;
+        }
+      }
+      .info-wrapper {
+        .recipe-description {
+          max-height: 1.2em;
+          max-width: 100%;
+        }
+      }
+    }
+
+    .recipe-title.bp3-skeleton {
+      height: 25px;
+      width: 90%;
+    }
+    .recipe-category.bp3-skeleton {
+      height: 20px;
+      width: 60%;
+    }
+    .recipe-description.bp3-skeleton {
+      height: 3.6em;
+      width: 95%;
+    }
+  }
+}

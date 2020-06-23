@@ -1,0 +1,8 @@
+.description-select-popover .bp3-menu {
+  max-height: 300px;
+  max-width: 400px;
+  overflow: auto;
+  .bp3-popover-content {
+    padding: 5px;
+  }
+}

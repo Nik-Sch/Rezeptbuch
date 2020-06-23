@@ -1,0 +1,11 @@
+$mobile-width: 700px;
+// $background-dark: hsl(206, 6%, 14%);
+// $background-dark-card: hsl(206, 10%, 18%);
+$background-dark: #293742;
+$background-dark-card: #30404d;
+
+:export {
+  mobileWidth: $mobile-width;
+  backgroundDark: $background-dark;
+  backgroundDarkCard: $background-dark-card;
+}

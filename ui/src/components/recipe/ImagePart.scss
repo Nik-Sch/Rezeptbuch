@@ -1,0 +1,62 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+.bp3-dialog.image-dialog {
+  width: unset;
+  padding: 5px 5px;
+  margin: 0;
+  .bp3-dialog-body {
+    max-width: calc(100vw - 85px);
+    max-height: calc(100vh - 85px);
+    border-radius: 6px;
+  }
+  .mobile {
+    max-width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+    border-radius: 6px;
+  }
+}
+
+.popover-edit-image {
+  display: flex;
+  justify-content: space-around;
+
+  .file-input {
+    margin-bottom: 0;
+  }
+  .delete-image {
+    display: block;
+  }
+}
+
+.mobile-edit-wrapper {
+  position: relative;
+  .mobile-edit-image {
+    position: absolute;
+  }
+  .backdrop {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba($dark-gray5, 0.6);
+
+    .mobile-edit-card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: row;
+      .file-input {
+        margin-right: 15px;
+      }
+    }
+  }
+  @supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+    .backdrop {
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
+    }
+  }
+}

@@ -1,0 +1,59 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+.recipe-list {
+  max-width: 1040px;
+  margin: 0 auto;
+  margin-top: 15px;
+  width: 100%;
+
+  .notification-asker {
+    margin: 15px;
+    width: auto;
+    .title-wrapper {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+
+  .ScrollbarsCustom-Track:hover {
+    background: rgba(0, 0, 0, 0.2) none repeat scroll 0% 0% !important;
+    cursor: pointer;
+  }
+  .ScrollbarsCustom-Track {
+    margin-right: 10px;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  .bp3-divider {
+    border-bottom: 2px solid rgba(16, 22, 26, 0.15);
+    margin: 5px 25px;
+  }
+
+  .error {
+    margin: 20px auto;
+    text-align: center;
+    font-family: "Montserrat Alternates", sans-serif;
+    padding: 0 25px;
+  }
+}
+
+.recipe-search {
+  margin-right: 15px;
+}
+
+.fab-add {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  font-size: 40px !important;
+  // background-color: $green2;
+  // color: #f5f8fa;
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.2), 0 4px 8px rgba(16, 22, 26, 0.4), 0 18px 46px 6px rgba(16, 22, 26, 0.4) !important;
+  border-radius: 100%;
+  border: none;
+  outline: none;
+}
