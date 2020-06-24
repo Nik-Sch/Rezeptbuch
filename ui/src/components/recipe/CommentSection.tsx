@@ -267,7 +267,7 @@ export default function CommentSection(props: IProps) {
     <div className='comment-section'>
       <Divider />
       <H3 className='comment-count'>
-        {(props.comments.length === 0 && props.writeAccess)
+        {(props.comments.length === 0 && props.writeAccess && !mobile)
           ? t('comments_0')
           : t('comments', { count: props.comments.length })}
       </H3>
