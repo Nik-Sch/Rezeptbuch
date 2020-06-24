@@ -81,5 +81,21 @@
   "noMatch": "The passwords don't match",
   "accountCreated": "The account was successfully created.",
   "accountError": "There was an error while creating the account. Inform Niklas.",
-  "accountErrorExists": "The username already exists"
+  "accountErrorExists": "The username already exists",
+  "edit": "Edit",
+  "edited": "edited {{date}}",
+  "deleteComment": "Delete Comment",
+  "commentDeleted": "The comment was successfully deleted.",
+  "commentNotDeleted": "There was a problem while deleting the comment.",
+  "commentNotSaved": "There was a problem while saving the comment.",
+  "save": "Save",
+  "commentSaved": "The comment was successfully saved.",
+  "commentNotModified": "The comment has not been modified.",
+  "comments": "One Comment",
+  "comments_0": "Be the first to comment:",
+  "comments_plural": "{{count}} Comments",
+  "editComment": "Edit the comment...",
+  "addComment": "Add a comment to the recipe...",
+  "comment": "Comment",
+  "newComment": "new comment"
 }

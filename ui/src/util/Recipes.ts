@@ -1,13 +1,13 @@
 import dayjs from "dayjs";
 import { Base64 } from 'js-base64';
-import { set, get, keys, del } from 'idb-keyval';
+import { set, get, del } from 'idb-keyval';
 import axios from 'axios';
-import { localStorageUserInfo } from "./StorageKeys";
+import { localStorageUserInfo, localStorageUserChecksum, localStorageRecipeChecksum, localStorageCommentChecksum, localStorageCategoryChecksum } from "./StorageKeys";
 
 const RECIPE_CACHE = 'recipes';
 const CATEGORY_CACHE = 'categories';
 const USER_CACHE = 'users';
-const CHECKSUM_CACHE = 'DBchecksum';
+const COMMENT_CACHE = 'DBchecksum';
 
 
 export const emptyRecipe: IRecipe = {
@@ -26,10 +26,29 @@ export const emptyRecipe: IRecipe = {
     readOnly: true,
     user: ''
   },
+  comments: [],
 }
 export interface ICategory {
   id: number;
   name: string;
+}
+
+export interface IComment {
+  id: number;
+  text: string;
+  user: IUser;
+  date: string;
+  editedDate?: string;
+}
+
+export interface IApiComment {
+  id: number;
+  text: string;
+  userId: number;
+  recipeId: number;
+  date: string;
+  editedDate?: string;
+
 }
 
 export interface IRecipe {
@@ -40,7 +59,8 @@ export interface IRecipe {
   image: string;
   date: string;
   id: number;
-  user: IApiUser;
+  user: IUser;
+  comments: IComment[];
 }
 
 interface IApiRecipe {
@@ -60,19 +80,11 @@ interface IApiCategory {
   userId: number
 }
 
-interface IApiUser {
+export interface IUser {
   id: number,
   user: string,
   readOnly: boolean
 }
-
-interface IApiResult {
-  recipes: IApiRecipe[],
-  categories: IApiCategory[],
-  users: IApiUser[],
-  checksum: number
-}
-
 
 
 function mapRecipeToAPI(recipe: IRecipe): IApiRecipe {
@@ -96,11 +108,12 @@ function mapRecipeToAPI(recipe: IRecipe): IApiRecipe {
   }
 }
 
-function apiToRecipe(r: IApiRecipe, categories: ICategory[], users: IApiUser[]): IRecipe {
+function apiToRecipe(r: IApiRecipe, categories: ICategory[], users: IUser[], comments: IApiComment[]): IRecipe {
   const category = categories.find(c => c.id === r.categoryId);
   const user = users.find(u => u.id === r.userId);
+  const recipeComments = comments.filter(c => c.recipeId === r.id).map(c => apiToComment(c, users));
 
-  const result: IRecipe = {
+  return {
     title: r.title,
     category: {
       name: category?.name || '',
@@ -115,15 +128,35 @@ function apiToRecipe(r: IApiRecipe, categories: ICategory[], users: IApiUser[]):
       id: user?.id || -1,
       readOnly: user?.readOnly || true,
       user: user?.user || ''
-    }
+    },
+    comments: recipeComments
   };
-  return result;
 }
 
-function apiToCategories(x: IApiResult): ICategory[] {
-  return x.categories.map((c) => {
+function reloadComments(r: IRecipe, users: IUser[], comments: IApiComment[]): IRecipe {
+  const recipeComments = comments.filter(c => c.recipeId === r.id).map(c => apiToComment(c, users));
+  return {...r, comments: recipeComments};
+}
+
+function apiToCategories(categories: IApiCategory[]): ICategory[] {
+  return categories.map((c) => {
     return { id: c.id, name: c.name }
   });
+}
+
+function apiToComment(comment: IApiComment, users: IUser[]): IComment {
+  const user = users.find(u => u.id === comment.userId);
+  return {
+    text: comment.text,
+    user: {
+      id: user?.id || -1,
+      readOnly: user?.readOnly || true,
+      user: user?.user || ''
+    },
+    id: comment.id,
+    date: comment.date,
+    editedDate: comment.editedDate
+  }
 }
 
 export function getHeaders(): Headers {
@@ -146,24 +179,30 @@ class Recipes {
 
   private recipeCache: IRecipe[] = [];
   private categoryCache: ICategory[] = [];
-  private userCache: IApiUser[] = [];
+  private commentCache: IApiComment[] = [];
+  private userCache: IUser[] = [];
 
   private callbacks: ICallBack[] = [];
 
   constructor() {
     get<IRecipe[]>(RECIPE_CACHE).then(async (result) => {
+      for (const recipe of result) {
+        if (!recipe.comments) {
+          recipe.comments = [];
+        }
+      }
       this.recipeCache = result || [];
       this.categoryCache = await get<ICategory[]>(CATEGORY_CACHE) || [];
-      this.userCache = await get<IApiUser[]>(USER_CACHE) || [];
+      this.userCache = await get<IUser[]>(USER_CACHE) || [];
       this.notify();
     });
-    this.fetch();
+    this.fetchData();
   }
 
   public subscribe(callback: ICallBack) {
     this.callbacks.push(callback);
     callback(this.recipeCache, this.categoryCache);
-    this.fetch();
+    this.fetchData();
     return () => { recipesHandler.unsubscribe(callback); };
   }
 
@@ -187,6 +226,42 @@ class Recipes {
       .catch(callbacks?.onFailure);
   }
 
+  public async deleteComment(comment: IComment): Promise<boolean> {
+    const headers = getHeaders();
+    headers.append('Content-Type', 'application/json');
+    const result = await fetch(`/api/comments/${comment.id}`, {
+      method: 'DELETE',
+      headers
+    });
+    this.fetchData();
+    return result.status === 204;
+  }
+
+  public async updateComment(comment: IComment): Promise<boolean> {
+    const headers = getHeaders();
+    headers.append('Content-Type', 'application/json');
+    const body = { text: comment.text }
+    const result = await fetch(`/api/comments/${comment.id}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body)
+    });
+    this.fetchData();
+    return result.status === 200;
+  }
+  public async addComment(comment: string, recipeId: number): Promise<boolean> {
+    const headers = getHeaders();
+    headers.append('Content-Type', 'application/json');
+    const body = { text: comment, recipeId: recipeId }
+    const result = await fetch(`/api/comments`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body)
+    });
+    this.fetchData();
+    return result.status === 200;
+  }
+
   public async deleteImage(image: string): Promise<boolean> {
     const headers = getHeaders();
     headers.append('Content-Type', 'application/json');
@@ -194,11 +269,10 @@ class Recipes {
       method: 'DELETE',
       headers
     });
-    this.fetch();
     return result.status === 204;
   }
 
-  public async addCategory(name: string): Promise<ICategory|undefined> {
+  public async addCategory(name: string): Promise<ICategory | undefined> {
     const headers = getHeaders();
     headers.append('Content-Type', 'application/json');
     const body = { name };
@@ -210,11 +284,11 @@ class Recipes {
     if (result.status !== 200) {
       return undefined;
     }
-    this.fetch();
+    this.fetchData();
     return { id: (await result.json()).id, name };
   }
 
-  public async addRecipe(recipe: IRecipe): Promise<number|undefined> {
+  public async addRecipe(recipe: IRecipe): Promise<number | undefined> {
     const headers = getHeaders();
     headers.append('Content-Type', 'application/json');
     const body = mapRecipeToAPI(recipe);
@@ -226,7 +300,7 @@ class Recipes {
     if (result.status !== 200) {
       return undefined;
     }
-    this.fetch();
+    this.fetchData();
     return (await result.json()).id;
   }
 
@@ -239,7 +313,7 @@ class Recipes {
       headers,
       body: JSON.stringify(body)
     });
-    this.fetch();
+    this.fetchData();
     return result.status === 200;
   }
 
@@ -250,7 +324,7 @@ class Recipes {
       method: 'DELETE',
       headers
     })
-    this.fetch();
+    this.fetchData();
     return result.status === 204;
   }
 
@@ -261,35 +335,116 @@ class Recipes {
     }
   }
 
-  async fetch() {
+  async fetchData() {
     try {
-      const url = (await keys()).includes(CHECKSUM_CACHE)
-        ? `/api/recipesUpdate/${await get<number>(CHECKSUM_CACHE)}`
-        : '/api/recipes';
-      const result = await fetch(url);
-      if (result.status === 200) {
-        const resultJson: IApiResult = await result.json();
-        this.categoryCache = apiToCategories(resultJson);
+      // fetch users, categories, comments and finally recipes
+      let reloadCommentsAfterFetching = false;
+
+      let url = '/api/users';
+      let checksum = localStorage.getItem(localStorageUserChecksum);
+      if (checksum) {
+        url += `?checksum=${checksum}`;
+      }
+      let result = await fetch(url);
+      if (result.status === 204) {
+        if (this.userCache.length === 0) {
+          this.userCache = await get<IUser[]>(USER_CACHE) || [];
+        }
+      } else if (result.status !== 200) {
+        await fetchUserInfo();
+        return;
+      } else {
+        reloadCommentsAfterFetching = true;
+        const resultJson: {
+          users: IUser[],
+          checksum: number
+        } = await result.json();
         this.userCache = resultJson.users;
-        this.recipeCache = resultJson.recipes.map(r => apiToRecipe(r, this.categoryCache, this.userCache));
-        this.notify();
-        await set(RECIPE_CACHE, this.recipeCache)//.catch(err => console.log(err));
-        await set(CATEGORY_CACHE, this.categoryCache)//.catch(err => console.log(err));
-        await set(USER_CACHE, this.userCache)//.catch(err => console.log(err));
-        await set(CHECKSUM_CACHE, resultJson.checksum)//.catch(err => console.log(err));
-      } else if (result.status === 204) {
+        await set(USER_CACHE, this.userCache);
+        localStorage.setItem(localStorageUserChecksum, JSON.stringify(resultJson.checksum));
+      }
+
+
+      url = '/api/categories';
+      checksum = localStorage.getItem(localStorageCategoryChecksum);
+      if (checksum) {
+        url += `?checksum=${checksum}`;
+      }
+      result = await fetch(url);
+      if (result.status === 204) {
+        if (this.categoryCache.length === 0) {
+          this.categoryCache = await get<ICategory[]>(CATEGORY_CACHE) || [];
+        }
+      } else if (result.status !== 200) {
+        await fetchUserInfo();
+        return;
+      } else {
+        reloadCommentsAfterFetching = true;
+        const resultJson: {
+          categories: IApiCategory[],
+          checksum: number
+        } = await result.json();
+        this.categoryCache = apiToCategories(resultJson.categories);
+        await set(CATEGORY_CACHE, this.categoryCache);
+        localStorage.setItem(localStorageCategoryChecksum, JSON.stringify(resultJson.checksum));
+      }
+
+      url = '/api/comments';
+      checksum = localStorage.getItem(localStorageCommentChecksum);
+      if (checksum) {
+        url += `?checksum=${checksum}`;
+      }
+      result = await fetch(url);
+      if (result.status === 204) {
+        if (this.commentCache.length === 0) {
+          this.commentCache = await get<IApiComment[]>(COMMENT_CACHE) || [];
+        }
+      } else if (result.status !== 200) {
+        await fetchUserInfo();
+        return;
+      } else {
+        reloadCommentsAfterFetching = true;
+        const resultJson: {
+          comments: IApiComment[],
+          checksum: number
+        } = await result.json();
+        this.commentCache = resultJson.comments;
+        await set(COMMENT_CACHE, this.commentCache);
+        localStorage.setItem(localStorageCommentChecksum, JSON.stringify(resultJson.checksum));
+      }
+      console.log('shouldReloadComments', reloadCommentsAfterFetching);
+
+      url = '/api/recipes';
+      checksum = localStorage.getItem(localStorageRecipeChecksum);
+      if (checksum) {
+        url += `?checksum=${checksum}`;
+      }
+      result = await fetch(url);
+      if (result.status === 204) {
         if (this.recipeCache.length === 0) {
           this.recipeCache = await get<IRecipe[]>(RECIPE_CACHE) || [];
-          this.userCache = await get<IApiUser[]>(USER_CACHE) || [];
-          this.categoryCache = await get<ICategory[]>(CATEGORY_CACHE) || [];
-          this.notify();
         }
-      } else {
+      } else if (result.status !== 200) {
         await fetchUserInfo();
-        // console.error('fetching result status: ', result.status);
+        return;
+      } else {
+        reloadCommentsAfterFetching = false; // no need to reload comments because we do it here, anyways
+        const resultJson: {
+          recipes: IApiRecipe[],
+          checksum: number
+        } = await result.json();
+        this.recipeCache = resultJson.recipes.map(r => apiToRecipe(r, this.categoryCache, this.userCache, this.commentCache));
+        await set(RECIPE_CACHE, this.recipeCache);
+        localStorage.setItem(localStorageRecipeChecksum, JSON.stringify(resultJson.checksum));
       }
-    } catch {
-      console.error('failed to fetch, offline');
+
+      if (reloadCommentsAfterFetching) {
+        this.recipeCache = this.recipeCache.map(r => reloadComments(r, this.userCache, this.commentCache));
+        await set(RECIPE_CACHE, this.recipeCache);
+      }
+      this.notify();
+    } catch (e) {
+      console.error('failed to fetch, offline', e);
     }
   }
 }
@@ -355,7 +510,7 @@ export async function loginToRecipes(user: string, password: string) {
   headers.append('Authorization', 'Basic ' + Base64.encode(`${user}:${password}`));
   const result = await fetch(`/api/login`, { headers });
   if (result.status === 200) {
-    recipesHandler.fetch();
+    recipesHandler.fetchData();
     await fetchUserInfo();
     return true;
   } else {
@@ -368,7 +523,7 @@ export async function createAccount(user: string, password: string) {
   headers.append('Content-Type', 'application/json');
   const result = await fetch('/api/users', {
     method: 'POST',
-    body: JSON.stringify({username: user, password}),
+    body: JSON.stringify({ username: user, password }),
     headers,
   });
   console.log(await result.text());
@@ -380,7 +535,10 @@ export async function logout() {
   if (result.status === 200) {
     userInfo = undefined;
     localStorage.removeItem(localStorageUserInfo);
-    await del(CHECKSUM_CACHE);
+    localStorage.removeItem(localStorageCategoryChecksum);
+    localStorage.removeItem(localStorageCommentChecksum);
+    localStorage.removeItem(localStorageRecipeChecksum);
+    localStorage.removeItem(localStorageUserChecksum);
     await del(RECIPE_CACHE);
     await del(CATEGORY_CACHE);
   }

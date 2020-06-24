@@ -1,0 +1,36 @@
+.comment-section {
+  margin: 0 auto;
+  max-width: 1000px;
+  .comment-count {
+    margin: 20px;
+  }
+  .comment {
+    margin: 15px 20px;
+    display: flex;
+    min-height: 75px;
+    .spacer {
+      flex: 1 0;
+    }
+    .content {
+      flex: 1 0;
+      .header {
+        display: flex;
+        .date::before {
+          content: "-";
+          margin: 0 5px;
+        }
+      }
+      .text {
+        margin-left: 10px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+    }
+    .controls {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      margin: 5px;
+    }
+  }
+}

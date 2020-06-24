@@ -81,5 +81,22 @@
   "new": "Neu hier?",
   "noMatch": "Die Passwörter stimmen nicht überein",
   "passwordRepeat": "Passwort erneut eingeben",
-  "recipeCreatedError": "Beim Erstellen des Rezepts ist ein unerwarteter Fehler aufgetreten. Informiere Niklas."
+  "recipeCreatedError": "Beim Erstellen des Rezepts ist ein unerwarteter Fehler aufgetreten. Informiere Niklas.",
+  "edit": "Editieren",
+  "edited": "{{date}} editiert",
+  "deleteComment": "Kommentar löschen",
+  "addComment": "Füge einen Kommentar hinzu...",
+  "comment": "Kommentieren",
+  "commentDeleted": "Der Kommentar wurde erfolgreich gelöscht.",
+  "commentNotDeleted": "Beim Löschen des Kommentars ist ein Fehler aufgetreten.",
+  "commentNotModified": "Der Kommentar wurde nicht verändert.",
+  "commentNotSaved": "Beim Speichern des Kommentars ist ein Fehler aufgetreten.",
+  "commentSaved": "Der Kommentar wurde erfolgreich gespeichert.",
+  "comments": "Ein Kommentar",
+  "comments_0": "Sei der erste der kommentiert:",
+  "comments_plural": "{{count}} Kommentare",
+  "editComment": "Kommentar bearbeiten...",
+  "newComment": "neuer Kommentar",
+  "save": "Speichern",
+  "tooltipNoWriteAccess": "Du kannst dieses Rezept nicht ändern."
 }

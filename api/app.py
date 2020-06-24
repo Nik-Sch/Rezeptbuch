@@ -37,6 +37,10 @@ Session(app)
 redisNotificationsDB = redis.Redis(host='redis', port=6379, db=0)
 redisUniqueRecipeDB = redis.Redis(host='redis', port=6379, db=1)
 
+checksumRequestParser = reqparse.RequestParser()
+checksumRequestParser.add_argument('checksum', type=int, required=False,
+                           help='No checksum provided')
+
 
 @auth.get_password
 def get_password(username):
@@ -73,21 +77,6 @@ def status():
             }), 200)
     else:
         return unauthorized()
-
-@app.route('/users', methods=['POST'])
-def addUser():
-    reqParser = reqparse.RequestParser()
-    reqParser.add_argument('username', type=str, required=True,
-                           help='No username provided',
-                           location='json')
-    reqParser.add_argument('password', type=str, required=True,
-                           help='No password provided',
-                           location='json')
-    args = reqParser.parse_args()
-    if db.addUser(args['username'], args['password']):
-        return make_response(jsonify({}), 200)
-    else:
-        return make_response(jsonify({}), 400)
 
 def notifyNewRecipe(recipe, exclude):
     print('sending notifications, but not to ', exclude)
@@ -144,6 +133,99 @@ def addUniqueRecipe():
     redisUniqueRecipeDB.expire(uuid, 60 * 60 * 24 * 30) # 30 days valid
     return make_response(jsonify({'createdId': uuid}), 200)
 
+class UserListAPI(Resource):
+    def get(self):
+        userName = session.get('userName', None)
+        if (userName == None):
+            return unauthorized()
+        args = checksumRequestParser.parse_args()
+        return db.getUsers(userName, args['checksum'])
+
+
+    def post(self):
+        reqParser = reqparse.RequestParser()
+        reqParser.add_argument('username', type=str, required=True,
+                            help='No username provided',
+                            location='json')
+        reqParser.add_argument('password', type=str, required=True,
+                            help='No password provided',
+                            location='json')
+        args = reqParser.parse_args()
+        if db.addUser(args['username'], args['password']):
+            return make_response(jsonify({}), 200)
+        else:
+            return make_response(jsonify({}), 400)
+
+class CommentListAPI(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('text', type=str, required=True,
+                                   help='No text provided',
+                                   location='json')
+        self.reqparse.add_argument('recipeId', type=int, required=True,
+                                   help='No recipe provided',
+                                   location='json')
+
+    def get(self):
+        userName = session.get('userName', None)
+        if (userName == None):
+            return unauthorized()
+        args = checksumRequestParser.parse_args()
+        return db.getComments(userName, args['checksum'])
+
+    def post(self):
+        userName = session.get('userName', None)
+        if (userName == None):
+            return unauthorized()
+        if not db.hasWriteAccess(userName):
+            return make_response(jsonify({'error': 'no write access'}), 403)
+        args = self.reqparse.parse_args()
+        try:
+            return db.addComment(userName, args['text'], args['recipeId'])
+        except:
+            return make_response(jsonify({'error': 'no write access'}), 405)
+
+class CommentAPI(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('text', type=str, required=True,
+                                   help='No text provided',
+                                   location='json')
+
+    def get(self, commentId):
+        userName = session.get('userName', None)
+        if (userName == None):
+            return unauthorized()
+        result = db.getComment(userName, commentId)
+        if result is not None:
+            return result
+        return make_response(jsonify({'error': 'Not found'}), 404)
+        return
+    
+    def put(self, commentId):
+        userName = session.get('userName', None)
+        if (userName == None):
+            return unauthorized()
+        if not db.hasWriteAccess(userName):
+            return make_response(jsonify({'error': 'no write access'}), 403)
+        args = self.reqparse.parse_args()
+        if db.updateComment(userName, commentId, args['text']):
+            return make_response('', 200)
+        else:
+            return make_response(jsonify({'error': 'No comment updated'}), 404)
+
+    def delete(self, commentId):
+        userName = session.get('userName', None)
+        if (userName == None):
+            return unauthorized()
+        if not db.hasWriteAccess(userName):
+            return make_response(jsonify({'error': 'no write access'}), 403)
+        result = db.deleteComment(userName, commentId)
+        if result == 0:
+            return make_response("", 404)
+        return make_response("", 204)
+
+
 class RecipeListAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -167,14 +249,15 @@ class RecipeListAPI(Resource):
         userName = session.get('userName', None)
         if (userName == None):
             return unauthorized()
-        return db.getAllRecipes(userName)
+        args = checksumRequestParser.parse_args()
+        return db.getRecipes(userName, args['checksum'])
 
     def post(self):
         userName = session.get('userName', None)
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
-            return make_response(jsonify({'error': 'no write access'}), 405)
+            return make_response(jsonify({'error': 'no write access'}), 403)
         args = self.reqparse.parse_args()
         result = db.insertRecipe(
             userName, args['title'], args['categoryId'], args['ingredients'], args['description'], args['image'])
@@ -222,7 +305,7 @@ class RecipeAPI(Resource):
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
-            return make_response(jsonify({'error': 405}), 405)
+            return make_response(jsonify({'error': 'no write access'}), 403)
         args = self.reqparse.parse_args()
         print(args)
         result = db.updateRecipe(
@@ -231,32 +314,17 @@ class RecipeAPI(Resource):
             return make_response('', 200)
         else:
             return make_response(jsonify({'error': 'No recipe updated'}), 404)
-        return make_response(jsonify({'error': 'an error occurred'}), 501)
 
     def delete(self, recipeId):
         userName = session.get('userName', None)
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
-            return make_response(jsonify({'error': 405}), 405)
+            return make_response(jsonify({'error': 'no write access'}), 403)
         result = db.deleteRecipe(userName, recipeId, IMAGE_FOLDER)
         if result == 0:
             return make_response("", 404)
         return make_response("", 204)
-
-
-class RecipeSyncAPI(Resource):
-    def __init__(self):
-        super(RecipeSyncAPI, self).__init__()
-
-    def get(self, lastChecksum):
-        userName = session.get('userName', None)
-        if (userName == None):
-            return unauthorized()
-        result = db.getUpdateRecipe(userName, lastChecksum)
-        if result is not None:
-            return result
-        return make_response('', 204)
 
 
 class CategoryListAPI(Resource):
@@ -271,14 +339,15 @@ class CategoryListAPI(Resource):
         userName = session.get('userName', None)
         if (userName == None):
             return unauthorized()
-        return db.getAllCategories(userName)
+        args = checksumRequestParser.parse_args()
+        return db.getCategories(userName, args['checksum'])
 
     def post(self):
         userName = session.get('userName', None)
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
-            return make_response(jsonify({'error': 405}), 405)
+            return make_response(jsonify({'error': 'no write access'}), 403)
         args = self.reqparse.parse_args()
         result = db.insertCategory(userName, args['name'])
         if result is not None:
@@ -295,7 +364,7 @@ class ImageListAPI(Resource):
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
-            return make_response(jsonify({'error': 405}), 405)
+            return make_response(jsonify({'error': 'no write access'}), 403)
         if 'image' not in request.files:
             return make_response(jsonify({'error': 'No image'}), 400)
         file = request.files['image']
@@ -347,9 +416,11 @@ class ImageAPI(Resource):
         return make_response(jsonify(), 200)
 
 
+api.add_resource(UserListAPI, '/users', endpoint='users')
 api.add_resource(RecipeAPI, '/recipes/<int:recipeId>', endpoint='recipe')
 api.add_resource(RecipeListAPI, '/recipes', endpoint='recipes')
-api.add_resource(RecipeSyncAPI, '/recipesUpdate/<int:lastChecksum>', endpoint='recipesync')
+api.add_resource(CommentAPI, '/comments/<int:commentId>', endpoint='comment')
+api.add_resource(CommentListAPI, '/comments', endpoint='comments')
 api.add_resource(CategoryListAPI, '/categories', endpoint='categories')
 api.add_resource(ImageListAPI, '/images', endpoint='images')
 api.add_resource(ImageAPI, '/images/<string:name>', endpoint='image')

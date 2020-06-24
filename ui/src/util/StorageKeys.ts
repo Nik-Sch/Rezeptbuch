@@ -1,5 +1,9 @@
 export const localStorageDarkTheme = 'darkTheme';
 export const localStorageUserInfo = 'userInfo';
+export const localStorageRecipeChecksum = 'recipeChecksum';
+export const localStorageCategoryChecksum = 'categoryChecksum';
+export const localStorageCommentChecksum = 'commentChecksum';
+export const localStorageUserChecksum = 'userChecksum';
 export const sessionStorageFilteredCategories = 'filteredCategories';
 export const sessionStorageSearchInIngredients = 'searchInIngredients';
 export const sessionStorageSearchString = 'searchString';

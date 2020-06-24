@@ -16,6 +16,7 @@ import { CategorySelect } from '../helpers/CategorySelect';
 import ShareButton from './ShareButton';
 import { DesktopIngredients, showDot } from './Ingredients';
 import DescriptionTextArea from './DescriptionTextArea';
+import CommentSection from './CommentSection';
 
 function verifyRecipe(recipe: IRecipe): boolean {
   return recipe.title.trim() !== '' &&
@@ -408,6 +409,13 @@ export function Recipe(props: IDarkThemeProps) {
           </H5>
         </div>
       </div>
+      <CommentSection
+        comments={recipe.comments}
+        username={status?.username ?? ''}
+        recipeId={recipe.id}
+        writeAccess={typeof status !== 'undefined' && status.write}
+      />
+      <div className='bottom-padding' />
     </>
   } else {
     return <>
@@ -556,6 +564,13 @@ export function Recipe(props: IDarkThemeProps) {
           </H5>
         </Card>
       </div>
+      <CommentSection
+        comments={recipe.comments}
+        username={status?.username ?? ''}
+        recipeId={recipe.id}
+        writeAccess={typeof status !== 'undefined' && status.write}
+      />
+      <div className='bottom-padding'/>
     </>
   }
 }
