@@ -8,9 +8,6 @@
     margin: 15px 20px;
     display: flex;
     min-height: 75px;
-    .spacer {
-      flex: 1 0;
-    }
     .content {
       flex: 1 0;
       .header {
@@ -31,6 +28,21 @@
       flex-direction: column;
       justify-content: flex-end;
       margin: 5px;
+    }
+  }
+}
+
+.mobile {
+  .comment {
+    flex-direction: column;
+    .header .more {
+      flex: 1 0;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .controls {
+      align-self: flex-end;
+      justify-content: flex-start;
     }
   }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import recipesHandler, { IComment } from "../../util/Recipes";
-import { Divider, Classes, H5, ButtonGroup, Button, Popover, TextArea, H3 } from "@blueprintjs/core";
+import { Divider, Classes, H5, ButtonGroup, Button, Popover, TextArea, H3, Dialog } from "@blueprintjs/core";
 import './CommentSection.scss';
 import classNames from "classnames";
 import { useTranslation } from "react-i18next";
@@ -25,6 +25,7 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newText, setNewText] = useState('');
+  const [deleteDialogIsOpen, setDeleteDialogIsOpen] = useState(false);
   const { t } = useTranslation();
   const mobile = useMobile();
 
@@ -38,6 +39,7 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
     } else {
       AppToasterTop.show({ message: t('commentNotDeleted'), intent: 'warning' });
     }
+    setDeleteDialogIsOpen(false);
   }
 
   const editComment = async () => {
@@ -68,6 +70,26 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
     </div>
   </div>
 
+  const mobileMorePopoverContent = <div>
+    <ButtonGroup
+      minimal={true}
+      vertical={true}
+      large={true}
+    >
+      <Button
+        text={t('edit')}
+        className={'popover-left ' + Classes.POPOVER_DISMISS}
+        onClick={() => setIsEditing(true)}
+      />
+      <Button
+        text={t('delete')}
+        intent='danger'
+        className={Classes.POPOVER_DISMISS}
+      onClick={() => setDeleteDialogIsOpen(true)}
+      />
+    </ButtonGroup>
+  </div>
+
   const mouseOverTimeout = useRef<number>();
   const mouseInTimeout = useRef<number>();
 
@@ -93,6 +115,30 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
     onMouseOver={mouseOver}
     onMouseOut={mouseOut}
   >
+    <Dialog
+    className='mobile-delete-dialog'
+    isOpen={deleteDialogIsOpen}
+    onClose={() => setDeleteDialogIsOpen(false)}
+    title={t('confirmDeleteTitle')}
+  >
+      <div className={Classes.DIALOG_BODY}>
+        <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+          <Button
+            text={t('cancel')}
+            large={true}
+            className={'popover-left'}
+            onClick={() => setDeleteDialogIsOpen(false)}
+          />
+          <Button
+            large={true}
+            text={t('deleteComment')}
+            intent='danger'
+            className={Classes.POPOVER_DISMISS}
+            onClick={deleteComment}
+          />
+        </div>
+      </div>
+    </Dialog>
     <div className='content'>
       <div className='header'>
         <H5 className='name'>
@@ -104,6 +150,20 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
         {props.comment.editedDate && <div className={classNames(Classes.TEXT_MUTED, 'date')}>
           {t('edited', { date: dayjs(props.comment.editedDate).locale(i18n.language).fromNow() })}
         </div>}
+        {mobile && props.username === props.comment.user.user &&
+          <div className='more'>
+            <Popover
+              minimal={true}
+              content={mobileMorePopoverContent}
+              position='left-top'
+            >
+              <Button
+                minimal={true}
+                icon='more'
+                style={{ transform: 'rotate(90deg)' }}
+              />
+            </Popover>
+          </div>}
       </div>
       <div className='text'>
         {isEditing
@@ -125,7 +185,7 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
       <div className='controls'>
         {isEditing
           ? <ButtonGroup
-            vertical={true}
+            vertical={!mobile}
             alignText='right'
             minimal={true}
           >
@@ -134,7 +194,6 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
               icon='undo'
               onClick={() => {
                 setIsEditing(false);
-                // setNewText(props.comment.text); // wanted?
               }}
             />
             <Button
@@ -158,7 +217,7 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
             <Popover
               isOpen={deleteOpen}
               popoverClassName={Classes.POPOVER_CONTENT_SIZING}
-              position='right'
+              position='left'
               content={deletePopoverContent}
               onClose={() => setDeleteOpen(false)}
             >
@@ -177,16 +236,18 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
 }
 
 function NewComment(props: { username: string, recipeId: number }) {
+  const mobile = useMobile();
 
   const [newText, setNewText] = useState('');
-  const [isFocus, setIsFocus] = useState(false);
+  const [showControls, setShowControls] = useState(false);
   const { t } = useTranslation();
 
   const addComment = async () => {
-
     if (newText.trim().length === 0) {
       return;
     }
+
+    setShowControls(false);
     if (await recipesHandler.addComment(newText, props.recipeId)) {
       AppToasterTop.show({ message: t('commentSaved'), intent: 'success' });
     } else {
@@ -194,6 +255,8 @@ function NewComment(props: { username: string, recipeId: number }) {
     }
     setNewText('');
   }
+
+  const blurTimeout = useRef<number>();
 
   return <div
     className='comment'
@@ -212,8 +275,15 @@ function NewComment(props: { username: string, recipeId: number }) {
           className={Classes.EDITABLE_TEXT_INPUT}
           value={newText}
           placeholder={t('addComment')}
-          onFocus={() => setIsFocus(true)}
-          onBlur={() => setTimeout(() => setIsFocus(false), 100)}
+          onFocus={() => setShowControls(true)}
+          onBlur={() => {
+            window.clearTimeout(blurTimeout.current);
+            blurTimeout.current = window.setTimeout(() => {
+              if (newText.trim().length === 0) {
+                setShowControls(false);
+              }
+            }, 100);
+          }}
           fill={true}
           onChange={e => {
             const value = e.currentTarget.value;
@@ -222,10 +292,10 @@ function NewComment(props: { username: string, recipeId: number }) {
         />
       </div>
     </div>
-    {(isFocus) &&
+    {(showControls) &&
       <div className='controls'>
         <ButtonGroup
-          vertical={true}
+          vertical={!mobile}
           minimal={true}
           alignText='right'
         >
@@ -233,6 +303,7 @@ function NewComment(props: { username: string, recipeId: number }) {
             rightIcon='undo'
             text={t('cancel')}
             onClick={() => {
+              setShowControls(false);
               setNewText('');
             }}
           />
@@ -264,14 +335,14 @@ export default function CommentSection(props: IProps) {
   const mobile = useMobile();
   const { t } = useTranslation();
   return <>
-    <div className='comment-section'>
+    <div className={classNames('comment-section', mobile ? 'mobile' : '')}>
       <Divider />
       <H3 className='comment-count'>
         {(props.comments.length === 0 && props.writeAccess && !mobile)
           ? t('comments_0')
           : t('comments', { count: props.comments.length })}
       </H3>
-      {(!mobile && props.writeAccess) && <NewComment
+      {props.writeAccess && <NewComment
         username={props.username}
         recipeId={props.recipeId}
       />}
