@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import recipesHandler, { IComment } from "../../util/Recipes";
-import { Divider, Classes, H5, ButtonGroup, Button, Popover, TextArea, H3, Dialog } from "@blueprintjs/core";
+import { Divider, Classes, H5, ButtonGroup, Button, Popover, TextArea, H3, Dialog, Tooltip, AnchorButton } from "@blueprintjs/core";
 import './CommentSection.scss';
 import classNames from "classnames";
 import { useTranslation } from "react-i18next";
@@ -10,7 +10,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import i18n from "../../util/i18n";
 import { AppToasterTop } from "../../util/toaster";
-import { useMobile } from "../helpers/CustomHooks";
+import { useMobile, useOnline } from "../helpers/CustomHooks";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
@@ -28,6 +28,7 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
   const [deleteDialogIsOpen, setDeleteDialogIsOpen] = useState(false);
   const { t } = useTranslation();
   const mobile = useMobile();
+  const online = useOnline();
 
   useEffect(() => {
     setNewText(props.comment.text);
@@ -85,7 +86,7 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
         text={t('delete')}
         intent='danger'
         className={Classes.POPOVER_DISMISS}
-      onClick={() => setDeleteDialogIsOpen(true)}
+        onClick={() => setDeleteDialogIsOpen(true)}
       />
     </ButtonGroup>
   </div>
@@ -116,11 +117,11 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
     onMouseOut={mouseOut}
   >
     <Dialog
-    className='mobile-delete-dialog'
-    isOpen={deleteDialogIsOpen}
-    onClose={() => setDeleteDialogIsOpen(false)}
-    title={t('confirmDeleteTitle')}
-  >
+      className='mobile-delete-dialog'
+      isOpen={deleteDialogIsOpen}
+      onClose={() => setDeleteDialogIsOpen(false)}
+      title={t('confirmDeleteTitle')}
+    >
       <div className={Classes.DIALOG_BODY}>
         <div className={Classes.DIALOG_FOOTER_ACTIONS}>
           <Button
@@ -156,12 +157,19 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
               minimal={true}
               content={mobileMorePopoverContent}
               position='left-top'
+              disabled={!online}
             >
-              <Button
-                minimal={true}
-                icon='more'
-                style={{ transform: 'rotate(90deg)' }}
-              />
+              <Tooltip
+                content={t('tooltipOffline')}
+                disabled={online}
+              >
+                <AnchorButton
+                  minimal={true}
+                  disabled={!online}
+                  icon='more'
+                  style={{ transform: 'rotate(90deg)' }}
+                />
+              </Tooltip>
             </Popover>
           </div>}
       </div>
@@ -183,53 +191,62 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
     </div>
     {(hover || deleteOpen || isEditing) &&
       <div className='controls'>
-        {isEditing
-          ? <ButtonGroup
-            vertical={!mobile}
-            alignText='right'
-            minimal={true}
-          >
-            <Button
-              text={t('cancel')}
-              icon='undo'
-              onClick={() => {
-                setIsEditing(false);
-              }}
-            />
-            <Button
-              text={t('save')}
-              icon='floppy-disk'
-              intent='primary'
-              onClick={editComment}
-            />
-          </ButtonGroup>
-          : <ButtonGroup
-            vertical={true}
-            minimal={true}
-            alignText='right'
-          >
-            <Button
-              rightIcon='edit'
-              text={t('edit')}
-              intent='primary'
-              onClick={() => setIsEditing(true)}
-            />
-            <Popover
-              isOpen={deleteOpen}
-              popoverClassName={Classes.POPOVER_CONTENT_SIZING}
-              position='left'
-              content={deletePopoverContent}
-              onClose={() => setDeleteOpen(false)}
+        <Tooltip
+          content={t('tooltipOffline')}
+          disabled={online}
+        >
+          {isEditing
+            ? <ButtonGroup
+              vertical={!mobile}
+              alignText='right'
+              minimal={true}
             >
-              <Button
-                rightIcon='delete'
-                text={t('delete')}
-                intent='danger'
-                onClick={() => setDeleteOpen(true)}
+              <AnchorButton
+                text={t('cancel')}
+                icon='undo'
+                onClick={() => {
+                  setIsEditing(false);
+                }}
               />
-            </Popover>
-          </ButtonGroup>
-        }
+              <AnchorButton
+                text={t('save')}
+                icon='floppy-disk'
+                disabled={!online}
+                intent='primary'
+                onClick={editComment}
+              />
+            </ButtonGroup>
+            : <ButtonGroup
+              vertical={true}
+              minimal={true}
+              alignText='right'
+            >
+              <AnchorButton
+                rightIcon='edit'
+                text={t('edit')}
+                disabled={!online}
+                intent='primary'
+                onClick={() => setIsEditing(true)}
+              />
+              <Popover
+                isOpen={deleteOpen}
+                popoverClassName={Classes.POPOVER_CONTENT_SIZING}
+                position='left'
+                disabled={!online}
+                content={deletePopoverContent}
+                onClose={() => setDeleteOpen(false)}
+              >
+                <AnchorButton
+                  rightIcon='delete'
+                  text={t('delete')}
+                  intent='danger'
+                  disabled={!online}
+                  onClick={() => setDeleteOpen(true)}
+                />
+              </Popover>
+            </ButtonGroup>
+          }
+        </Tooltip>
       </div>
     }
   </div>
@@ -237,6 +254,7 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
 
 function NewComment(props: { username: string, recipeId: number }) {
   const mobile = useMobile();
+  const online = useOnline();
 
   const [newText, setNewText] = useState('');
   const [showControls, setShowControls] = useState(false);
@@ -258,9 +276,7 @@ function NewComment(props: { username: string, recipeId: number }) {
 
   const blurTimeout = useRef<number>();
 
-  return <div
-    className='comment'
-  >
+  return <div className='comment'>
     <div className='content'>
       <div className='header'>
         <H5 className='name'>
@@ -307,13 +323,18 @@ function NewComment(props: { username: string, recipeId: number }) {
               setNewText('');
             }}
           />
-          <Button
-            rightIcon='comment'
-            text={t('comment')}
-            disabled={newText.trim().length === 0}
-            intent='primary'
-            onClick={addComment}
-          />
+          <Tooltip
+            content={t('tooltipOffline')}
+            disabled={online}
+          >
+            <AnchorButton
+              rightIcon='comment'
+              text={t('comment')}
+              disabled={newText.trim().length === 0 || !online}
+              intent='primary'
+              onClick={addComment}
+            />
+          </Tooltip>
         </ButtonGroup>
       </div>
     }

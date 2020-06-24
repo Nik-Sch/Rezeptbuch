@@ -409,12 +409,12 @@ export function Recipe(props: IDarkThemeProps) {
           </H5>
         </div>
       </div>
-      <CommentSection
+      {recipe.id !== -1 && <CommentSection
         comments={recipe.comments}
         username={status?.username ?? ''}
         recipeId={recipe.id}
         writeAccess={typeof status !== 'undefined' && status.write}
-      />
+      />}
       <div className='bottom-padding' />
     </>
   } else {
@@ -564,13 +564,13 @@ export function Recipe(props: IDarkThemeProps) {
           </H5>
         </Card>
       </div>
-      <CommentSection
+      {recipe.id !== -1 && <CommentSection
         comments={recipe.comments}
         username={status?.username ?? ''}
         recipeId={recipe.id}
         writeAccess={typeof status !== 'undefined' && status.write}
-      />
-      <div className='bottom-padding'/>
+      />}
+      <div className='bottom-padding' />
     </>
   }
 }

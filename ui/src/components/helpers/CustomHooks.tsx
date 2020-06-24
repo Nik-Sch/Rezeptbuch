@@ -42,7 +42,7 @@ export function useOnline() {
       window.removeEventListener('online', handle);
       window.removeEventListener('offline', handle);
     }
-  })
+  }, []);
 
   return online;
 }

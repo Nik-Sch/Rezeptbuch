@@ -209,7 +209,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
         </>;
         tokens.push(
         <Tooltip key={lastIndex} content={tooltipContent} >
-          <Link to={`/recipes/${match[1]}`}>{match[0]} </Link>
+          <Link to={`/recipes/${match[1]}`}>{match[0]}</Link>
         </Tooltip>
         );
       } else {
@@ -274,9 +274,17 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
         // line height could be 0 if the isNaN block from getLineHeight kicks in
         // scrollHeight = clamp(scrollHeight, minLines * lineHeight, maxLines * lineHeight);
       }
+       // at least about 3 lines
+      let lineHeightBoundary = parentElement ? getLineHeight(parentElement) * 3 : 0;
+      if (mobile) { // plus 20px padding for mobile
+        lineHeightBoundary += 20;
+      }
       // Chrome's input caret height misaligns text so the line-height must be larger than font-size.
       // The computed scrollHeight must also account for a larger inherited line-height from the parent.
-      scrollHeight = Math.max(scrollHeight, getFontSize(contentElement.current) + 1, parentElement ? getLineHeight(parentElement) : 0);
+      scrollHeight = Math.max(scrollHeight,
+        getFontSize(contentElement.current) + 1,
+        lineHeightBoundary);
+      
       // IE11 & Edge needs a small buffer so text does not shift prior to resizing
       // if (Browser.isEdge()) {
       //   scrollWidth += BUFFER_WIDTH_EDGE;
@@ -290,7 +298,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
         setTimeout(() => (parentElement.style.height = `${scrollHeight}px`));
       }
     }
-  }, [isEditing]);
+  }, [isEditing, mobile]);
 
   useEffect(() => {
     updateHeight();
@@ -327,7 +335,8 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
       }}
       style={{
         visibility: editable ? 'hidden' : undefined,
-        position: editable ? 'absolute' : undefined
+        position: editable ? 'absolute' : undefined,
+        padding: mobile ? '10px' : undefined
       }}
     >
       {hasValue ? highlightRecipeRef(value ?? '') : textAreaProps.placeholder}
