@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import './App.scss';
-import { RecipeList } from './components/recipeList/RecipeList';
+import RecipeList from './components/recipeList/RecipeList';
 import { Recipe } from './components/recipe/Recipe';
 import { Route, BrowserRouter as Router, RouteProps, Redirect } from 'react-router-dom';
 import { Classes } from '@blueprintjs/core';
 import { fetchUserInfo, getUserInfo } from './util/Recipes';
 import { LoginPage } from './components/LoginPage';
-import { usePersistentState } from './components/helpers/CustomHooks';
+import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
 import { localStorageDarkTheme } from './util/StorageKeys';
 import { UniqueRecipe } from './components/recipe/UniqueRecipe';
 
@@ -45,7 +45,7 @@ function PrivateRoute({ children, ...rest }: RouteProps) {
 
 function App() {
 
-const [darkTheme, setDarkTheme] = usePersistentState(false, localStorageDarkTheme);
+  const [darkTheme, setDarkTheme] = usePersistentState(false, localStorageDarkTheme);
   const handleThemeChange = (theme: boolean) => {
     changeThemeClass(theme);
     setDarkTheme(theme);
@@ -57,6 +57,7 @@ const [darkTheme, setDarkTheme] = usePersistentState(false, localStorageDarkThem
   useEffect(() => {
     fetchUserInfo(); // just make sure to always check the status
   }, []);
+  const mobile = useMobile();
 
   const routes = [
     { path: '/', Component: RecipeList },
@@ -64,30 +65,32 @@ const [darkTheme, setDarkTheme] = usePersistentState(false, localStorageDarkThem
   ]
 
   return (
-    <Router>
-      {routes.map(({ path, Component }) => (
-        <PrivateRoute key={path} exact path={path}>
-          <div className='page'>
-            <Component 
+    <div className={mobile ? 'mobile' : ''}>
+      <Router>
+        {routes.map(({ path, Component }) => (
+          <PrivateRoute key={path} exact path={path}>
+            <div className='page'>
+              <Component
+                darkTheme={darkTheme}
+                onDarkThemeChanged={handleThemeChange}
+              />
+            </div>
+          </PrivateRoute>
+        ))}
+        <Route exact path='/uniqueRecipes/:id'>
+          <UniqueRecipe
             darkTheme={darkTheme}
             onDarkThemeChanged={handleThemeChange}
-            />
-          </div>
-        </PrivateRoute>
-      ))}
-      <Route exact path='/uniqueRecipes/:id'>
-        <UniqueRecipe
-          darkTheme={darkTheme}
-          onDarkThemeChanged={handleThemeChange}
-        />
-      </Route>
-      <Route exact path='/login'>
-        <LoginPage
-          darkTheme={darkTheme}
-          onDarkThemeChanged={handleThemeChange}
           />
-      </Route>
-    </Router>
+        </Route>
+        <Route exact path='/login'>
+          <LoginPage
+            darkTheme={darkTheme}
+            onDarkThemeChanged={handleThemeChange}
+          />
+        </Route>
+      </Router>
+    </div>
   );
 }
 

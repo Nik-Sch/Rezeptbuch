@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Callout, H4, Button, Divider } from '@blueprintjs/core';
+import { Callout, H4, Button } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { observeSubscription, deleteCallback, subscribeUser } from '../pushServiceWorker';
 import { usePersistentState } from './helpers/CustomHooks';
@@ -78,6 +78,5 @@ export default function AskForNotifications() {
         }}
       />
     </Callout>
-    <Divider />
   </>
 }

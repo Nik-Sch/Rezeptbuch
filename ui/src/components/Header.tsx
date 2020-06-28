@@ -3,7 +3,7 @@ import logoDark from '../static/logo-dark.svg';
 import logo from '../static/logo.svg';
 import logoNoText from '../static/logo-no-text.svg';
 import { Link } from 'react-router-dom';
-import { Classes, Icon, Navbar, IconName, ButtonGroup } from '@blueprintjs/core';
+import { Navbar, ButtonGroup } from '@blueprintjs/core';
 import { LanguageSelect } from './helpers/LanguageSelect';
 import './Header.scss';
 import classNames from 'classnames';
@@ -13,7 +13,7 @@ import { IDarkThemeProps } from '../App';
 import LogoutButton from './helpers/LogoutButton';
 
 export interface IHeaderProps {
-  navigationIcon: IconName;
+  navigationIcon?: JSX.Element;
   onNavigationClick?: () => void;
   children?: React.ReactNode;
   logo?: boolean;
@@ -28,12 +28,7 @@ export default function Header(props: IHeaderProps) {
       <header>
         <Navbar fixedToTop={true} className={classNames(props.className, 'mobile-header')} >
           <div className='left-align'>
-            <Icon
-              className={classNames('navigate-button', Classes.BUTTON, Classes.MINIMAL)}
-              onClick={props.onNavigationClick}
-              icon={props.navigationIcon}
-              iconSize={24}
-            />
+            {props.navigationIcon}
           </div>
           <div className='right-align'>
             {props.children}

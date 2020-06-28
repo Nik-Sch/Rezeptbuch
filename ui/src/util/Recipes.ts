@@ -31,6 +31,7 @@ export const emptyRecipe: IRecipe = {
 export interface ICategory {
   id: number;
   name: string;
+  count?: number;
 }
 
 export interface IComment {
@@ -81,9 +82,10 @@ interface IApiCategory {
 }
 
 export interface IUser {
-  id: number,
-  user: string,
-  readOnly: boolean
+  id: number;
+  user: string;
+  readOnly: boolean;
+  count?: number;
 }
 
 
@@ -173,7 +175,8 @@ export interface IUploadCallbacks {
 
 type ICallBack = (
   recipes: IRecipe[],
-  categories: ICategory[]
+  categories: ICategory[],
+  users: IUser[]
 ) => void
 class Recipes {
 
@@ -186,6 +189,9 @@ class Recipes {
 
   constructor() {
     get<IRecipe[]>(RECIPE_CACHE).then(async (result) => {
+      if (!result) {
+        return;
+      }
       for (const recipe of result) {
         if (!recipe.comments) {
           recipe.comments = [];
@@ -201,7 +207,7 @@ class Recipes {
 
   public subscribe(callback: ICallBack) {
     this.callbacks.push(callback);
-    callback(this.recipeCache, this.categoryCache);
+    callback(this.recipeCache, this.categoryCache, this.userCache);
     this.fetchData();
     return () => { recipesHandler.unsubscribe(callback); };
   }
@@ -331,7 +337,7 @@ class Recipes {
   private notify() {
     // console.debug('notifying', this.callbacks);
     for (const callback of this.callbacks) {
-      callback(this.recipeCache, this.categoryCache);
+      callback(this.recipeCache, this.categoryCache, this.userCache);
     }
   }
 

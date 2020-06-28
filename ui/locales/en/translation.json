@@ -97,5 +97,8 @@
   "editComment": "Edit the comment...",
   "addComment": "Add a comment to the recipe...",
   "comment": "Comment",
-  "newComment": "new comment"
+  "newComment": "new comment",
+  "filterForUsers": "Filter for users...",
+  "noUsersFound": "No user matching",
+  "tooltipNoWriteRecipe": "You cannot edit this recipe."
 }

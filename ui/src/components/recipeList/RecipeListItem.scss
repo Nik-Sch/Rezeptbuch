@@ -2,7 +2,8 @@
 
 .recipe-list-item {
   display: flex;
-  margin: 10px 15px;
+  margin: 0 15px 20px 15px;
+  
   height: 150px;
 
   .thumbnail {
@@ -29,6 +30,9 @@
       flex-direction: row;
       justify-content: space-between;
       font-family: "Montserrat Alternates", sans-serif;
+      max-height: 50px;
+      text-overflow: ellipsis;
+      overflow: hidden;
       .recipe-category {
         flex-shrink: 0;
         font-style: italic;
@@ -88,7 +92,7 @@
 
 .mobile {
   .recipe-list-item {
-    margin: 15px;
+    // margin: 15px;
     .recipe-text-wrapper {
       max-width: calc(100vw - 200px);
       flex-direction: column;
@@ -96,6 +100,7 @@
 
       .title-category-wrapper {
         flex-direction: column;
+        max-height: unset;
         .recipe-title {
           overflow: hidden;
           text-overflow: ellipsis;

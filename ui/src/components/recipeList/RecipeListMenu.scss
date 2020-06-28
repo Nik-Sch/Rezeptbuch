@@ -1,65 +1,50 @@
 .recipe-menu {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
   margin: 15px;
-  min-height: 110px;
-
-  .filter-recipes {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-self: stretch;
-    min-width: 30%;
-    max-width: 50%;
-    margin: 0 20px;
-    > * {
-      width: 100%;
-    }
-    .search-recipes {
-      margin-bottom: 5px;
-    }
+  flex: 0 1 25%;
+  max-width: 280px;
+  .search-recipe,
+  .filter-categories {
+    margin-bottom: 20px;
   }
-
-  .sort-recipes-wrapper {
-    align-self: flex-end;
-    .sort-button {
-      white-space: nowrap;
-    }
-  }
-
-  .add-recipe {
-    align-self: flex-start;
-  }
-
-  .spacer {
-    flex: 1 0;
-  }
+  height: fit-content;
 }
 
-.drawer {
-  .settings {
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    .spacer {
-      flex-grow: 1;
-    }
-    .logout-button {
-      margin-left: 10px;
-    }
-  }
+.mobile {
+  .recipe-menu {
+    // using padding for collapse auto height to work
+    padding-top: 20px;
+    padding-bottom: 10px;
+    flex: unset;
+    max-width: unset;
+    margin: unset;
 
-  .control {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    .sort-recipes-wrapper {
-      margin-left: 15px;
+    .settings {
+      margin: 20px;
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      .spacer {
+        flex-grow: 1;
+      }
+      .logout-button {
+        margin-left: 10px;
+      }
     }
 
-    .filter-categories {
-      max-width: calc(100% - 135px);
+    .control {
+      margin: 0 20px;
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      justify-content: space-between;
+      
+      > * {
+        margin: 7.5px;
+      }
+
+      .filter-categories, .filter-users {
+        flex: 1 1 200px;
+      }
     }
   }
 }

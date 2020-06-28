@@ -1,5 +1,5 @@
 import { IItemRendererProps, ItemPredicate, MultiSelect } from '@blueprintjs/select';
-import { ICategory } from '../../util/Recipes';
+import { IUser } from '../../util/Recipes';
 
 import React from 'react';
 import { Button, MenuItem } from '@blueprintjs/core';
@@ -7,77 +7,77 @@ import { useMobile } from './CustomHooks';
 
 
 interface IProps {
-  onCategorySelected: (categories: ICategory[]) => void;
-  selectedCategories: ICategory[];
-  allCategories: ICategory[];
+  onUserSelected: (users: IUser[]) => void;
+  selectedUsers: IUser[];
+  allUsers: IUser[];
   placeholder: string;
   className?: string;
   noResultText: string;
 }
 
-export function CategoryMultiSelect(props: IProps) {
-  const CatSelect = MultiSelect.ofType<ICategory>();
+export function UserMultiSelect(props: IProps) {
+  const Select = MultiSelect.ofType<IUser>();
 
-  const isSelected = (category: ICategory) => {
-    return props.selectedCategories.findIndex((v) => v.id === category.id) !== -1;
+  const isSelected = (user: IUser) => {
+    return props.selectedUsers.findIndex((v) => v.id === user.id) !== -1;
   }
 
-  const itemRenderer = (category: ICategory, { handleClick, modifiers }: IItemRendererProps) => {
+  const itemRenderer = (user: IUser, { handleClick, modifiers }: IItemRendererProps) => {
     if (!modifiers.matchesPredicate) {
       return null;
     }
     return (
       <MenuItem
         active={modifiers.active}
-        key={category.id}
+        key={user.id}
         className={mobile ? 'mobile-menu-item' : ''}
-        icon={isSelected(category) ? "tick" : "blank"}
-        label={typeof category.count !== 'undefined' ? `${category.count}` : undefined}
+        icon={isSelected(user) ? "tick" : "blank"}
         onClick={handleClick}
-        text={category.name}
+        label={typeof user.count !== 'undefined' ? `${user.count}` : undefined}
+        text={user.user}
         shouldDismissPopover={false}
       />
     );
   };
 
-  const filterCategory: ItemPredicate<ICategory> = (query, category) => {
-    return category.name.toLowerCase().indexOf(query.toLowerCase()) >= 0;
+  const filterUser: ItemPredicate<IUser> = (query, user) => {
+    return user.user.toLowerCase().indexOf(query.toLowerCase()) >= 0;
   };
 
-  const onItemSelect = (item: ICategory) => {
+  const onItemSelect = (item: IUser) => {
     if (isSelected(item)) {
-      const cats = props.selectedCategories.filter((v) => v.id !== item.id);
-      props.onCategorySelected(cats);
+      const cats = props.selectedUsers.filter((v) => v.id !== item.id);
+      props.onUserSelected(cats);
     } else {
-      const cats = props.selectedCategories.slice();
+      const cats = props.selectedUsers.slice();
       cats.push(item);
-      props.onCategorySelected(cats);
+      props.onUserSelected(cats);
     }
   };
 
   const handleTagRemove = (_: string, index: number) => {
-    const cats = props.selectedCategories.filter((_, i) => i !== index);
-    props.onCategorySelected(cats);
+    const cats = props.selectedUsers.filter((_, i) => i !== index);
+    props.onUserSelected(cats);
   }
 
   const handleClearClick = () => {
-    props.onCategorySelected([]);
+    props.onUserSelected([]);
   }
 
   const mobile = useMobile();
 
-  const clearButton = props.selectedCategories.length > 0 ?
+  const clearButton = props.selectedUsers.length > 0 ?
     <Button icon="cross" minimal={true} onClick={handleClearClick} large={mobile} />
     : undefined;
 
   return (
-    <CatSelect
+    <Select
       noResults={<MenuItem disabled={true} text={props.noResultText} />}
       className={props.className}
-      items={props.allCategories}
-      selectedItems={props.selectedCategories}
+      items={props.allUsers}
+      selectedItems={props.selectedUsers}
       itemsEqual='id'
-      itemPredicate={filterCategory}
+      itemPredicate={filterUser}
       itemRenderer={itemRenderer}
       onItemSelect={onItemSelect}
       fill={true}
@@ -98,9 +98,9 @@ export function CategoryMultiSelect(props: IProps) {
       }}
       popoverProps={{
         minimal: mobile,
-        position: 'bottom-right'
+        position: 'bottom-left'
       }}
-      tagRenderer={item => item.name}
+      tagRenderer={item => item.user}
       resetOnSelect={true}
     />
   );

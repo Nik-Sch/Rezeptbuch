@@ -215,6 +215,13 @@ export function Recipe(props: IDarkThemeProps) {
     history.push('/');
   }
 
+  const navigationIcon = <Icon
+    className={classNames('navigate-button', Classes.BUTTON, Classes.MINIMAL)}
+    onClick={handleNavigationClick}
+    icon='arrow-left'
+    iconSize={24}
+  />
+
   if (mobile) {
     return <>
       <Prompt
@@ -223,7 +230,7 @@ export function Recipe(props: IDarkThemeProps) {
       />
       <Header
         darkThemeProps={props}
-        navigationIcon='arrow-left'
+        navigationIcon={navigationIcon}
         onNavigationClick={handleNavigationClick}
       >
         <Dialog
@@ -425,8 +432,6 @@ export function Recipe(props: IDarkThemeProps) {
       />
       <Header
         darkThemeProps={props}
-        navigationIcon='arrow-left'
-        onNavigationClick={handleNavigationClick}
       />
       <div className='recipe-container'>
         <Card className='recipe' elevation={2}>

@@ -5,6 +5,7 @@ export const localStorageCategoryChecksum = 'categoryChecksum';
 export const localStorageCommentChecksum = 'commentChecksum';
 export const localStorageUserChecksum = 'userChecksum';
 export const sessionStorageFilteredCategories = 'filteredCategories';
+export const sessionStorageFilteredUsers = 'filteredUsers';
 export const sessionStorageSearchInIngredients = 'searchInIngredients';
 export const sessionStorageSearchString = 'searchString';
 export const sessionStorageSortingOrder = 'sortingOrder';

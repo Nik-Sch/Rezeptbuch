@@ -32,11 +32,8 @@ const RecipeListItem = (myProps: IRecipeListItemProps) => {
     return <Link
       to={recipe ? `/recipes/${recipe.id}` : '/'}
       style={style}
-      className='mobile'
     >
-      <Card
-        {...props}
-      >
+      <Card {...props}>
         <div className={classNames('thumbnail', recipe ? '' : Classes.SKELETON)}>
           {recipe && <MyImage
             size={150}

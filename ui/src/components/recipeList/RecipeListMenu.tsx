@@ -1,18 +1,17 @@
 import React from 'react';
-import { Card, Button, InputGroup, Tooltip, Classes, Icon } from '@blueprintjs/core';
-import { Link } from 'react-router-dom';
+import { Card, Button, InputGroup, Tooltip } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { SortSelect, ISort } from '../helpers/SortSelect';
-import { ICategory, getUserInfo } from '../../util/Recipes';
+import { ICategory, IUser } from '../../util/Recipes';
 
 import './RecipeListMenu.scss'
 import { LanguageSelect } from '../helpers/LanguageSelect';
 import { DarkModeSwitch } from '../helpers/DarkModeSwitch';
 import { IDarkThemeProps } from '../../App';
-import { useOnline } from '../helpers/CustomHooks';
-import classNames from 'classnames';
+import { useMobile } from '../helpers/CustomHooks';
 import LogoutButton from '../helpers/LogoutButton';
+import { UserMultiSelect } from '../helpers/UserMultiSelect';
 
 export interface ISearchProps {
   handleSearchChange: (newValue: string) => void;
@@ -24,35 +23,33 @@ export interface ISearchProps {
   selectedCategories: ICategory[];
   allCategories: ICategory[];
   sortOptions: ISort[];
-  drawer?: boolean;
-  height?: number;
+  onUserSelected: (users: IUser[]) => void;
+  selectedUsers: IUser[];
+  allUsers: IUser[];
   darkModeProps: IDarkThemeProps;
 }
 
 export default function RecipeListMenu(myProps: ISearchProps) {
   const [t] = useTranslation();
   const { darkModeProps, ...props } = myProps;
-  const online = useOnline();
-  const status = getUserInfo();
-  const hasWriteAccess = typeof status !== 'undefined' && status.write;
+  const mobile = useMobile();
 
-  if (props.drawer) {
-    return <div className='drawer'>
+  if (mobile) {
+    return <div className='recipe-menu'>
       <div className='settings'>
         <DarkModeSwitch {...darkModeProps} />
         <div className='spacer' />
         <LanguageSelect />
-        <LogoutButton/>
+        <LogoutButton />
       </div>
       <div className='control'>
-        <CategoryMultiSelect
-          placeholder={t('filterForCategories')}
-          noResultText={t('noCategoryFound')}
-          onCategorySelected={props.onCategorySelected}
-          selectedCategories={props.selectedCategories}
-          allCategories={props.allCategories}
-          className='filter-categories'
-
+        <UserMultiSelect
+          placeholder={t('filterForUsers')}
+          noResultText={t('noUsersFound')}
+          onUserSelected={props.onUserSelected}
+          selectedUsers={props.selectedUsers}
+          allUsers={props.allUsers}
+          className='filter-users'
         />
         <div className='sort-recipes-wrapper'>
           <SortSelect
@@ -64,6 +61,14 @@ export default function RecipeListMenu(myProps: ISearchProps) {
             onSelected={props.onSortSelected}
           />
         </div>
+          <CategoryMultiSelect
+            placeholder={t('filterForCategories')}
+            noResultText={t('noCategoryFound')}
+            onCategorySelected={props.onCategorySelected}
+            selectedCategories={props.selectedCategories}
+            allCategories={props.allCategories}
+            className='filter-categories'
+          />
       </div>
     </div>
   }
@@ -80,55 +85,30 @@ export default function RecipeListMenu(myProps: ISearchProps) {
       />
     </Tooltip>
   );
-  return <Card className={'recipe-menu'} style={{ height: props.height }}>
-    <Tooltip
-      disabled={online && hasWriteAccess}
-      content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWrite')}
-      position='bottom'
-    >
-      <Link
-        to={(online && hasWriteAccess) ? '/recipes/new' : ''}
-        className={classNames('add-recipe', Classes.BUTTON, Classes.INTENT_PRIMARY, (online && hasWriteAccess) ? '' : Classes.DISABLED)}
-        role='button'
-      >
-        <>
-          <Icon icon='add' />
-          <span className={Classes.BUTTON_TEXT}>
-            {t('newRecipe')}
-          </span>
-        </>
-      </Link>
-    </Tooltip>
-    <div className='spacer' />
-    <div className='filter-recipes'>
-      <div className='search-recipes'>
-        <InputGroup
-          leftIcon='search'
-          rightElement={searchInIngredientsButton}
-          placeholder={t('searchRecipe')}
-          value={props.searchString}
-          fill={true}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.handleSearchChange(e.target.value)}
-        />
-      </div>
-      <CategoryMultiSelect
-        placeholder={t('filterForCategories')}
-        noResultText={t('noCategoryFound')}
-        onCategorySelected={props.onCategorySelected}
-        selectedCategories={props.selectedCategories}
-        allCategories={props.allCategories}
-        className='filter-categories'
-      />
-    </div>
-
-    <div className='sort-recipes-wrapper'>
-      <SortSelect
-        defaultDesc={false}
-        defaultIndex={0}
-        className='sort-recipes'
-        items={props.sortOptions}
-        onSelected={props.onSortSelected}
-      />
-    </div>
+  return <Card className='recipe-menu'>
+    <InputGroup
+      leftIcon='search'
+      rightElement={searchInIngredientsButton}
+      placeholder={t('searchRecipe')}
+      value={props.searchString}
+      className='search-recipe'
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.handleSearchChange(e.target.value)}
+    />
+    <CategoryMultiSelect
+      placeholder={t('filterForCategories')}
+      noResultText={t('noCategoryFound')}
+      onCategorySelected={props.onCategorySelected}
+      selectedCategories={props.selectedCategories}
+      allCategories={props.allCategories}
+      className='filter-categories'
+    />
+    <UserMultiSelect
+      placeholder={t('filterForUsers')}
+      noResultText={t('noUsersFound')}
+      onUserSelected={props.onUserSelected}
+      selectedUsers={props.selectedUsers}
+      allUsers={props.allUsers}
+      className='filter-users'
+    />
   </Card>
 }

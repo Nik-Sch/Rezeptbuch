@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { IRecipe, emptyRecipe, fetchUniqueRecipe } from '../../util/Recipes';
-import { H1, Classes, H3, Card, H4, Icon, H2, Drawer } from '@blueprintjs/core';
+import { H1, Classes, H3, Card, H4, Icon, H2, Collapse } from '@blueprintjs/core';
 
 import { useTranslation } from 'react-i18next';
 import Header from '../Header';
@@ -15,6 +15,7 @@ import { DesktopIngredients, showDot } from './Ingredients';
 import { Helmet } from 'react-helmet';
 import { LanguageSelect } from '../helpers/LanguageSelect';
 import { DarkModeSwitch } from '../helpers/DarkModeSwitch';
+import { NavigationIcon } from '../recipeList/RecipeList';
 
 
 export function UniqueRecipe(props: IDarkThemeProps) {
@@ -46,7 +47,7 @@ export function UniqueRecipe(props: IDarkThemeProps) {
   }, [id]);
 
   if (error) {
-  return <H3>{t('notFound')}</H3>
+    return <H3>{t('notFound')}</H3>
   }
 
   if (mobile) {
@@ -54,30 +55,27 @@ export function UniqueRecipe(props: IDarkThemeProps) {
       <Header
         darkThemeProps={props}
         logo={true}
-        navigationIcon='menu'
-        onNavigationClick={() => setDrawerIsOpen(true)}
+        navigationIcon={<NavigationIcon
+          isOpen={drawerIsOpen}
+          onClick={() => setDrawerIsOpen(!drawerIsOpen)}
+        />}
         className='login-header'
       >
         {loaded && <div className='edit-container'>
           <ShareButton onlyLink={true} />
         </div>}
       </Header>
-      {mobile && <Drawer
+      <Collapse
         isOpen={drawerIsOpen}
-        onClose={() => setDrawerIsOpen(false)}
-        position='top'
-        size='70px'
       >
-        <div className={Classes.DIALOG_BODY}>
-          <div className='drawer'>
-            <div className='settings'>
-              <LanguageSelect />
-              <div className='spacer' />
-              <DarkModeSwitch {...props} />
-            </div>
+        <div className='recipe-menu'>
+          <div className='settings' style={{ marginBottom: '0' }}>
+            <DarkModeSwitch {...props} />
+            <div className='spacer' />
+            <LanguageSelect />
           </div>
         </div>
-      </Drawer>}
+      </Collapse>
       <div className='recipe-container-mobile'>
         <ImagePart
           recipe={recipe}
@@ -155,7 +153,6 @@ export function UniqueRecipe(props: IDarkThemeProps) {
       </Helmet>
       <Header
         darkThemeProps={props}
-        navigationIcon='arrow-left'
       />
       <div className='recipe-container'>
         <Card className='recipe' elevation={2}>

@@ -356,7 +356,7 @@ export default function CommentSection(props: IProps) {
   const mobile = useMobile();
   const { t } = useTranslation();
   return <>
-    <div className={classNames('comment-section', mobile ? 'mobile' : '')}>
+    <div className='comment-section'>
       <Divider />
       <H3 className='comment-count'>
         {(props.comments.length === 0 && props.writeAccess && !mobile)

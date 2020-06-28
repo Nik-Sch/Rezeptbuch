@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import recipesHandler, { IRecipe, ICategory, getUserInfo } from '../../util/Recipes';
-import { Classes, Divider, Drawer, Icon, InputGroup, Button, H3 } from '@blueprintjs/core';
+import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Recipes';
+import { Classes, Icon, InputGroup, Button, H3, Collapse, Tooltip } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
-import { ISort } from '../helpers/SortSelect';
+import { ISort, SortSelect } from '../helpers/SortSelect';
 import { FixedSizeList } from 'react-window';
 import { useMobile, useSessionState, useWindowDimensions, useOnline } from '../helpers/CustomHooks';
 import RSC from 'react-scrollbars-custom';
@@ -17,11 +17,28 @@ import { Link } from 'react-router-dom';
 import { IDarkThemeProps } from '../../App';
 import AskForNotifications from '../AskForNotifications';
 import { isNotificationAvailable, registerSW } from '../../pushServiceWorker';
-import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionStorageSearchInIngredients, sessionStorageSortingOrder } from '../../util/StorageKeys';
+import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionStorageSearchInIngredients, sessionStorageSortingOrder, sessionStorageFilteredUsers } from '../../util/StorageKeys';
 import { AppToasterBottom } from '../../util/toaster';
 import i18n from '../../util/i18n';
 
 const skeletonRecipes = [undefined, undefined, undefined, undefined];
+
+export function NavigationIcon(props: { isOpen: boolean, onClick: () => void }) {
+  return <div className='nav-icon2-wrapper'>
+    <div
+      id="nav-icon2"
+      className={classNames(Classes.ICON, props.isOpen ? 'open' : '')}
+      onClick={props.onClick}
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+}
 
 // https://codesandbox.io/s/bvaughnreact-window-react-scrollbars-custom-pjyxs?file=/index.js
 const CustomScrollbars = (params: {
@@ -93,7 +110,7 @@ function onServiceWorkerUpdate() {
   });
 }
 
-export function RecipeList(props: IDarkThemeProps) {
+export default function RecipeList(props: IDarkThemeProps) {
   document.title = 'Unsere Rezepte';
   const [t] = useTranslation();
   const online = useOnline();
@@ -105,21 +122,32 @@ export function RecipeList(props: IDarkThemeProps) {
 
   const [recipes, setRecipes] = useState<(IRecipe)[]>([]);
   const [categories, setCategories] = useState<ICategory[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
   const [filteredCategories, setFilteredCategories] = useSessionState<ICategory[]>([], sessionStorageFilteredCategories);
+  const [filteredUsers, setFilteredUsers] = useSessionState<IUser[]>([], sessionStorageFilteredUsers);
   const [searchString, setSearchString] = useSessionState<string>('', sessionStorageSearchString);
   const [searchInIngredients, setSearchInIngredients] = useSessionState<boolean>(true, sessionStorageSearchInIngredients);
   const [sortingOrder, setSortingOrder] = useSessionState<{ key: keyof IRecipe, desc: boolean }>({ key: 'date', desc: false }, sessionStorageSortingOrder);
   const [recipesToShow, setRecipesToShow] = useState<(IRecipe | undefined)[]>(skeletonRecipes);
+  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
   const timeout = useRef<number>();
   const mobile = useMobile();
   const status = getUserInfo();
   const hasWriteAccess = typeof status !== 'undefined' && status.write;
 
+  // recipe change
   useEffect(() => {
-    const handleRecipesChange = (recipes: IRecipe[], categories: ICategory[]) => {
+    const handleRecipesChange = (recipes: IRecipe[], categories: ICategory[], users: IUser[]) => {
       console.log(recipes);
       setRecipes(recipes);
+      for (const category of categories) {
+        category.count = recipes.filter(r => r.category.id === category.id).length;
+      }
       setCategories(categories);
+      for (const user of users) {
+        user.count = recipes.filter(r => r.user.id === user.id).length;
+      }
+      setUsers(users);
     }
 
     return recipesHandler.subscribe(handleRecipesChange);
@@ -151,6 +179,13 @@ export function RecipeList(props: IDarkThemeProps) {
       return filteredCategories.findIndex((category) => category.id === recipe.category.id) !== -1
     }
 
+    const filterRecipeByUser = (recipe?: IRecipe) => {
+      if (filteredUsers.length === 0 || !recipe) {
+        return true;
+      }
+      return filteredUsers.findIndex(user => user.id === recipe.user.id) !== -1
+    }
+
     const filterRecipeBySearch = (recipe?: IRecipe) => {
       if (searchString === '' || !recipe) {
         return true;
@@ -161,7 +196,9 @@ export function RecipeList(props: IDarkThemeProps) {
     }
 
     const filterRecipe = (recipe?: IRecipe) => {
-      return filterRecipeBySearch(recipe) && filterRecipeByCategory(recipe);
+      return filterRecipeBySearch(recipe)
+        && filterRecipeByCategory(recipe)
+        && filterRecipeByUser(recipe);
     }
     window.clearTimeout(timeout.current);
     timeout.current = window.setTimeout(() => {
@@ -172,8 +209,8 @@ export function RecipeList(props: IDarkThemeProps) {
           setRecipesToShow([]);
         }
       }
-    }, mobile ? 400 : 0);
-  }, [recipes, sortingOrder, filteredCategories, searchString, searchInIngredients, mobile]);
+    }, mobile ? 100 : 0);
+  }, [recipes, sortingOrder, filteredCategories, filteredUsers, searchString, searchInIngredients, mobile]);
 
   const { height } = useWindowDimensions();
   const listRef = React.createRef<FixedSizeList>();
@@ -185,27 +222,9 @@ export function RecipeList(props: IDarkThemeProps) {
     setSearchString(value);
   }
 
-  const handleCategorySelected = (cs: ICategory[]) => {
-    setFilteredCategories(cs);
-  };
-
   const onSortSelected = (v: ISort, d: boolean) => {
     setSortingOrder({ key: v.key, desc: d })
   };
-
-  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
-
-  // const [initialScrollOffset, setInitialScrollOffset] = useSessionState(0, 'initialScrollOffset');
-
-  // const handleScroll = (props: ListOnScrollProps) => {
-  //   setInitialScrollOffset(props.scrollOffset);
-  // }
-
-  // useEffect(() => {
-  //   if (listRef.current) {
-  //     listRef.current.scrollTo(initialScrollOffset);
-  //   }
-  // }, [recipesToShow, initialScrollOffset, listRef]);
 
   const searchClearButton = searchString.length === 0
     ? undefined
@@ -215,8 +234,10 @@ export function RecipeList(props: IDarkThemeProps) {
     <Header
       darkThemeProps={props}
       logo={true}
-      navigationIcon={filteredCategories.length === 0 ? 'menu' : 'add-to-artifact'}
-      onNavigationClick={() => setDrawerIsOpen(true)}
+      navigationIcon={<NavigationIcon
+        isOpen={drawerIsOpen}
+        onClick={() => setDrawerIsOpen(!drawerIsOpen)}
+      />}
     >
       {mobile &&
         <InputGroup
@@ -229,79 +250,108 @@ export function RecipeList(props: IDarkThemeProps) {
           className='recipe-search'
         />}
     </Header>
-    {mobile && <Drawer
-      isOpen={drawerIsOpen}
-      onClose={() => setDrawerIsOpen(false)}
-      position='top'
-      size={(130 + filteredCategories.length * 35) + 'px'}
-    >
-      <div className={Classes.DIALOG_BODY}>
+    {mobile &&
+      <Collapse
+        isOpen={drawerIsOpen}
+      >
         <RecipeListMenu
           darkModeProps={props}
-          drawer={true}
           searchString={searchString}
           handleSearchChange={handleSearchChange}
           handleSearchInIngredientsChange={v => setSearchInIngredients(v)}
           searchInIngredients={searchInIngredients}
-          onCategorySelected={handleCategorySelected}
+          onCategorySelected={setFilteredCategories}
           selectedCategories={filteredCategories}
           allCategories={categories}
           sortOptions={sortOptions}
+          onUserSelected={setFilteredUsers}
+          selectedUsers={filteredUsers}
+          allUsers={users}
           onSortSelected={onSortSelected}
         />
-      </div>
-    </Drawer>}
-    <div className='recipe-list'>
+      </Collapse>
+    }
+    <div className='body'>
       {!mobile &&
-        <>
-          <RecipeListMenu
-            darkModeProps={props}
-            searchString={searchString}
-            handleSearchInIngredientsChange={v => setSearchInIngredients(v)}
-            searchInIngredients={searchInIngredients}
-            handleSearchChange={handleSearchChange}
-            onCategorySelected={handleCategorySelected}
-            selectedCategories={filteredCategories}
-            allCategories={categories}
-            sortOptions={sortOptions}
-            onSortSelected={onSortSelected}
+        <RecipeListMenu
+          darkModeProps={props}
+          searchString={searchString}
+          handleSearchInIngredientsChange={v => setSearchInIngredients(v)}
+          searchInIngredients={searchInIngredients}
+          handleSearchChange={handleSearchChange}
+          onCategorySelected={setFilteredCategories}
+          selectedCategories={filteredCategories}
+          allCategories={categories}
+          sortOptions={sortOptions}
+          onUserSelected={setFilteredUsers}
+          selectedUsers={filteredUsers}
+          allUsers={users}
+          onSortSelected={onSortSelected}
+        />
+      }
+      <div className='recipe-list'>
+        {!mobile && <div className='header'>
+          <Tooltip
+            disabled={online && hasWriteAccess}
+            content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWrite')}
+            position='bottom'
+          >
+            <Link
+              to={(online && hasWriteAccess) ? '/recipes/new' : ''}
+              className={classNames('add-recipe', Classes.BUTTON, Classes.INTENT_PRIMARY, (online && hasWriteAccess) ? '' : Classes.DISABLED)}
+              role='button'
+            >
+              <>
+                <Icon icon='add' />
+                <span className={Classes.BUTTON_TEXT}>
+                  {t('newRecipe')}
+                </span>
+              </>
+            </Link>
+          </Tooltip>
+
+          <SortSelect
+            defaultDesc={false}
+            defaultIndex={0}
+            className='sort-recipes'
+            items={sortOptions}
+            onSelected={onSortSelected}
           />
-          <Divider />
-        </>}
-      {isNotificationAvailable() && <AskForNotifications />}
-      {recipes.length === 0 && recipesToShow.length === 0 &&
-      <H3 className='error'>
-        {t('noRecipes')}
-      </H3>}
-      {recipes.length > 0 && recipesToShow.length === 0 &&
-      <H3 className='error'>
-        {t('noRecipesMatching')}
-      </H3>}
-      {recipesToShow.length > 0 && <div className='virtual-list-wrapper'>
-        {<FixedSizeList
-          ref={mobile ? undefined : listRef}
-          outerElementType={mobile ? undefined : CustomScrollbarsVirtualList}
-          outerRef={mobile ? undefined : outerRef}
-          itemCount={recipesToShow.length}
-          className='virtual-list'
-          itemSize={150 + 20}
-          // initialScrollOffset={initialScrollOffset}
-          // onScroll={handleScroll}
-          height={mobile ? height - 60 : height - 100 - 130 - 35}
-          width='100%'
-          itemKey={getListItemKey}
-        >
-          {({ index, style, isScrolling }) => {
-            return <RecipeListItem
-              interactive={true}
-              elevation={1}
-              className={`recipe-list-item ${isScrolling ? Classes.SKELETON : ''}`}
-              recipe={recipesToShow[index]}
-              style={style}
-            />
-          }}
-        </FixedSizeList >}
-      </div>}
+        </div>}
+        {isNotificationAvailable() && <AskForNotifications />}
+        {recipes.length === 0 && recipesToShow.length === 0 &&
+          <H3 className='error'>
+            {t('noRecipes')}
+          </H3>}
+        {recipes.length > 0 && recipesToShow.length === 0 &&
+          <H3 className='error'>
+            {t('noRecipesMatching')}
+          </H3>}
+        {recipesToShow.length > 0 && <div className='virtual-list-wrapper'>
+          {<FixedSizeList
+            ref={mobile ? undefined : listRef}
+            outerElementType={mobile ? undefined : CustomScrollbarsVirtualList}
+            outerRef={mobile ? undefined : outerRef}
+            itemCount={recipesToShow.length}
+            className='virtual-list'
+            itemSize={150 + 20}
+
+            height={mobile ? height - 60 : height - 105 - 45}
+            width='100%'
+            itemKey={getListItemKey}
+          >
+            {({ index, style, isScrolling }) => {
+              return <RecipeListItem
+                interactive={true}
+                elevation={1}
+                className={`recipe-list-item ${isScrolling ? Classes.SKELETON : ''}`}
+                recipe={recipesToShow[index]}
+                style={style}
+              />
+            }}
+          </FixedSizeList >}
+        </div>}
+      </div>
     </div>
     {mobile && online && hasWriteAccess && <Link
       to='/recipes/new'

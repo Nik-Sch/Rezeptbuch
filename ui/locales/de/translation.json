@@ -98,5 +98,7 @@
   "editComment": "Kommentar bearbeiten...",
   "newComment": "neuer Kommentar",
   "save": "Speichern",
-  "tooltipNoWriteAccess": "Du kannst dieses Rezept nicht ändern."
+  "tooltipNoWriteAccess": "Du kannst dieses Rezept nicht ändern.",
+  "filterForUsers": "Nach Benutzern filtern...",
+  "noUsersFound": "Keinen Benutzer gefunden"
 }

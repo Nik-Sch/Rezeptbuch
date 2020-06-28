@@ -161,7 +161,7 @@ export default function ImagePart(props: IImagePartProps) {
         >
           <MyImage
             size={Math.max(width, height)}
-            className={mobile ? 'mobile' : Classes.DIALOG_BODY}
+            className={mobile ? 'mobile-image' : Classes.DIALOG_BODY}
             recipe={props.recipe}
             fallback={false}
             onClick={() => setShowImage(false)}

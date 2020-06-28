@@ -3,7 +3,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import { IDarkThemeProps } from "../App";
 import Header from "./Header";
 import { useMobile } from "./helpers/CustomHooks";
-import { Drawer, Classes, Card, H1, FormGroup, InputGroup, Tooltip, Button, Intent, Callout, H4 } from "@blueprintjs/core";
+import { Classes, Card, H1, FormGroup, InputGroup, Tooltip, Button, Intent, Callout, H4, Collapse } from "@blueprintjs/core";
 import { LanguageSelect } from "./helpers/LanguageSelect";
 import { DarkModeSwitch } from "./helpers/DarkModeSwitch";
 import { useTranslation } from "react-i18next";
@@ -13,6 +13,7 @@ import { loginToRecipes, createAccount } from "../util/Recipes";
 import classNames from "classnames";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { AppToasterTop } from "../util/toaster";
+import { NavigationIcon } from "./recipeList/RecipeList";
 
 export function LoginPage(props: IDarkThemeProps) {
   const history = useHistory();
@@ -104,26 +105,23 @@ export function LoginPage(props: IDarkThemeProps) {
     <Header
       darkThemeProps={props}
       logo={true}
-      navigationIcon='menu'
-      onNavigationClick={() => setDrawerIsOpen(true)}
+      navigationIcon={<NavigationIcon
+        isOpen={drawerIsOpen}
+        onClick={() => setDrawerIsOpen(!drawerIsOpen)}
+      />}
       className='login-header'
     />
-    {mobile && <Drawer
+    {mobile && <Collapse
       isOpen={drawerIsOpen}
-      onClose={() => setDrawerIsOpen(false)}
-      position='top'
-      size='70px'
     >
-      <div className={Classes.DIALOG_BODY}>
-        <div className='drawer'>
-          <div className='settings'>
-            <LanguageSelect />
-            <div className='spacer' />
-            <DarkModeSwitch {...props} />
-          </div>
+      <div className='recipe-menu'>
+        <div className='settings' style={{marginBottom: '0'}}>
+          <DarkModeSwitch {...props} />
+          <div className='spacer' />
+          <LanguageSelect />
         </div>
       </div>
-    </Drawer>}
+    </Collapse>}
     <div className='card-wrapper'>
       {wrongCredentials && <Callout intent='danger' className='error-callout'>
         <H4 className='error-callout-content'>
