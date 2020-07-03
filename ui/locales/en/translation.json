@@ -100,5 +100,9 @@
   "newComment": "new comment",
   "filterForUsers": "Filter for users...",
   "noUsersFound": "No user matching",
-  "tooltipNoWriteRecipe": "You cannot edit this recipe."
+  "tooltipNoWriteRecipe": "You cannot edit this recipe.",
+  "shoppingList": "Shopping List",
+  "404Header": "404",
+  "404Text": "Your site couldn't be found :/",
+  "recipes": "Recipes"
 }

@@ -1,16 +1,25 @@
-.recipe-menu {
+.menu {
   margin: 15px;
   flex: 0 1 25%;
   max-width: 280px;
-  .search-recipe,
-  .filter-categories {
-    margin-bottom: 20px;
-  }
   height: fit-content;
+
+  .menu-item {
+    margin: 20px 0;
+  }
+  .menu-link {
+    margin: 5px 0;
+  }
+  .menu-item:first-child, .menu-link:first-child {
+    margin-top: 0;
+  }
+  .menu-item:last-child, .menu-link:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .mobile {
-  .recipe-menu {
+  .menu {
     // using padding for collapse auto height to work
     padding-top: 20px;
     padding-bottom: 10px;
@@ -37,12 +46,13 @@
       flex-wrap: wrap;
       flex-direction: row;
       justify-content: space-between;
-      
+
       > * {
         margin: 7.5px;
       }
 
-      .filter-categories, .filter-users {
+      .filter-categories,
+      .filter-users {
         flex: 1 1 200px;
       }
     }

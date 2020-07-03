@@ -233,7 +233,6 @@ export default function RecipeList(props: IDarkThemeProps) {
   return <>
     <Header
       darkThemeProps={props}
-      logo={true}
       navigationIcon={<NavigationIcon
         isOpen={drawerIsOpen}
         onClick={() => setDrawerIsOpen(!drawerIsOpen)}
@@ -289,7 +288,7 @@ export default function RecipeList(props: IDarkThemeProps) {
           onSortSelected={onSortSelected}
         />
       }
-      <div className='recipe-list'>
+      <div className='main-content'>
         {!mobile && <div className='header'>
           <Tooltip
             disabled={online && hasWriteAccess}
@@ -301,12 +300,10 @@ export default function RecipeList(props: IDarkThemeProps) {
               className={classNames('add-recipe', Classes.BUTTON, Classes.INTENT_PRIMARY, (online && hasWriteAccess) ? '' : Classes.DISABLED)}
               role='button'
             >
-              <>
-                <Icon icon='add' />
-                <span className={Classes.BUTTON_TEXT}>
-                  {t('newRecipe')}
-                </span>
-              </>
+              <Icon icon='add' />
+              <span className={Classes.BUTTON_TEXT}>
+                {t('newRecipe')}
+              </span>
             </Link>
           </Tooltip>
 

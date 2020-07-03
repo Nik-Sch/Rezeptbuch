@@ -1,14 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.scss';
-import RecipeList from './components/recipeList/RecipeList';
+import RecipeList, { NavigationIcon } from './components/recipeList/RecipeList';
 import { Recipe } from './components/recipe/Recipe';
-import { Route, BrowserRouter as Router, RouteProps, Redirect } from 'react-router-dom';
-import { Classes } from '@blueprintjs/core';
+import { Route, BrowserRouter as Router, RouteProps, Redirect, Switch } from 'react-router-dom';
+import { Classes, Collapse, Card, H1, H3 } from '@blueprintjs/core';
 import { fetchUserInfo, getUserInfo } from './util/Recipes';
 import { LoginPage } from './components/LoginPage';
 import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
 import { localStorageDarkTheme } from './util/StorageKeys';
 import { UniqueRecipe } from './components/recipe/UniqueRecipe';
+import { ShoppingList } from './components/ShoppingList';
+import Header from './components/Header';
+import { DarkModeSwitch } from './components/helpers/DarkModeSwitch';
+import { LanguageSelect } from './components/helpers/LanguageSelect';
+import { useTranslation } from 'react-i18next';
 
 function changeThemeClass(darkTheme: boolean) {
   if (darkTheme) {
@@ -43,6 +48,43 @@ function PrivateRoute({ children, ...rest }: RouteProps) {
   );
 }
 
+function NotFound(props: IDarkThemeProps) {
+  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
+  const mobile = useMobile();
+  const { t } = useTranslation();
+
+  return <>
+    <Header
+      darkThemeProps={props}
+      navigationIcon={<NavigationIcon
+        isOpen={drawerIsOpen}
+        onClick={() => setDrawerIsOpen(!drawerIsOpen)}
+      />}
+      className='login-header'
+    />
+    {mobile && <Collapse
+      isOpen={drawerIsOpen}
+    >
+      <div className='menu'>
+        <div className='settings' style={{ marginBottom: '0' }}>
+          <DarkModeSwitch {...props} />
+          <div className='spacer' />
+          <LanguageSelect />
+        </div>
+      </div>
+    </Collapse>}
+    <div className='card-wrapper'>
+      <Card
+        className='login'
+        elevation={1}
+      >
+        <H1>{t('404Header')}</H1>
+        <H3>{t('404Text')}</H3>
+      </Card>
+    </div>
+  </>
+}
+
 function App() {
 
   const [darkTheme, setDarkTheme] = usePersistentState(false, localStorageDarkTheme);
@@ -60,35 +102,30 @@ function App() {
   const mobile = useMobile();
 
   const routes = [
-    { path: '/', Component: RecipeList },
-    { path: '/recipes/:id', Component: Recipe },
+    { path: '/', Component: RecipeList, R: PrivateRoute },
+    { path: '/recipes/:id', Component: Recipe, R: PrivateRoute },
+    { path: '/shoppingList', Component: ShoppingList, R: PrivateRoute },
+    { path: '/uniqueRecipes/:id', Component: UniqueRecipe, R: Route },
+    { path: '/login', Component: LoginPage, R: Route },
+    { path: undefined, Component: NotFound, R: Route },
   ]
 
   return (
     <div className={mobile ? 'mobile' : ''}>
       <Router>
-        {routes.map(({ path, Component }) => (
-          <PrivateRoute key={path} exact path={path}>
-            <div className='page'>
-              <Component
-                darkTheme={darkTheme}
-                onDarkThemeChanged={handleThemeChange}
-              />
-            </div>
-          </PrivateRoute>
-        ))}
-        <Route exact path='/uniqueRecipes/:id'>
-          <UniqueRecipe
-            darkTheme={darkTheme}
-            onDarkThemeChanged={handleThemeChange}
-          />
-        </Route>
-        <Route exact path='/login'>
-          <LoginPage
-            darkTheme={darkTheme}
-            onDarkThemeChanged={handleThemeChange}
-          />
-        </Route>
+        <Switch>
+          {routes.map(({ path, Component, R }) => (
+            <R key={path} exact path={path}>
+              <div className='page'>
+                <Component
+                  darkTheme={darkTheme}
+                  onDarkThemeChanged={handleThemeChange}
+                />
+              </div>
+            </R>
+          ))}
+          {/* <Redirect to='404' /> */}
+        </Switch>
       </Router>
     </div>
   );

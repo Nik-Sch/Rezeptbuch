@@ -36,6 +36,7 @@ db = Database()
 Session(app)
 redisNotificationsDB = redis.Redis(host='redis', port=6379, db=0)
 redisUniqueRecipeDB = redis.Redis(host='redis', port=6379, db=1)
+redisShoppingListDB = redis.Redis(host='redis', port=6379, db=2)
 
 checksumRequestParser = reqparse.RequestParser()
 checksumRequestParser.add_argument('checksum', type=int, required=False,
@@ -68,13 +69,26 @@ def logout():
 
 @app.route('/status', methods=['GET'])
 def status():
-    print(str(uuid4()))
     userName = session.get('userName', None)
     if (userName != None):
         return make_response(jsonify({
             'username': userName,
             'write': db.hasWriteAccess(userName)
             }), 200)
+    else:
+        return unauthorized()
+
+@app.route('/shoppingList', methods=['GET', 'POST'])
+def shoppingList():
+    userName = session.get('userName', None)
+    if (userName != None):
+        if request.method == 'GET':
+            if (not redisShoppingListDB.exists(userName)):
+                return make_response('', 404)
+            return make_response(jsonify(json.loads(redisShoppingListDB.get(userName))), 200)
+        elif request.method == 'POST':
+            redisShoppingListDB.set(userName, json.dumps(request.json))
+            return make_response('', 200)
     else:
         return unauthorized()
 
@@ -127,7 +141,6 @@ def addUniqueRecipe():
     if (userName == None):
         return unauthorized()
     requestData = request.json
-    print(requestData)
     uuid = str(uuid4())
     redisUniqueRecipeDB.set(uuid, json.dumps(requestData))
     redisUniqueRecipeDB.expire(uuid, 60 * 60 * 24 * 30) # 30 days valid

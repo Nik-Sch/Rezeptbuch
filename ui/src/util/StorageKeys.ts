@@ -4,6 +4,7 @@ export const localStorageRecipeChecksum = 'recipeChecksum';
 export const localStorageCategoryChecksum = 'categoryChecksum';
 export const localStorageCommentChecksum = 'commentChecksum';
 export const localStorageUserChecksum = 'userChecksum';
+export const localStorageShoppingList = 'shoppingList';
 export const sessionStorageFilteredCategories = 'filteredCategories';
 export const sessionStorageFilteredUsers = 'filteredUsers';
 export const sessionStorageSearchInIngredients = 'searchInIngredients';

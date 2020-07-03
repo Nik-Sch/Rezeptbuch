@@ -17,6 +17,7 @@ import ShareButton from './ShareButton';
 import { DesktopIngredients, showDot } from './Ingredients';
 import DescriptionTextArea from './DescriptionTextArea';
 import CommentSection from './CommentSection';
+import { IMenuLink, MenuLinks } from '../recipeList/RecipeListMenu';
 
 function verifyRecipe(recipe: IRecipe): boolean {
   return recipe.title.trim() !== '' &&
@@ -221,6 +222,11 @@ export function Recipe(props: IDarkThemeProps) {
     icon='arrow-left'
     iconSize={24}
   />
+
+  const menuLinks: IMenuLink[] = [
+    { to: '/', icon: 'git-repo', text: t('recipes'), active: true},
+    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
+  ];
 
   if (mobile) {
     return <>
@@ -433,148 +439,157 @@ export function Recipe(props: IDarkThemeProps) {
       <Header
         darkThemeProps={props}
       />
-      <div className='recipe-container'>
-        <Card className='recipe' elevation={2}>
-          {state.loaded && <div className='edit-container'>
-            {state.editable ?
-              <ButtonGroup>
-                <CancelButton
-                  handleDiscardClick={handleDiscardClick}
-                  popoverTarget={<Button
-                    text={t('cancelEdit')}
-                    onClick={handleCancelClick}
-                  />}
-                />
-                <Tooltip
-                  disabled={online}
-                  content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
-                  position='bottom'
-                >
-                  <AnchorButton
-                    disabled={!online}
-                    icon='floppy-disk'
-                    text={t('saveRecipe')}
-                    intent='primary'
-                    onClick={saveRecipe}
-                  />
-                </Tooltip>
-              </ButtonGroup>
-              :
-              <ButtonGroup>
-                <ShareButton recipe={recipe} />
-                <Tooltip
-                  disabled={online && hasWriteAccess}
-                  content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
-                  position='bottom'
-                >
-                  <AnchorButton
-                    icon='edit'
-                    disabled={!(online && hasWriteAccess)}
-                    intent='primary'
-                    text={t('editRecipe')}
-                    onClick={handleSetEditable}
-                  />
-                </Tooltip>
-                <DeleteButton
-                  handleDeleteClick={handleDeleteClick}
-                  disabled={!(online && hasWriteAccess)}
-                  popoverTarget={
+      <div className='body'>
+        <Card className='menu'>
+          <MenuLinks
+            menuLinks={menuLinks}
+          />
+        </Card>
+        <div className='main-content'>
+          <div className='recipe-container'>
+            <Card className='recipe' elevation={2}>
+              {state.loaded && <div className='edit-container'>
+                {state.editable ?
+                  <ButtonGroup>
+                    <CancelButton
+                      handleDiscardClick={handleDiscardClick}
+                      popoverTarget={<Button
+                        text={t('cancelEdit')}
+                        onClick={handleCancelClick}
+                      />}
+                    />
+                    <Tooltip
+                      disabled={online}
+                      content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
+                      position='bottom'
+                    >
+                      <AnchorButton
+                        disabled={!online}
+                        icon='floppy-disk'
+                        text={t('saveRecipe')}
+                        intent='primary'
+                        onClick={saveRecipe}
+                      />
+                    </Tooltip>
+                  </ButtonGroup>
+                  :
+                  <ButtonGroup>
+                    <ShareButton recipe={recipe} />
                     <Tooltip
                       disabled={online && hasWriteAccess}
                       content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
                       position='bottom'
                     >
                       <AnchorButton
-                        text={t('deleteRecipe')}
+                        icon='edit'
                         disabled={!(online && hasWriteAccess)}
-                        intent='warning'
-                        icon='trash'
+                        intent='primary'
+                        text={t('editRecipe')}
+                        onClick={handleSetEditable}
                       />
                     </Tooltip>
-                  }
-                />
-              </ButtonGroup>
-            }
-          </div>}
-          {error && <H3>{t('notFound')}</H3>}
-          <H1 className='title-wrapper'>
-            <EditableText
-              multiline={true}
-              className={classNames(state.loaded ? '' : Classes.SKELETON, 'title')}
-              placeholder={t('phTitle')}
-              disabled={!state.editable}
-              value={recipe.title.trim()}
-              onChange={handleSetTitle}
-            />
-          </H1>
-          <div className='text-image-wrapper'>
-            <div className='text-wrapper'>
-              <H3>
-                <CategorySuggest
-                  canAddCategory={true}
-                  noResultText={t('noCategoryFound')}
-                  className={classNames('category-select', state.loaded ? '' : Classes.SKELETON)}
+                    <DeleteButton
+                      handleDeleteClick={handleDeleteClick}
+                      disabled={!(online && hasWriteAccess)}
+                      popoverTarget={
+                        <Tooltip
+                          disabled={online && hasWriteAccess}
+                          content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
+                          position='bottom'
+                        >
+                          <AnchorButton
+                            text={t('deleteRecipe')}
+                            disabled={!(online && hasWriteAccess)}
+                            intent='warning'
+                            icon='trash'
+                          />
+                        </Tooltip>
+                      }
+                    />
+                  </ButtonGroup>
+                }
+              </div>}
+              {error && <H3>{t('notFound')}</H3>}
+              <H1 className='title-wrapper'>
+                <EditableText
+                  multiline={true}
+                  className={classNames(state.loaded ? '' : Classes.SKELETON, 'title')}
+                  placeholder={t('phTitle')}
                   disabled={!state.editable}
-                  placeholder={t('phCategory')}
-                  initialCategory={recipe.category}
-                  onCategorySelected={handleSetCategory}
+                  value={recipe.title.trim()}
+                  onChange={handleSetTitle}
                 />
-              </H3>
-              <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
-                {t('ingredients')}:
+              </H1>
+              <div className='text-image-wrapper'>
+                <div className='text-wrapper'>
+                  <H3>
+                    <CategorySuggest
+                      canAddCategory={true}
+                      noResultText={t('noCategoryFound')}
+                      className={classNames('category-select', state.loaded ? '' : Classes.SKELETON)}
+                      disabled={!state.editable}
+                      placeholder={t('phCategory')}
+                      initialCategory={recipe.category}
+                      onCategorySelected={handleSetCategory}
+                    />
+                  </H3>
+                  <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
+                    {t('ingredients')}:
               </H4>
-              <DesktopIngredients
-                ingredients={recipe.ingredients}
-                loaded={state.loaded}
-                editable={state.editable}
-                addIngredient={v => {
-                  setState(state => ({ ...state, dirty: true }));
-                  const ingredients = recipe.ingredients.splice(0);
-                  ingredients.push(v);
-                  setRecipe(recipe => ({ ...recipe, ingredients }));
+                  <DesktopIngredients
+                    ingredients={recipe.ingredients}
+                    loaded={state.loaded}
+                    editable={state.editable}
+                    addIngredient={v => {
+                      setState(state => ({ ...state, dirty: true }));
+                      const ingredients = recipe.ingredients.splice(0);
+                      ingredients.push(v);
+                      setRecipe(recipe => ({ ...recipe, ingredients }));
 
-                }}
-                deleteIngredient={index => {
-                  setState(state => ({ ...state, dirty: true }));
-                  const ingredients = recipe.ingredients.filter((_, i) => i !== index);
-                  setRecipe(recipe => ({ ...recipe, ingredients }));
-                }}
-                replaceIngredient={(index, v) => {
-                  setState(state => ({ ...state, dirty: true }));
-                  const ingredients = recipe.ingredients.splice(0);
-                  ingredients[index] = v;
-                  setRecipe(recipe => ({ ...recipe, ingredients }));
-                }}
-              />
-            </div>
-            <ImagePart
-              recipe={recipe}
-              setImage={handleSetImage}
-              editable={state.editable}
-              className='image'
-            />
-          </div>
-          <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
-            {t('description')}:
+                    }}
+                    deleteIngredient={index => {
+                      setState(state => ({ ...state, dirty: true }));
+                      const ingredients = recipe.ingredients.filter((_, i) => i !== index);
+                      setRecipe(recipe => ({ ...recipe, ingredients }));
+                    }}
+                    replaceIngredient={(index, v) => {
+                      setState(state => ({ ...state, dirty: true }));
+                      const ingredients = recipe.ingredients.splice(0);
+                      ingredients[index] = v;
+                      setRecipe(recipe => ({ ...recipe, ingredients }));
+                    }}
+                  />
+                </div>
+                <ImagePart
+                  recipe={recipe}
+                  setImage={handleSetImage}
+                  editable={state.editable}
+                  className='image'
+                />
+              </div>
+              <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
+                {t('description')}:
           </H4>
-          <DescriptionTextArea
-            value={recipe.description}
-            changeValue={handleSetDescription}
-            placeholder={state.editable ? t('phDescription') : t('noDescription')}
-            editable={state.editable}
-            className={classNames(state.loaded ? '' : Classes.SKELETON, 'description')}
-          />
-          <H5 className='user'>
-            {!state.editable && `${t('by')} ${recipe.user.user}.`}
-          </H5>
-        </Card>
+              <DescriptionTextArea
+                value={recipe.description}
+                changeValue={handleSetDescription}
+                placeholder={state.editable ? t('phDescription') : t('noDescription')}
+                editable={state.editable}
+                className={classNames(state.loaded ? '' : Classes.SKELETON, 'description')}
+              />
+              <H5 className='user'>
+                {!state.editable && `${t('by')} ${recipe.user.user}.`}
+              </H5>
+            </Card>
+          </div>
+          {recipe.id !== -1 && <CommentSection
+            comments={recipe.comments}
+            username={status?.username ?? ''}
+            recipeId={recipe.id}
+            writeAccess={typeof status !== 'undefined' && status.write}
+          />}
+        </div>
       </div>
-      {recipe.id !== -1 && <CommentSection
-        comments={recipe.comments}
-        username={status?.username ?? ''}
-        recipeId={recipe.id}
-        writeAccess={typeof status !== 'undefined' && status.write}
-      />}
       <div className='bottom-padding' />
     </>
   }

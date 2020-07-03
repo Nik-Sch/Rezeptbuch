@@ -9,22 +9,22 @@
     margin: 15px 20px;
     display: flex;
     min-height: 75px;
-    .content {
+    .comment-content {
       flex: 1 0;
-      .header {
+      .comment-header {
         display: flex;
         .date::before {
           content: "-";
           margin: 0 5px;
         }
       }
-      .text {
+      .comment-text {
         margin-left: 10px;
         white-space: pre-wrap;
         word-wrap: break-word;
       }
     }
-    .controls {
+    .comment-controls {
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
@@ -36,12 +36,12 @@
 .mobile {
   .comment {
     flex-direction: column;
-    .header .more {
+    .comment-header .more {
       flex: 1 0;
       display: flex;
       justify-content: flex-end;
     }
-    .controls {
+    .comment-controls {
       align-self: flex-end;
       justify-content: flex-start;
     }

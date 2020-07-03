@@ -54,7 +54,6 @@ export function UniqueRecipe(props: IDarkThemeProps) {
     return <>
       <Header
         darkThemeProps={props}
-        logo={true}
         navigationIcon={<NavigationIcon
           isOpen={drawerIsOpen}
           onClick={() => setDrawerIsOpen(!drawerIsOpen)}
@@ -68,7 +67,7 @@ export function UniqueRecipe(props: IDarkThemeProps) {
       <Collapse
         isOpen={drawerIsOpen}
       >
-        <div className='recipe-menu'>
+        <div className='menu'>
           <div className='settings' style={{ marginBottom: '0' }}>
             <DarkModeSwitch {...props} />
             <div className='spacer' />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Button, InputGroup, Tooltip } from '@blueprintjs/core';
+import { Card, Button, InputGroup, Tooltip, Divider, Classes, Icon, IconName } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { SortSelect, ISort } from '../helpers/SortSelect';
@@ -12,6 +12,8 @@ import { IDarkThemeProps } from '../../App';
 import { useMobile } from '../helpers/CustomHooks';
 import LogoutButton from '../helpers/LogoutButton';
 import { UserMultiSelect } from '../helpers/UserMultiSelect';
+import { Link } from 'react-router-dom';
+import classNames from 'classnames';
 
 export interface ISearchProps {
   handleSearchChange: (newValue: string) => void;
@@ -29,19 +31,65 @@ export interface ISearchProps {
   darkModeProps: IDarkThemeProps;
 }
 
+export interface IMenuLink {
+  to: string;
+  icon: IconName;
+  text: string;
+  active?: boolean;
+}
+
+export function MenuLinks(props: { menuLinks: IMenuLink[] }) {
+  return <>
+    {props.menuLinks.map(menu => (
+      <div className='menu-link'>
+        <Link
+          to={menu.to}
+          className={classNames(Classes.BUTTON, Classes.FILL, Classes.ALIGN_LEFT, Classes.MINIMAL, menu.active ? Classes.INTENT_PRIMARY : '')}
+          role='button'
+        >
+          <Icon icon={menu.icon} />
+          <span className={Classes.BUTTON_TEXT}>
+            {menu.text}
+          </span>
+        </Link>
+      </div>
+    ))}
+  </>
+}
+
 export default function RecipeListMenu(myProps: ISearchProps) {
   const [t] = useTranslation();
   const { darkModeProps, ...props } = myProps;
   const mobile = useMobile();
+  const menuLinks: IMenuLink[] = [
+    { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
+    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
+  ];
 
   if (mobile) {
-    return <div className='recipe-menu'>
+    return <div className='menu'>
       <div className='settings'>
         <DarkModeSwitch {...darkModeProps} />
         <div className='spacer' />
         <LanguageSelect />
         <LogoutButton />
       </div>
+
+      {/* <Divider />
+      <div className='control'>
+        <Link
+          to='/shoppingList'
+          className={classNames(Classes.BUTTON, Classes.ALIGN_LEFT, Classes.LARGE)}
+          role='button'
+        >
+          <Icon icon='shopping-cart' />
+          <span className={Classes.BUTTON_TEXT}>
+            {t('shoppingList')}
+          </span>
+        </Link>
+      </div>
+      <Divider /> */}
+
       <div className='control'>
         <UserMultiSelect
           placeholder={t('filterForUsers')}
@@ -61,14 +109,14 @@ export default function RecipeListMenu(myProps: ISearchProps) {
             onSelected={props.onSortSelected}
           />
         </div>
-          <CategoryMultiSelect
-            placeholder={t('filterForCategories')}
-            noResultText={t('noCategoryFound')}
-            onCategorySelected={props.onCategorySelected}
-            selectedCategories={props.selectedCategories}
-            allCategories={props.allCategories}
-            className='filter-categories'
-          />
+        <CategoryMultiSelect
+          placeholder={t('filterForCategories')}
+          noResultText={t('noCategoryFound')}
+          onCategorySelected={props.onCategorySelected}
+          selectedCategories={props.selectedCategories}
+          allCategories={props.allCategories}
+          className='filter-categories'
+        />
       </div>
     </div>
   }
@@ -85,13 +133,19 @@ export default function RecipeListMenu(myProps: ISearchProps) {
       />
     </Tooltip>
   );
-  return <Card className='recipe-menu'>
+  return <Card className='menu'>
+    <MenuLinks
+      menuLinks={menuLinks}
+    />
+
+    <Divider className='menu-item'/>
+
     <InputGroup
       leftIcon='search'
       rightElement={searchInIngredientsButton}
       placeholder={t('searchRecipe')}
       value={props.searchString}
-      className='search-recipe'
+      className='search-recipe menu-item'
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.handleSearchChange(e.target.value)}
     />
     <CategoryMultiSelect
@@ -100,7 +154,7 @@ export default function RecipeListMenu(myProps: ISearchProps) {
       onCategorySelected={props.onCategorySelected}
       selectedCategories={props.selectedCategories}
       allCategories={props.allCategories}
-      className='filter-categories'
+      className='filter-categories menu-item'
     />
     <UserMultiSelect
       placeholder={t('filterForUsers')}
@@ -108,7 +162,7 @@ export default function RecipeListMenu(myProps: ISearchProps) {
       onUserSelected={props.onUserSelected}
       selectedUsers={props.selectedUsers}
       allUsers={props.allUsers}
-      className='filter-users'
+      className='filter-users menu-item'
     />
   </Card>
 }

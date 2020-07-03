@@ -16,7 +16,6 @@ export interface IHeaderProps {
   navigationIcon?: JSX.Element;
   onNavigationClick?: () => void;
   children?: React.ReactNode;
-  logo?: boolean;
   className?: string;
   darkThemeProps: IDarkThemeProps;
 }
@@ -32,13 +31,13 @@ export default function Header(props: IHeaderProps) {
           </div>
           <div className='right-align'>
             {props.children}
-            {props.logo && <Link to='/'>
+            <Link to='/'>
               <img
                 src={logoNoText}
                 className="logo"
                 alt="logo"
               />
-            </Link>}
+            </Link>
           </div>
         </Navbar>
       </header>

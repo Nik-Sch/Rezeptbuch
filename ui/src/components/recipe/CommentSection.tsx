@@ -20,7 +20,7 @@ interface ICommentProps {
   username: string;
 }
 
-function Comment(props: ICommentProps) { // TODO: mobile edit
+function Comment(props: ICommentProps) {
   const [hover, setHover] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -140,8 +140,8 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
         </div>
       </div>
     </Dialog>
-    <div className='content'>
-      <div className='header'>
+    <div className='comment-content'>
+      <div className='comment-header'>
         <H5 className='name'>
           {props.comment.user.user}
         </H5>
@@ -173,7 +173,7 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
             </Popover>
           </div>}
       </div>
-      <div className='text'>
+      <div className='comment-text'>
         {isEditing
           ? <TextArea
             className={Classes.EDITABLE_TEXT_INPUT}
@@ -190,7 +190,7 @@ function Comment(props: ICommentProps) { // TODO: mobile edit
       </div>
     </div>
     {(hover || deleteOpen || isEditing) &&
-      <div className='controls'>
+      <div className='comment-controls'>
         <Tooltip
           content={t('tooltipOffline')}
           disabled={online}
@@ -277,8 +277,8 @@ function NewComment(props: { username: string, recipeId: number }) {
   const blurTimeout = useRef<number>();
 
   return <div className='comment'>
-    <div className='content'>
-      <div className='header'>
+    <div className='comment-content'>
+      <div className='comment-header'>
         <H5 className='name'>
           {props.username}
         </H5>
@@ -286,7 +286,7 @@ function NewComment(props: { username: string, recipeId: number }) {
           {t('newComment')}
         </div>
       </div>
-      <div className='text'>
+      <div className='comment-text'>
         <TextArea
           className={Classes.EDITABLE_TEXT_INPUT}
           value={newText}
@@ -309,7 +309,7 @@ function NewComment(props: { username: string, recipeId: number }) {
       </div>
     </div>
     {(showControls) &&
-      <div className='controls'>
+      <div className='comment-controls'>
         <ButtonGroup
           vertical={!mobile}
           minimal={true}
@@ -357,7 +357,7 @@ export default function CommentSection(props: IProps) {
   const { t } = useTranslation();
   return <>
     <div className='comment-section'>
-      <Divider />
+      {mobile && <Divider />}
       <H3 className='comment-count'>
         {(props.comments.length === 0 && props.writeAccess && !mobile)
           ? t('comments_0')

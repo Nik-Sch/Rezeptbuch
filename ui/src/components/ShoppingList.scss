@@ -1,0 +1,26 @@
+.shopping-list-wrapper {
+  margin: 15px;
+  margin-top: 0;
+
+  .shopping-list {
+    margin: 20px;
+    .shopping-item {
+      padding-right: 20px;
+      display: flex;
+      justify-items: flex-start;
+      margin: 10px 0;
+      .spacer {
+        flex-grow: 1;
+      }
+      .shopping-item-checkbox {
+        margin-bottom: 0;
+      }
+      .drag-handle {
+        margin-right: 10px;
+      }
+      .drag-handle.active {
+        cursor: grab;
+      }
+    }
+  }
+}
