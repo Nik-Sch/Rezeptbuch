@@ -100,5 +100,12 @@
   "save": "Speichern",
   "tooltipNoWriteAccess": "Du kannst dieses Rezept nicht ändern.",
   "filterForUsers": "Nach Benutzern filtern...",
-  "noUsersFound": "Keinen Benutzer gefunden"
+  "noUsersFound": "Keinen Benutzer gefunden",
+  "404Header": "404",
+  "404Text": "Ihre Website wurde nicht gefunden :/",
+  "addItem": "Artikel hinzufügen...",
+  "checkedItems": "{{count}} erledigter Eintrag",
+  "checkedItems_plural": "{{count}} erledigte Einträge",
+  "recipes": "Rezepte",
+  "shoppingList": "Einkaufsliste"
 }

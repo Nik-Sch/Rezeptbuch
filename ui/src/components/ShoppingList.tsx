@@ -1,80 +1,167 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Header from "./Header";
 import { NavigationIcon } from "./recipeList/RecipeList";
-import { Collapse, Card, H1, Checkbox, EditableText, Icon, Button, Divider } from "@blueprintjs/core";
+import { Collapse, Card, H1, Checkbox, EditableText, Icon, Button, Divider, Classes, Keys } from "@blueprintjs/core";
 import { DarkModeSwitch } from "./helpers/DarkModeSwitch";
 import { LanguageSelect } from "./helpers/LanguageSelect";
 import { useMobile, usePersistentState } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
 import { IDarkThemeProps } from "../App";
 import { IMenuLink, MenuLinks } from "./recipeList/RecipeListMenu";
-import { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import DraggableList from "react-draggable-list";
 import './ShoppingList.scss';
 import classNames from "classnames";
 import { localStorageShoppingList } from "../util/StorageKeys";
 
-interface IShoppingElement {
+interface IShoppingItem {
   text: string;
-  done: boolean;
-  id: number;
-  doneTime?: Dayjs;
+  checked: boolean;
+  addedTime: string;
+  checkedTime?: string;
 }
 
 interface IItemProps {
-  item: IShoppingElement;
-  dragHandleProps: object;
+  item: IShoppingItem;
+  dragHandleProps?: object;
   commonProps: ICommonProps;
-  newElement?: boolean;
-  onConfirm?: (value: string) => void;
 }
 
 interface ICommonProps {
-  updateElement: (newElement: IShoppingElement) => void;
-  deleteElement?: (elem: IShoppingElement) => void;
+  updateElement: (newElement: IShoppingItem) => void;
+  deleteElement?: (elem: IShoppingItem) => void;
+}
+
+function NewShoppingListItem(props: {
+  onConfirm: (value: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [isEditing, setIsEditing] = useState(false);
+  const [text, setText] = useState('');
+  const [hover, setHover] = useState(false);
+
+  const handleConfirm = (shouldRefocus: boolean = false) => {
+    if (text.trim() !== '') {
+      props.onConfirm(text);
+      if (shouldRefocus) {
+        setTimeout(() => {
+          setIsEditing(true);
+        }, 0);
+      }
+    }
+    setIsEditing(false);
+    setText('');
+  }
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.which === Keys.ENTER) {
+      handleConfirm(true);
+    } else if (e.which === Keys.ESCAPE) {
+      setIsEditing(false);
+      setText('');
+    }
+  }
+
+  const hoverTimeout = useRef<number>();
+  const hasValue = text.trim().length > 0;
+
+  return <div
+    onMouseOver={() => {
+      window.clearTimeout(hoverTimeout.current);
+      hoverTimeout.current = window.setTimeout(() => setHover(true), 50);
+    }}
+    onMouseOut={() => {
+      window.clearTimeout(hoverTimeout.current);
+      hoverTimeout.current = window.setTimeout(() => setHover(false), 50);
+    }}
+  >
+    {hover ? <Divider /> : <div className='fake-divider' />}
+    <div className='shopping-item'>
+      <Icon icon='blank' style={{ marginRight: '10px' }} />
+      <Icon
+        className='new-icon'
+        icon='plus'
+      />
+      <div
+        className={classNames(
+          Classes.EDITABLE_TEXT,
+          {
+            [Classes.EDITABLE_TEXT_EDITING]: isEditing,
+            [Classes.EDITABLE_TEXT_PLACEHOLDER]: !hasValue
+          },
+          'new-text'
+        )}
+        onFocus={() => setIsEditing(true)}
+        tabIndex={isEditing ? undefined : 0}
+      >
+        {isEditing
+          ? <input
+            className={Classes.EDITABLE_TEXT_INPUT}
+            onBlur={() => handleConfirm()}
+            onChange={e => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            ref={input => input?.focus()}
+            placeholder={t('addItem')}
+            value={text}
+          />
+          : <span className={Classes.EDITABLE_TEXT_CONTENT}>
+            {hasValue ? text : t('addItem')}
+          </span>}
+      </div>
+    </div>
+    {hover ? <Divider /> : <div className='fake-divider' />}
+  </div>
+
 }
 
 function ShoppingListItem(props: IItemProps) {
   const [hover, setHover] = useState(false);
 
-  return <>
-    {!props.newElement && <Divider />}
+  const hoverTimeout = useRef<number>();
+
+  return <div
+    onMouseOver={() => {
+      window.clearTimeout(hoverTimeout.current);
+      hoverTimeout.current = window.setTimeout(() => setHover(true), 50);
+    }}
+    onMouseOut={() => {
+      window.clearTimeout(hoverTimeout.current);
+      hoverTimeout.current = window.setTimeout(() => setHover(false), 50);
+    }}
+  >
+    {hover ? <Divider /> : <div className='fake-divider' />}
     <div
-      className='shopping-item'
-      key={props.item.id}
-      onMouseOver={() => setHover(true)}
-      onMouseOut={() => setHover(false)}
+      className={classNames('shopping-item', props.item.checked ? Classes.TEXT_DISABLED : '')}
     >
       <Icon
-        icon={hover && !props.newElement ? 'drag-handle-vertical' : 'blank'}
+        icon={hover && props.dragHandleProps ? 'drag-handle-vertical' : 'blank'}
         {...props.dragHandleProps}
-        className={classNames('drag-handle', !props.newElement ? 'active' : '')}
+        className={classNames('drag-handle', props.dragHandleProps ? 'active' : '')}
       />
       <Checkbox
         className='shopping-item-checkbox'
-        checked={props.item.done}
+        checked={props.item.checked}
         onChange={(event: React.FormEvent<HTMLInputElement>) => {
           const v = event.currentTarget.checked;
-          props.commonProps.updateElement({ ...props.item, done: v });
+          props.commonProps.updateElement({ ...props.item, checked: v });
         }}
       />
-      <EditableText
+      {<EditableText
         value={props.item.text}
         minWidth={500}
         alwaysRenderInput={true}
         className='shopping-item-text'
         onChange={v => props.commonProps.updateElement({ ...props.item, text: v })}
-        onConfirm={props.onConfirm}
-      />
+      />}
       <div className='spacer' />
-      {!props.newElement && <Button
+      {<Button
         icon='cross'
         small={true}
         minimal={true}
         onClick={() => props.commonProps.deleteElement && props.commonProps.deleteElement(props.item)}
       />}
     </div>
-  </>
+    {hover ? <Divider /> : <div className='fake-divider' />}
+  </div>
 }
 
 class ShoppingListItemClassWrapper extends React.Component<IItemProps, Readonly<{}>> {
@@ -83,13 +170,26 @@ class ShoppingListItemClassWrapper extends React.Component<IItemProps, Readonly<
   }
 }
 
+interface IShoppingState {
+  notChecked: IShoppingItem[];
+  checked: IShoppingItem[];
+  nextId: number;
+  showChecked: boolean;
+}
+
+const defaultShoppingState: IShoppingState = {
+  notChecked: [],
+  checked: [],
+  nextId: 0,
+  showChecked: true
+}
+
 export function ShoppingList(props: IDarkThemeProps) {
   const [drawerIsOpen, setDrawerIsOpen] = useState(false);
-  const [elements, setElements] = usePersistentState<IShoppingElement[]>([], localStorageShoppingList);
-  const [newElement, setNewElement] = useState<IShoppingElement>({ text: '', done: false, id: -1 });
+  const [state, setState] = usePersistentState<IShoppingState>(defaultShoppingState, localStorageShoppingList);
+
   const mobile = useMobile();
   const { t } = useTranslation();
-
 
   const menuLinks: IMenuLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes') },
@@ -125,54 +225,77 @@ export function ShoppingList(props: IDarkThemeProps) {
         <Card className='shopping-list-wrapper'>
           <H1>{t('shoppingList')}</H1>
           <div className='shopping-list'>
-            <ShoppingListItem
-              item={newElement}
-              dragHandleProps={{}}
-              commonProps={{ updateElement: setNewElement }}
-              newElement={true}
-              onConfirm={value => {
-                if (value.trim().length > 0) {
-                  const elems = elements.slice();
-                  const newElem = {
-                    text: value,
-                    done: newElement.done,
-                    id: elems.length > 0 ? elems.reduce((p, c) => p.id > c.id ? p : c).id + 1 : 0
-                  };
-                  if (newElem.done) {
-                    elems.push(newElem)
-                  } else {
-                    elems.unshift(newElem);
-                  }
-                  setElements(elems);
-                  setNewElement({ text: '', done: false, id: -1 });
-                }
-              }}
-            />
-            <DraggableList<IShoppingElement, ICommonProps, ShoppingListItemClassWrapper>
-              itemKey='id'
+            <DraggableList<IShoppingItem, ICommonProps, ShoppingListItemClassWrapper>
+              itemKey={item => item.addedTime}
+              padding={0}
               template={ShoppingListItemClassWrapper}
-              list={elements}
-              onMoveEnd={newList => setElements(newList.slice())}
+              list={state.notChecked}
+              onMoveEnd={newList => setState(items => ({ ...items, notChecked: newList.slice() }))}
               commonProps={{
-                updateElement: (newElement: IShoppingElement) => {
-                  const elems = elements.slice();
-                  const oldElemIndex = elems.findIndex(v => v.id === newElement.id);
-                  if (!elems[oldElemIndex].done && newElement.done) {
-                    elems.splice(oldElemIndex, 1);
-                    elems.push(newElement);
-                  } else if (elems[oldElemIndex].done && !newElement.done) {
-                    elems.splice(oldElemIndex, 1);
-                    elems.unshift(newElement);
+                updateElement: (newItem: IShoppingItem) => {
+                  const notChecked = state.notChecked.slice();
+                  const checked = state.checked.slice();
+                  const oldElemIndex = notChecked.findIndex(v => v.addedTime === newItem.addedTime);
+                  if (newItem.checked) {
+                    notChecked.splice(oldElemIndex, 1);
+                    checked.push(newItem);
                   } else {
-                    elems[oldElemIndex] = newElement;
+                    notChecked[oldElemIndex] = newItem;
                   }
-                  setElements(elems);
+                  setState(state => ({ ...state, notChecked, checked: checked.sort((a, b) => dayjs(a.addedTime).diff(b.addedTime)) }));
                 },
-                deleteElement: (elem: IShoppingElement) => {
-                  setElements(elements.filter(e => e.id !== elem.id));
+                deleteElement: (elem: IShoppingItem) => {
+                  setState(state => ({ ...state, notChecked: state.notChecked.filter(e => e.addedTime !== elem.addedTime) }));
                 }
               }}
             />
+            <NewShoppingListItem
+              onConfirm={(text) => {
+                if (text.trim().length > 0) {
+                  const notChecked = state.notChecked.slice();
+                  const newItem: IShoppingItem = {
+                    text: text,
+                    checked: false,
+                    addedTime: dayjs().toJSON()
+                  };
+                  notChecked.push(newItem);
+                  setState(state => ({ ...state, notChecked, nextId: state.nextId + 1 }));
+                }
+              }}
+            />
+            {state.checked.length > 0 && <Button
+              minimal={true}
+              text={t('checkedItems', { count: state.checked.length })}
+              icon={state.showChecked ? 'caret-down' : 'caret-right'}
+              onClick={() => setState(state => ({ ...state, showChecked: !state.showChecked }))}
+            />}
+            <Collapse
+              isOpen={state.showChecked}
+            >
+              {state.checked.map(item => {
+                return <ShoppingListItem
+                  item={item}
+                  key={item.addedTime}
+                  commonProps={{
+                    updateElement: (newItem: IShoppingItem) => {
+                      const notChecked = state.notChecked.slice();
+                      const checked = state.checked.slice();
+                      const oldElemIndex = checked.findIndex(v => v.addedTime === newItem.addedTime);
+                      if (!newItem.checked) {
+                        checked.splice(oldElemIndex, 1);
+                        notChecked.push(newItem);
+                      } else {
+                        checked[oldElemIndex] = newItem;
+                      }
+                      setState(state => ({ ...state, notChecked, checked }));
+                    },
+                    deleteElement: (elem: IShoppingItem) => {
+                      setState(state => ({ ...state, checked: state.checked.filter(e => e.addedTime !== elem.addedTime) }));
+                    }
+                  }}
+                />
+              })}
+            </Collapse>
           </div>
         </Card>
       </div>

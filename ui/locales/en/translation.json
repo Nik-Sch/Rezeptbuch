@@ -104,5 +104,8 @@
   "shoppingList": "Shopping List",
   "404Header": "404",
   "404Text": "Your site couldn't be found :/",
-  "recipes": "Recipes"
+  "recipes": "Recipes",
+  "addItem": "Add an item...",
+  "checkedItems": "{{count}} completed item",
+  "checkedItems_plural": "{{count}} completed items"
 }
