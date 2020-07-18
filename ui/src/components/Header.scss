@@ -38,37 +38,72 @@ body {
   }
 }
 
-.mobile-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+.mobile-header-wrapper {
+  // position: relative;
 
-  .left-align {
+  .mobile-header-content {
     display: flex;
     flex-direction: row;
-    align-items: center;
-  }
+    justify-content: space-between;
 
-  .right-align {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .logo {
-    max-height: 50px;
-    margin-left: 10px;
-  }
-
-  .recipe-search {
-    margin-left: 5px;
-
-    .bp3-input {
-      transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-      width: 45vw;
+    .left-align {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
     }
-    .bp3-input:focus {
-      width: 55vw;
+
+    .right-align {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .logo {
+      max-height: 50px;
+      margin-left: 10px;
+    }
+
+    .recipe-search {
+      margin-left: 5px;
+
+      .bp3-input {
+        transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        width: 45vw;
+      }
+      .bp3-input:focus {
+        width: 55vw;
+      }
+    }
+  }
+
+  .mobile-header-menu {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: calc(100% - 0px);
+    height: auto;
+    padding: unset;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    z-index: 10;
+    .settings {
+      margin: 0 20px;
+      padding-top: 10px;
+      display: flex;
+      align-items: center;
+
+      .bp3-switch {
+        margin-bottom: 0;
+      }
+
+      .spacer {
+        flex-grow: 1;
+      }
+    }
+    .navigation {
+      padding-bottom: 10px;
+      margin: 0 20px;
+
     }
   }
 }

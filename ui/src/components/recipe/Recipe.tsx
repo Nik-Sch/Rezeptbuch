@@ -17,7 +17,7 @@ import ShareButton from './ShareButton';
 import { DesktopIngredients, showDot } from './Ingredients';
 import DescriptionTextArea from './DescriptionTextArea';
 import CommentSection from './CommentSection';
-import { IMenuLink, MenuLinks } from '../recipeList/RecipeListMenu';
+import { INavigationLink, NavigationLinks } from '../recipeList/RecipeListMenu';
 
 function verifyRecipe(recipe: IRecipe): boolean {
   return recipe.title.trim() !== '' &&
@@ -212,18 +212,8 @@ export function Recipe(props: IDarkThemeProps) {
     deletable.push(recipe.image);
     setImagesToBeDeleted(deletable);
   };
-  const handleNavigationClick = () => {
-    history.push('/');
-  }
 
-  const navigationIcon = <Icon
-    className={classNames('navigate-button', Classes.BUTTON, Classes.MINIMAL)}
-    onClick={handleNavigationClick}
-    icon='arrow-left'
-    iconSize={24}
-  />
-
-  const menuLinks: IMenuLink[] = [
+  const navigationLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes'), active: true},
     { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
   ];
@@ -236,8 +226,9 @@ export function Recipe(props: IDarkThemeProps) {
       />
       <Header
         darkThemeProps={props}
-        navigationIcon={navigationIcon}
-        onNavigationClick={handleNavigationClick}
+        navigationLinks={navigationLinks}
+        // navigationIcon={navigationIcon}
+        // onNavigationClick={handleNavigationClick}
       >
         <Dialog
           className='mobile-cancel-dialog'
@@ -297,16 +288,16 @@ export function Recipe(props: IDarkThemeProps) {
                 large={true}
               />
               <Tooltip
-                disabled={online && hasWriteAccess}
-                content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
+                disabled={online}
+                content={t('tooltipOffline')}
                 position='bottom'
               >
                 <Icon
-                  className={classNames(Classes.BUTTON, Classes.MINIMAL, (online && hasWriteAccess) ? '' : Classes.DISABLED)}
+                  className={classNames(Classes.BUTTON, Classes.MINIMAL, online ? '' : Classes.DISABLED)}
                   icon='floppy-disk'
                   iconSize={24}
                   intent='primary'
-                  onClick={online && hasWriteAccess ? saveRecipe : undefined}
+                  onClick={online ? saveRecipe : undefined}
                 />
               </Tooltip>
             </>
@@ -441,8 +432,8 @@ export function Recipe(props: IDarkThemeProps) {
       />
       <div className='body'>
         <Card className='menu'>
-          <MenuLinks
-            menuLinks={menuLinks}
+          <NavigationLinks
+            navigationLinks={navigationLinks}
           />
         </Card>
         <div className='main-content'>
@@ -460,7 +451,7 @@ export function Recipe(props: IDarkThemeProps) {
                     />
                     <Tooltip
                       disabled={online}
-                      content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
+                      content={t('tooltipOffline')}
                       position='bottom'
                     >
                       <AnchorButton

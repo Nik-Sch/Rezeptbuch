@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { IRecipe, emptyRecipe, fetchUniqueRecipe } from '../../util/Recipes';
-import { H1, Classes, H3, Card, H4, Icon, H2, Collapse } from '@blueprintjs/core';
+import { H1, Classes, H3, Card, H4, Icon, H2 } from '@blueprintjs/core';
 
 import { useTranslation } from 'react-i18next';
 import Header from '../Header';
@@ -13,9 +13,6 @@ import { useMobile } from '../helpers/CustomHooks';
 import ShareButton from './ShareButton';
 import { DesktopIngredients, showDot } from './Ingredients';
 import { Helmet } from 'react-helmet';
-import { LanguageSelect } from '../helpers/LanguageSelect';
-import { DarkModeSwitch } from '../helpers/DarkModeSwitch';
-import { NavigationIcon } from '../recipeList/RecipeList';
 
 
 export function UniqueRecipe(props: IDarkThemeProps) {
@@ -25,7 +22,6 @@ export function UniqueRecipe(props: IDarkThemeProps) {
   const [recipe, setRecipe] = useState<IRecipe>(emptyRecipe);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
 
   const mobile = useMobile();
   // load recipes
@@ -54,27 +50,12 @@ export function UniqueRecipe(props: IDarkThemeProps) {
     return <>
       <Header
         darkThemeProps={props}
-        navigationIcon={<NavigationIcon
-          isOpen={drawerIsOpen}
-          onClick={() => setDrawerIsOpen(!drawerIsOpen)}
-        />}
         className='login-header'
       >
         {loaded && <div className='edit-container'>
           <ShareButton onlyLink={true} />
         </div>}
       </Header>
-      <Collapse
-        isOpen={drawerIsOpen}
-      >
-        <div className='menu'>
-          <div className='settings' style={{ marginBottom: '0' }}>
-            <DarkModeSwitch {...props} />
-            <div className='spacer' />
-            <LanguageSelect />
-          </div>
-        </div>
-      </Collapse>
       <div className='recipe-container-mobile'>
         <ImagePart
           recipe={recipe}

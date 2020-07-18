@@ -6,11 +6,8 @@ import { SortSelect, ISort } from '../helpers/SortSelect';
 import { ICategory, IUser } from '../../util/Recipes';
 
 import './RecipeListMenu.scss'
-import { LanguageSelect } from '../helpers/LanguageSelect';
-import { DarkModeSwitch } from '../helpers/DarkModeSwitch';
 import { IDarkThemeProps } from '../../App';
 import { useMobile } from '../helpers/CustomHooks';
-import LogoutButton from '../helpers/LogoutButton';
 import { UserMultiSelect } from '../helpers/UserMultiSelect';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames';
@@ -31,25 +28,27 @@ export interface ISearchProps {
   darkModeProps: IDarkThemeProps;
 }
 
-export interface IMenuLink {
+export interface INavigationLink {
   to: string;
   icon: IconName;
   text: string;
   active?: boolean;
 }
 
-export function MenuLinks(props: { menuLinks: IMenuLink[] }) {
+export function NavigationLinks(props: { navigationLinks: INavigationLink[] }) {
+  const mobile = useMobile();
+
   return <>
-    {props.menuLinks.map(menu => (
-      <div className='menu-link'>
+    {props.navigationLinks.map(nav => (
+      <div className='navigation-link'>
         <Link
-          to={menu.to}
-          className={classNames(Classes.BUTTON, Classes.FILL, Classes.ALIGN_LEFT, Classes.MINIMAL, menu.active ? Classes.INTENT_PRIMARY : '')}
+          to={nav.to}
+          className={classNames(Classes.BUTTON, Classes.FILL, Classes.ALIGN_LEFT, Classes.MINIMAL, mobile ? Classes.LARGE : '', nav.active ? Classes.INTENT_PRIMARY : '')}
           role='button'
         >
-          <Icon icon={menu.icon} />
+          <Icon icon={nav.icon} />
           <span className={Classes.BUTTON_TEXT}>
-            {menu.text}
+            {nav.text}
           </span>
         </Link>
       </div>
@@ -61,35 +60,13 @@ export default function RecipeListMenu(myProps: ISearchProps) {
   const [t] = useTranslation();
   const { darkModeProps, ...props } = myProps;
   const mobile = useMobile();
-  const menuLinks: IMenuLink[] = [
+  const menuLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
     { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
   ];
 
   if (mobile) {
     return <div className='menu'>
-      <div className='settings'>
-        <DarkModeSwitch {...darkModeProps} />
-        <div className='spacer' />
-        <LanguageSelect />
-        <LogoutButton />
-      </div>
-
-      {/* <Divider />
-      <div className='control'>
-        <Link
-          to='/shoppingList'
-          className={classNames(Classes.BUTTON, Classes.ALIGN_LEFT, Classes.LARGE)}
-          role='button'
-        >
-          <Icon icon='shopping-cart' />
-          <span className={Classes.BUTTON_TEXT}>
-            {t('shoppingList')}
-          </span>
-        </Link>
-      </div>
-      <Divider /> */}
-
       <div className='control'>
         <UserMultiSelect
           placeholder={t('filterForUsers')}
@@ -134,8 +111,8 @@ export default function RecipeListMenu(myProps: ISearchProps) {
     </Tooltip>
   );
   return <Card className='menu'>
-    <MenuLinks
-      menuLinks={menuLinks}
+    <NavigationLinks
+      navigationLinks={menuLinks}
     />
 
     <Divider className='menu-item'/>

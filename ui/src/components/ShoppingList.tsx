@@ -1,13 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Header from "./Header";
-import { NavigationIcon } from "./recipeList/RecipeList";
 import { Collapse, Card, H1, Checkbox, EditableText, Icon, Button, Divider, Classes, Keys } from "@blueprintjs/core";
-import { DarkModeSwitch } from "./helpers/DarkModeSwitch";
-import { LanguageSelect } from "./helpers/LanguageSelect";
-import { useMobile, usePersistentState } from "./helpers/CustomHooks";
+import { usePersistentState, useMobile } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
 import { IDarkThemeProps } from "../App";
-import { IMenuLink, MenuLinks } from "./recipeList/RecipeListMenu";
+import { INavigationLink, NavigationLinks } from "./recipeList/RecipeListMenu";
 import dayjs from "dayjs";
 import DraggableList from "react-draggable-list";
 import './ShoppingList.scss';
@@ -115,6 +112,13 @@ function NewShoppingListItem(props: {
 
 function ShoppingListItem(props: IItemProps) {
   const [hover, setHover] = useState(false);
+  const mobile = useMobile();
+
+  const [text, setText] = useState(props.item.text);
+
+  useEffect(() => {
+    setText(props.item.text);
+  }, [props.item.text]);
 
   const hoverTimeout = useRef<number>();
 
@@ -146,11 +150,12 @@ function ShoppingListItem(props: IItemProps) {
         }}
       />
       {<EditableText
-        value={props.item.text}
-        minWidth={500}
+        value={text}
+        minWidth={mobile ? undefined : 500}
         alwaysRenderInput={true}
         className='shopping-item-text'
-        onChange={v => props.commonProps.updateElement({ ...props.item, text: v })}
+        onChange={v => setText(v)}
+        onConfirm={v => props.commonProps.updateElement({ ...props.item, text: v })}
       />}
       <div className='spacer' />
       {<Button
@@ -184,14 +189,25 @@ const defaultShoppingState: IShoppingState = {
   showChecked: true
 }
 
+function CardNoCard(props: { children?: React.ReactNode; className?: string }) {
+  const mobile = useMobile();
+  const className = classNames(props.className, mobile ? 'mobile' : '');
+  return mobile
+    ? <div className={className}>
+      {props.children}
+    </div>
+    : <Card className={className}>
+      {props.children}
+    </Card>
+}
+
 export function ShoppingList(props: IDarkThemeProps) {
-  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
   const [state, setState] = usePersistentState<IShoppingState>(defaultShoppingState, localStorageShoppingList);
 
-  const mobile = useMobile();
   const { t } = useTranslation();
+  const mobile = useMobile();
 
-  const menuLinks: IMenuLink[] = [
+  const navigationLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes') },
     { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList'), active: true }
   ];
@@ -199,30 +215,25 @@ export function ShoppingList(props: IDarkThemeProps) {
   return <>
     <Header
       darkThemeProps={props}
-      navigationIcon={<NavigationIcon
-        isOpen={drawerIsOpen}
-        onClick={() => setDrawerIsOpen(!drawerIsOpen)}
-      />}
-    />
-    {mobile && <Collapse
-      isOpen={drawerIsOpen}
+      navigationLinks={navigationLinks}
     >
-      <div className='menu'>
-        <div className='settings' style={{ marginBottom: '0' }}>
-          <DarkModeSwitch {...props} />
-          <div className='spacer' />
-          <LanguageSelect />
-        </div>
-      </div>
-    </Collapse>}
+      <Icon
+        className={classNames(Classes.BUTTON, Classes.MINIMAL)}
+        icon='trash'
+        intent='danger'
+        iconSize={24}
+        onClick={() => setState(defaultShoppingState)}
+      />
+    </Header>
     <div className='body'>
-      <Card className='menu'>
-        <MenuLinks
-          menuLinks={menuLinks}
-        />
-      </Card>
+      {!mobile &&
+        <Card className='menu'>
+          <NavigationLinks
+            navigationLinks={navigationLinks}
+          />
+        </Card>}
       <div className='main-content'>
-        <Card className='shopping-list-wrapper'>
+        <CardNoCard className='shopping-list-wrapper'>
           <H1>{t('shoppingList')}</H1>
           <div className='shopping-list'>
             <DraggableList<IShoppingItem, ICommonProps, ShoppingListItemClassWrapper>
@@ -233,6 +244,7 @@ export function ShoppingList(props: IDarkThemeProps) {
               onMoveEnd={newList => setState(items => ({ ...items, notChecked: newList.slice() }))}
               commonProps={{
                 updateElement: (newItem: IShoppingItem) => {
+                  console.log(newItem.text);
                   const notChecked = state.notChecked.slice();
                   const checked = state.checked.slice();
                   const oldElemIndex = notChecked.findIndex(v => v.addedTime === newItem.addedTime);
@@ -263,6 +275,7 @@ export function ShoppingList(props: IDarkThemeProps) {
                 }
               }}
             />
+            {state.checked.length > 0 && <Divider />}
             {state.checked.length > 0 && <Button
               minimal={true}
               text={t('checkedItems', { count: state.checked.length })}
@@ -297,7 +310,7 @@ export function ShoppingList(props: IDarkThemeProps) {
               })}
             </Collapse>
           </div>
-        </Card>
+        </CardNoCard>
       </div>
     </div>
   </>

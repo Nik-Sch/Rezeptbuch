@@ -8,7 +8,7 @@ import { FixedSizeList } from 'react-window';
 import { useMobile, useSessionState, useWindowDimensions, useOnline } from '../helpers/CustomHooks';
 import RSC from 'react-scrollbars-custom';
 import RecipeListItem from './RecipeListItem';
-import RecipeListMenu from './RecipeListMenu';
+import RecipeListMenu, { INavigationLink } from './RecipeListMenu';
 import Header from '../Header';
 
 import './RecipeList.scss'
@@ -129,7 +129,7 @@ export default function RecipeList(props: IDarkThemeProps) {
   const [searchInIngredients, setSearchInIngredients] = useSessionState<boolean>(true, sessionStorageSearchInIngredients);
   const [sortingOrder, setSortingOrder] = useSessionState<{ key: keyof IRecipe, desc: boolean }>({ key: 'date', desc: false }, sessionStorageSortingOrder);
   const [recipesToShow, setRecipesToShow] = useState<(IRecipe | undefined)[]>(skeletonRecipes);
-  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
+  const [filterIsOpen, setFilterIsOpen] = useState(false);
   const timeout = useRef<number>();
   const mobile = useMobile();
   const status = getUserInfo();
@@ -230,15 +230,39 @@ export default function RecipeList(props: IDarkThemeProps) {
     ? undefined
     : <Button icon='cross' minimal={true} onClick={() => handleSearchChange('')} />;
 
+  const navigationLinks: INavigationLink[] = [
+    { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
+    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
+  ];
+  const recipeListMenu = <RecipeListMenu
+    darkModeProps={props}
+    searchString={searchString}
+    handleSearchChange={handleSearchChange}
+    handleSearchInIngredientsChange={v => setSearchInIngredients(v)}
+    searchInIngredients={searchInIngredients}
+    onCategorySelected={setFilteredCategories}
+    selectedCategories={filteredCategories}
+    allCategories={categories}
+    sortOptions={sortOptions}
+    onUserSelected={setFilteredUsers}
+    selectedUsers={filteredUsers}
+    allUsers={users}
+    onSortSelected={onSortSelected}
+  />;
+
   return <>
     <Header
       darkThemeProps={props}
-      navigationIcon={<NavigationIcon
-        isOpen={drawerIsOpen}
-        onClick={() => setDrawerIsOpen(!drawerIsOpen)}
-      />}
+      navigationLinks={navigationLinks}
     >
-      {mobile &&
+      {mobile && <>
+        <Icon
+          className={classNames(Classes.BUTTON, Classes.MINIMAL)}
+          icon={filteredCategories.length > 0 || filteredUsers.length > 0 ? 'filter-keep' : 'filter'}
+          intent={filterIsOpen ? 'primary' : 'none'}
+          iconSize={24}
+          onClick={() => setFilterIsOpen(!filterIsOpen)}
+        />
         <InputGroup
           leftIcon='search'
           large={true}
@@ -247,47 +271,18 @@ export default function RecipeList(props: IDarkThemeProps) {
           value={searchString}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
           className='recipe-search'
-        />}
+        />
+      </>}
     </Header>
     {mobile &&
       <Collapse
-        isOpen={drawerIsOpen}
+        isOpen={filterIsOpen}
       >
-        <RecipeListMenu
-          darkModeProps={props}
-          searchString={searchString}
-          handleSearchChange={handleSearchChange}
-          handleSearchInIngredientsChange={v => setSearchInIngredients(v)}
-          searchInIngredients={searchInIngredients}
-          onCategorySelected={setFilteredCategories}
-          selectedCategories={filteredCategories}
-          allCategories={categories}
-          sortOptions={sortOptions}
-          onUserSelected={setFilteredUsers}
-          selectedUsers={filteredUsers}
-          allUsers={users}
-          onSortSelected={onSortSelected}
-        />
+        {recipeListMenu}
       </Collapse>
     }
     <div className='body'>
-      {!mobile &&
-        <RecipeListMenu
-          darkModeProps={props}
-          searchString={searchString}
-          handleSearchInIngredientsChange={v => setSearchInIngredients(v)}
-          searchInIngredients={searchInIngredients}
-          handleSearchChange={handleSearchChange}
-          onCategorySelected={setFilteredCategories}
-          selectedCategories={filteredCategories}
-          allCategories={categories}
-          sortOptions={sortOptions}
-          onUserSelected={setFilteredUsers}
-          selectedUsers={filteredUsers}
-          allUsers={users}
-          onSortSelected={onSortSelected}
-        />
-      }
+      {!mobile && recipeListMenu}
       <div className='main-content'>
         {!mobile && <div className='header'>
           <Tooltip

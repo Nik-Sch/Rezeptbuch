@@ -3,9 +3,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import { IDarkThemeProps } from "../App";
 import Header from "./Header";
 import { useMobile } from "./helpers/CustomHooks";
-import { Classes, Card, H1, FormGroup, InputGroup, Tooltip, Button, Intent, Callout, H4, Collapse } from "@blueprintjs/core";
-import { LanguageSelect } from "./helpers/LanguageSelect";
-import { DarkModeSwitch } from "./helpers/DarkModeSwitch";
+import { Classes, Card, H1, FormGroup, InputGroup, Tooltip, Button, Intent, Callout, H4 } from "@blueprintjs/core";
 import { useTranslation } from "react-i18next";
 
 import './LoginPage.scss';
@@ -13,7 +11,6 @@ import { loginToRecipes, createAccount } from "../util/Recipes";
 import classNames from "classnames";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { AppToasterTop } from "../util/toaster";
-import { NavigationIcon } from "./recipeList/RecipeList";
 
 export function LoginPage(props: IDarkThemeProps) {
   const history = useHistory();
@@ -21,7 +18,6 @@ export function LoginPage(props: IDarkThemeProps) {
   const mobile = useMobile();
   const [t] = useTranslation();
 
-  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
   const [login, setLogin] = useState(true); // 'login' | 'register'
   const [details, setDetails] = useState({ username: '', password: '', password2: '' });
   const [visited, setVisited] = useState({ username: false, password: false, password2: false });
@@ -104,23 +100,8 @@ export function LoginPage(props: IDarkThemeProps) {
   return <>
     <Header
       darkThemeProps={props}
-      navigationIcon={<NavigationIcon
-        isOpen={drawerIsOpen}
-        onClick={() => setDrawerIsOpen(!drawerIsOpen)}
-      />}
       className='login-header'
     />
-    {mobile && <Collapse
-      isOpen={drawerIsOpen}
-    >
-      <div className='menu'>
-        <div className='settings' style={{marginBottom: '0'}}>
-          <DarkModeSwitch {...props} />
-          <div className='spacer' />
-          <LanguageSelect />
-        </div>
-      </div>
-    </Collapse>}
     <div className='card-wrapper'>
       {wrongCredentials && <Callout intent='danger' className='error-callout'>
         <H4 className='error-callout-content'>

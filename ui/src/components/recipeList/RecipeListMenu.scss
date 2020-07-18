@@ -7,13 +7,13 @@
   .menu-item {
     margin: 20px 0;
   }
-  .menu-link {
+  .navigation-link {
     margin: 5px 0;
   }
-  .menu-item:first-child, .menu-link:first-child {
+  .menu-item:first-child, .navigation-link:first-child {
     margin-top: 0;
   }
-  .menu-item:last-child, .menu-link:last-child {
+  .menu-item:last-child, .navigation-link:last-child {
     margin-bottom: 0;
   }
 }
