@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, forwardRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon, EditableText, Classes, Keys } from "@blueprintjs/core";
+import { Icon, Classes, Keys } from "@blueprintjs/core";
 import classNames from "classnames";
 
 export function showDot(line: string): boolean {
@@ -8,16 +8,38 @@ export function showDot(line: string): boolean {
 }
 
 interface IIngredientsLine {
-  loaded: boolean,
-  editable: boolean,
-  line: string,
-  delete: () => void,
-  replace: (v: string) => void
+  loaded: boolean;
+  editable: boolean;
+  line: string;
+  delete: () => void;
+  replace: (v: string, shouldRefocus: boolean) => void;
 }
 
-function IngredientsLine(props: IIngredientsLine) {
-  const [t] = useTranslation();
+const IngredientsLine = forwardRef((props: IIngredientsLine, ref) => {
   const [hover, setHover] = useState(false);
+  const [value, setValue] = useState<string>(props.line);
+  useEffect(() => {
+    setValue(props.line);
+  }, [props.line]);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const handleConfirm = (shouldRefocus: boolean = false) => {
+    setIsEditing(false);
+    if (value.trim() !== '') {
+      props.replace(value, shouldRefocus);
+    } else {
+      props.delete();
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.which === Keys.ENTER) {
+      handleConfirm(true);
+    } else if (e.which === Keys.ESCAPE) {
+      setIsEditing(false);
+      setValue(props.line);
+    }
+  }
 
   return <div
     className='ingredients-line'
@@ -33,24 +55,38 @@ function IngredientsLine(props: IIngredientsLine) {
         }
       }}
     />}
-    <EditableText
-      className={props.loaded ? 'ingredients-line-text' : Classes.SKELETON}
-      placeholder={t('phIngredients')}
-      disabled={!props.editable}
-      value={props.line.trim()}
-      multiline={false}
-      alwaysRenderInput={true}
-      onConfirm={v => {
-        if (v.trim() === '') {
-          props.delete();
+    <div
+      ref={ref as any}
+      className={classNames(
+        Classes.EDITABLE_TEXT,
+        {
+          [Classes.EDITABLE_TEXT_EDITING]: isEditing,
+          [Classes.DISABLED]: !props.editable,
+        },
+        'ingredients-line-text'
+      )}
+      onFocus={() => {
+        if (props.editable) {
+          setIsEditing(true);
         }
       }}
-      onChange={v => {
-        props.replace(v);
-      }}
-    />
+      tabIndex={isEditing ? undefined : 0}
+    >
+      {isEditing
+        ? <input
+          className={Classes.EDITABLE_TEXT_INPUT}
+          onBlur={() => handleConfirm()}
+          onChange={e => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          ref={input => input?.focus()}
+          value={value}
+        />
+        : <span className={Classes.EDITABLE_TEXT_CONTENT}>
+          {value}
+        </span>}
+    </div>
   </div>
-}
+});
 
 function ExtraIngredientLine(props: {
   addIngredient?: (ing: string) => void
@@ -127,6 +163,7 @@ export function DesktopIngredients(props: IDesktopIngredients) {
   const [t] = useTranslation();
 
   if (props.ingredients.length > 0) {
+    const ingredientsRefs: HTMLDivElement[] = [];
     return <>
       {props.ingredients.filter(v => v.trim() !== '').map(((line, index) => (
         <IngredientsLine
@@ -136,12 +173,22 @@ export function DesktopIngredients(props: IDesktopIngredients) {
           line={line}
           delete={() => {
             if (props.deleteIngredient) {
-              props.deleteIngredient(index)
+              props.deleteIngredient(index);
             }
           }}
-          replace={(v) => {
+          replace={(v, shouldRefocus) => {
             if (props.replaceIngredient) {
-              props.replaceIngredient(index, v)
+              props.replaceIngredient(index, v);
+              if (shouldRefocus && ingredientsRefs[index + 1]) {
+                setTimeout(() => {
+                  ingredientsRefs[index + 1].focus();
+                }, 10);
+              }
+            }
+          }}
+          ref={(v: HTMLDivElement) => {
+            if (v) {
+              ingredientsRefs[index] = v;
             }
           }}
         />

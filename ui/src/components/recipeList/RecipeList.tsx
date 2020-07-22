@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Notwork';
+import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Network';
 import { Classes, Icon, InputGroup, Button, H3, Collapse, Tooltip } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';

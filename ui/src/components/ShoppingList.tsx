@@ -10,7 +10,7 @@ import DraggableList from "react-draggable-list";
 import './ShoppingList.scss';
 import classNames from "classnames";
 import { localStorageShoppingList } from "../util/StorageKeys";
-import { uploadShoppingList } from "../util/Notwork";
+import { uploadShoppingList } from "../util/Network";
 
 interface IShoppingItem {
   text: string;

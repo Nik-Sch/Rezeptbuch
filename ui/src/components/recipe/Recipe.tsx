@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory, Prompt } from 'react-router-dom';
-import recipesHandler, { IRecipe, ICategory, emptyRecipe, getUserInfo } from '../../util/Notwork';
+import recipesHandler, { IRecipe, ICategory, emptyRecipe, getUserInfo } from '../../util/Network';
 import { H1, EditableText, Classes, Button, H3, Card, H5, H4, ButtonGroup, Popover, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton, Tooltip } from '@blueprintjs/core';
 
 import { AppToasterTop } from '../../util/toaster';
@@ -507,7 +507,7 @@ export function Recipe(props: IDarkThemeProps) {
                   className={classNames(state.loaded ? '' : Classes.SKELETON, 'title')}
                   placeholder={t('phTitle')}
                   disabled={!state.editable}
-                  value={recipe.title.trim()}
+                  value={recipe.title}
                   onChange={handleSetTitle}
                 />
               </H1>
@@ -533,7 +533,7 @@ export function Recipe(props: IDarkThemeProps) {
                     editable={state.editable}
                     addIngredient={v => {
                       setState(state => ({ ...state, dirty: true }));
-                      const ingredients = recipe.ingredients.splice(0);
+                      const ingredients = recipe.ingredients.slice(0);
                       ingredients.push(v);
                       setRecipe(recipe => ({ ...recipe, ingredients }));
 
@@ -545,7 +545,7 @@ export function Recipe(props: IDarkThemeProps) {
                     }}
                     replaceIngredient={(index, v) => {
                       setState(state => ({ ...state, dirty: true }));
-                      const ingredients = recipe.ingredients.splice(0);
+                      const ingredients = recipe.ingredients.slice(0);
                       ingredients[index] = v;
                       setRecipe(recipe => ({ ...recipe, ingredients }));
                     }}

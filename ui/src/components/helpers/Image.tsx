@@ -1,7 +1,7 @@
 import React, { MouseEventHandler } from 'react';
 import noRecipe from '../../static/default-images/noRecipe.jpg';
 import { useTranslation } from 'react-i18next';
-import { IRecipe } from '../../util/Notwork';
+import { IRecipe } from '../../util/Network';
 import categoryImageMap from '../../util/categoryImageMap';
 
 interface IProps {

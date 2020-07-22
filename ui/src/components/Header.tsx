@@ -12,7 +12,7 @@ import { DarkModeSwitch } from './helpers/DarkModeSwitch';
 import { IDarkThemeProps } from '../App';
 import LogoutButton from './helpers/LogoutButton';
 import { NavigationIcon } from './recipeList/RecipeList';
-import { getUserInfo } from '../util/Notwork';
+import { getUserInfo } from '../util/Network';
 import { INavigationLink, NavigationLinks } from './recipeList/RecipeListMenu';
 
 export interface IHeaderProps {

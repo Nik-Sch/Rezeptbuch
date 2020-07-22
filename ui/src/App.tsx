@@ -4,7 +4,7 @@ import RecipeList from './components/recipeList/RecipeList';
 import { Recipe } from './components/recipe/Recipe';
 import { Route, BrowserRouter as Router, RouteProps, Redirect, Switch } from 'react-router-dom';
 import { Classes, Card, H1, H3 } from '@blueprintjs/core';
-import { fetchUserInfo, getUserInfo } from './util/Notwork';
+import { fetchUserInfo, getUserInfo } from './util/Network';
 import { LoginPage } from './components/LoginPage';
 import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
 import { localStorageDarkTheme } from './util/StorageKeys';

@@ -7,7 +7,7 @@ import { Classes, Card, H1, FormGroup, InputGroup, Tooltip, Button, Intent, Call
 import { useTranslation } from "react-i18next";
 
 import './LoginPage.scss';
-import { loginToRecipes, createAccount } from "../util/Notwork";
+import { loginToRecipes, createAccount } from "../util/Network";
 import classNames from "classnames";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { AppToasterTop } from "../util/toaster";

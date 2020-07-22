@@ -218,6 +218,7 @@ class Recipes {
   }
 
   public getRecipeOnce(id: number) {
+    console.log(this.recipeCache.filter(r => r.ingredients.length === 0));
     return this.recipeCache.find(r => r.id === id);
   }
 
@@ -419,7 +420,6 @@ class Recipes {
         await set(COMMENT_CACHE, this.commentCache);
         localStorage.setItem(localStorageCommentChecksum, JSON.stringify(resultJson.checksum));
       }
-      console.log('shouldReloadComments', reloadCommentsAfterFetching);
 
       url = '/api/recipes';
       checksum = localStorage.getItem(localStorageRecipeChecksum);

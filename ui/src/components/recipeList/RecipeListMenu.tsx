@@ -3,7 +3,7 @@ import { Card, Button, InputGroup, Tooltip, Divider, Classes, Icon, IconName } f
 import { useTranslation } from 'react-i18next';
 import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { SortSelect, ISort } from '../helpers/SortSelect';
-import { ICategory, IUser } from '../../util/Notwork';
+import { ICategory, IUser } from '../../util/Network';
 
 import './RecipeListMenu.scss'
 import { IDarkThemeProps } from '../../App';
