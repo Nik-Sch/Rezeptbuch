@@ -2,7 +2,7 @@ import { Select, IItemRendererProps } from '@blueprintjs/select';
 
 import React, { useState, useEffect } from 'react';
 import { Button, MenuItem, ButtonGroup, Classes } from '@blueprintjs/core';
-import { IRecipe } from '../../util/Recipes';
+import { IRecipe } from '../../util/Notwork';
 import classNames from 'classnames';
 import { useMobile } from './CustomHooks';
 import { useTranslation } from 'react-i18next';

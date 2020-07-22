@@ -1,5 +1,5 @@
 import { IItemRendererProps, ItemPredicate, MultiSelect } from '@blueprintjs/select';
-import { IUser } from '../../util/Recipes';
+import { IUser } from '../../util/Notwork';
 
 import React from 'react';
 import { Button, MenuItem } from '@blueprintjs/core';

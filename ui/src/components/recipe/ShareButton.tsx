@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { useTranslation } from "react-i18next";
 import { AppToasterTop } from "../../util/toaster";
 import i18n from "../../util/i18n";
-import { getUniqueRecipeLink, IRecipe, emptyRecipe } from "../../util/Recipes";
+import { getUniqueRecipeLink, IRecipe, emptyRecipe } from "../../util/Notwork";
 
 
 async function shareLink(link?: string) {

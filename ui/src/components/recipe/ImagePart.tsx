@@ -8,7 +8,7 @@ import classNames from 'classnames';
 
 import './ImagePart.scss'
 import { useMobile, useWindowDimensions } from '../helpers/CustomHooks';
-import recipesHandler, { IRecipe } from '../../util/Recipes';
+import recipesHandler, { IRecipe } from '../../util/Notwork';
 
 export interface IImagePartProps {
   recipe: IRecipe,

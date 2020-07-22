@@ -1,5 +1,5 @@
 import React from 'react';
-import { IRecipe } from '../../util/Recipes';
+import { IRecipe } from '../../util/Notwork';
 import { ICardProps, Card, H5, H3, H4, Classes } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { MyImage } from '../helpers/Image';

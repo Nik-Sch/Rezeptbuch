@@ -3,7 +3,7 @@ import { Card, Button, InputGroup, Tooltip, Divider, Classes, Icon, IconName } f
 import { useTranslation } from 'react-i18next';
 import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { SortSelect, ISort } from '../helpers/SortSelect';
-import { ICategory, IUser } from '../../util/Recipes';
+import { ICategory, IUser } from '../../util/Notwork';
 
 import './RecipeListMenu.scss'
 import { IDarkThemeProps } from '../../App';
@@ -40,7 +40,7 @@ export function NavigationLinks(props: { navigationLinks: INavigationLink[] }) {
 
   return <>
     {props.navigationLinks.map(nav => (
-      <div className='navigation-link'>
+      <div className='navigation-link' key={nav.to}>
         <Link
           to={nav.to}
           className={classNames(Classes.BUTTON, Classes.FILL, Classes.ALIGN_LEFT, Classes.MINIMAL, mobile ? Classes.LARGE : '', nav.active ? Classes.INTENT_PRIMARY : '')}
@@ -125,14 +125,6 @@ export default function RecipeListMenu(myProps: ISearchProps) {
       className='search-recipe menu-item'
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.handleSearchChange(e.target.value)}
     />
-    <CategoryMultiSelect
-      placeholder={t('filterForCategories')}
-      noResultText={t('noCategoryFound')}
-      onCategorySelected={props.onCategorySelected}
-      selectedCategories={props.selectedCategories}
-      allCategories={props.allCategories}
-      className='filter-categories menu-item'
-    />
     <UserMultiSelect
       placeholder={t('filterForUsers')}
       noResultText={t('noUsersFound')}
@@ -140,6 +132,14 @@ export default function RecipeListMenu(myProps: ISearchProps) {
       selectedUsers={props.selectedUsers}
       allUsers={props.allUsers}
       className='filter-users menu-item'
+    />
+    <CategoryMultiSelect
+      placeholder={t('filterForCategories')}
+      noResultText={t('noCategoryFound')}
+      onCategorySelected={props.onCategorySelected}
+      selectedCategories={props.selectedCategories}
+      allCategories={props.allCategories}
+      className='filter-categories menu-item'
     />
   </Card>
 }

@@ -12,7 +12,7 @@ import { DarkModeSwitch } from './helpers/DarkModeSwitch';
 import { IDarkThemeProps } from '../App';
 import LogoutButton from './helpers/LogoutButton';
 import { NavigationIcon } from './recipeList/RecipeList';
-import { getUserInfo } from '../util/Recipes';
+import { getUserInfo } from '../util/Notwork';
 import { INavigationLink, NavigationLinks } from './recipeList/RecipeListMenu';
 
 export interface IHeaderProps {
@@ -32,10 +32,10 @@ export default function Header(props: IHeaderProps) {
         className='mobile-header-wrapper'
       >
         <Navbar fixedToTop={true} className={classNames(props.className, 'mobile-header-content')} >
-          <div className='left-align'>
+          <div className='left-align'
+            onClick={() => setMenuIsOpen(!menuIsOpen)}>
             <NavigationIcon
               isOpen={menuIsOpen}
-              onClick={() => setMenuIsOpen(!menuIsOpen)}
             />
           </div>
           <div className='right-align'>

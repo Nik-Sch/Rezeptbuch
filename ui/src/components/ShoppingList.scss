@@ -2,6 +2,12 @@
   margin: 15px;
   margin-top: 0;
 
+  .edit-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 20px;
+  }
+
   .shopping-list {
     margin: 20px;
 
@@ -29,7 +35,7 @@
         cursor: grab;
       }
 
-      .new-text {
+      .my-editable-text {
         margin-right: 40px;
         flex-grow: 1;
       }
@@ -43,4 +49,43 @@
   .shopping-list {
     margin: 10px 0;
   }
+}
+
+.shopping-list-status-element {
+  margin: 0 20px;
+  display: flex;
+  align-items: center;
+  .text {
+    margin-left: 10px;
+  }
+  .my-spinner {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+  }
+  .my-spinner:after {
+    content: " ";
+    display: block;
+    width: 20px;
+    height: 20px;
+    margin: 2.8px;
+    border-radius: 50%;
+    border: 2.3px solid #000;
+    border-color: #000 transparent #000 transparent;
+    animation: my-spinner 1.2s linear infinite;
+  }
+  @keyframes my-spinner {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+.bp3-dark .shopping-list-status-element .my-spinner:after {
+  border: 2.3px solid #fff;
+  border-color: #fff transparent #fff transparent;
+
 }

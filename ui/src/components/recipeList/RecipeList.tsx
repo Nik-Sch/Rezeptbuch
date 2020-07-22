@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Recipes';
+import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Notwork';
 import { Classes, Icon, InputGroup, Button, H3, Collapse, Tooltip } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
@@ -23,7 +23,7 @@ import i18n from '../../util/i18n';
 
 const skeletonRecipes = [undefined, undefined, undefined, undefined];
 
-export function NavigationIcon(props: { isOpen: boolean, onClick: () => void }) {
+export function NavigationIcon(props: { isOpen: boolean, onClick?: () => void }) {
   return <div className='nav-icon2-wrapper'>
     <div
       id="nav-icon2"

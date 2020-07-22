@@ -107,5 +107,11 @@
   "recipes": "Recipes",
   "addItem": "Add an item...",
   "checkedItems": "{{count}} completed item",
-  "checkedItems_plural": "{{count}} completed items"
+  "checkedItems_plural": "{{count}} completed items",
+  "deleteAll": "Delete all items",
+  "uploaded": "Saved to server",
+  "uploading": "Saving to server...",
+  "uploadingFailed": "Uploading failed",
+  "retryUploading": "Try again to upload the shopping list.",
+  "syncing": "Syncing with the server..."
 }

@@ -107,5 +107,11 @@
   "checkedItems": "{{count}} erledigter Eintrag",
   "checkedItems_plural": "{{count}} erledigte Einträge",
   "recipes": "Rezepte",
-  "shoppingList": "Einkaufsliste"
+  "shoppingList": "Einkaufsliste",
+  "deleteAll": "Alle Elemente löschen",
+  "retryUploading": "Erneut versuchen die Einkaufsliste hochzuladen.",
+  "syncing": "Synchronisiere mit dem Server...",
+  "uploaded": "Synchronisiert",
+  "uploading": "Zum Server hochladen...",
+  "uploadingFailed": "Hochladen fehlgeschlagen"
 }

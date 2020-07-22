@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify, abort, make_response, redirect, url_for, send_from_directory, send_file, session
+from flask import Flask, request, jsonify, abort, make_response, redirect, url_for, send_from_directory, send_file, session, Response
 from flask_restful import Api, Resource, reqparse
 from flask_httpauth import HTTPBasicAuth
 from flask_compress import Compress
@@ -34,9 +34,9 @@ auth = HTTPBasicAuth()
 db = Database()
 
 Session(app)
-redisNotificationsDB = redis.Redis(host='redis', port=6379, db=0)
-redisUniqueRecipeDB = redis.Redis(host='redis', port=6379, db=1)
-redisShoppingListDB = redis.Redis(host='redis', port=6379, db=2)
+redisNotificationsDB = redis.StrictRedis(host='redis', port=6379, db=0)
+redisUniqueRecipeDB = redis.StrictRedis(host='redis', port=6379, db=1)
+redisShoppingListDB = redis.StrictRedis(host='redis', port=6379, db=2)
 
 checksumRequestParser = reqparse.RequestParser()
 checksumRequestParser.add_argument('checksum', type=int, required=False,
@@ -78,16 +78,42 @@ def status():
     else:
         return unauthorized()
 
+
+def event_stream(username, exclude):
+    data = redisShoppingListDB.get(username)
+    if type(data) is bytes:
+        yield 'data: %s\n\n' % data.decode('utf-8')
+    else:
+        yield 'data: null\n\n'
+    pubsub = redisShoppingListDB.pubsub()
+    pubsub.subscribe(username)
+    print('starting', exclude)
+    for message in pubsub.listen():
+        if message['type'] == 'message':
+            m = json.loads(message['data'])
+            # print(exclude, 'received', m['origin'], type(m['data'])) 
+            if m['origin'] != exclude:
+                print(exclude, 'sending')
+                yield 'data: %s\n\n' % m['data']
+
 @app.route('/shoppingList', methods=['GET', 'POST'])
 def shoppingList():
     userName = session.get('userName', None)
     if (userName != None):
         if request.method == 'GET':
-            if (not redisShoppingListDB.exists(userName)):
-                return make_response('', 404)
-            return make_response(jsonify(json.loads(redisShoppingListDB.get(userName))), 200)
+            resp = Response(event_stream(userName, session.get('id', -1)),
+                                    mimetype="text/event-stream")
+            resp.headers['X-Accel-Buffering'] = 'No'
+            resp.headers['Cache-Control'] = 'no-transform' # for npm dev
+            return resp
         elif request.method == 'POST':
-            redisShoppingListDB.set(userName, json.dumps(request.json))
+            string = json.dumps(request.json)
+            redisShoppingListDB.set(userName, string)
+            toPublish = {}
+            toPublish['data'] = string
+            toPublish['origin'] = session.get('id', -1)
+            # print('publishing', userName, json.dumps(toPublish))
+            redisShoppingListDB.publish(userName, json.dumps(toPublish))
             return make_response('', 200)
     else:
         return unauthorized()
