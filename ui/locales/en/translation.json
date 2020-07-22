@@ -113,5 +113,6 @@
   "uploading": "Saving to server...",
   "uploadingFailed": "Uploading failed",
   "retryUploading": "Try again to upload the shopping list.",
-  "syncing": "Syncing with the server..."
+  "syncing": "Syncing with the server...",
+  "addToShopping": "Add to shopping list"
 }

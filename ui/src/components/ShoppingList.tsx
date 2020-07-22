@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Header from "./Header";
 import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Tooltip } from "@blueprintjs/core";
 import { usePersistentState, useMobile } from "./helpers/CustomHooks";
@@ -212,6 +212,7 @@ class ShoppingListItemClassWrapper extends React.Component<IItemProps, Readonly<
     return <ShoppingListItem {...this.props} />
   }
 }
+
 type SyncState = 'initial-fetch' | 'uploading' | 'synced' | 'failed';
 
 export interface IShoppingState {
@@ -240,22 +241,45 @@ function CardNoCard(props: { children?: React.ReactNode; className?: string }) {
     </Card>
 }
 
+const itemsToBeAdded: string[] = [];
+
+export function addShoppingItems(items: string[]) {
+  itemsToBeAdded.push(...items);
+}
+
 export function ShoppingList(props: IDarkThemeProps) {
   const [state, setState] = usePersistentState<IShoppingState>(defaultShoppingState, localStorageShoppingList);
 
   const [synced, setSynced] = useState<SyncState>('initial-fetch');
-  const setStateWithServer = (value: IShoppingState | ((state: IShoppingState) => IShoppingState)) => {
+  const setStateWithServer = useCallback((value: IShoppingState | ((state: IShoppingState) => IShoppingState)) => {
     const newState = (typeof value === 'function') ? value(state) : value;
     setState(newState);
     setSynced('uploading');
     uploadShoppingList(newState).then(r => {
       setSynced(r ? 'synced' : 'failed');
     });
-  }
+  }, [setState, state]);
 
   const { t } = useTranslation();
   const mobile = useMobile();
 
+  // itemsToBeAdded
+  useEffect(() => {
+    if (itemsToBeAdded.length > 0) {
+      const notChecked = state.notChecked.slice(0);
+      for (const item of itemsToBeAdded) {
+        notChecked.push({
+          text: item,
+          checked: false,
+          addedTime: dayjs().toJSON()
+        });
+      }
+      setStateWithServer(state => ({...state, notChecked}))
+      itemsToBeAdded.length = 0;
+    }
+  }, [setStateWithServer, state.notChecked]);
+
+  // sse
   useEffect(() => {
     const eventSource = new EventSource('/api/shoppingList');
     eventSource.onmessage = v => {

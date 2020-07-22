@@ -62,8 +62,11 @@
       margin-bottom: 5px;
     }
 
-    .ingredients-title {
-      margin-top: 30px;
+    .ingredients-title-wrapper {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .description,
@@ -211,8 +214,11 @@
     margin-bottom: 5px;
   }
 
-  .ingredients-title {
-    margin-top: 30px;
+  .ingredients-title-wrapper {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   // .description,

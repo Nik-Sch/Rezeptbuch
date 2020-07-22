@@ -113,5 +113,6 @@
   "syncing": "Synchronisiere mit dem Server...",
   "uploaded": "Synchronisiert",
   "uploading": "Zum Server hochladen...",
-  "uploadingFailed": "Hochladen fehlgeschlagen"
+  "uploadingFailed": "Hochladen fehlgeschlagen",
+  "addToShopping": "Zur Einkaufsliste hinzufügen"
 }

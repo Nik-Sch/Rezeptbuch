@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useHistory, Prompt } from 'react-router-dom';
 import recipesHandler, { IRecipe, ICategory, emptyRecipe, getUserInfo } from '../../util/Network';
 import { H1, EditableText, Classes, Button, H3, Card, H5, H4, ButtonGroup, Popover, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton, Tooltip } from '@blueprintjs/core';
@@ -18,6 +18,7 @@ import { DesktopIngredients, showDot } from './Ingredients';
 import DescriptionTextArea from './DescriptionTextArea';
 import CommentSection from './CommentSection';
 import { INavigationLink, NavigationLinks } from '../recipeList/RecipeListMenu';
+import { addShoppingItems } from '../ShoppingList';
 
 function verifyRecipe(recipe: IRecipe): boolean {
   return recipe.title.trim() !== '' &&
@@ -214,9 +215,26 @@ export function Recipe(props: IDarkThemeProps) {
   };
 
   const navigationLinks: INavigationLink[] = [
-    { to: '/', icon: 'git-repo', text: t('recipes'), active: true},
+    { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
     { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
   ];
+
+  const [hoverIngredients, setHoverIngredients] = useState(false);
+
+
+  const hoverIngredientsTimeout = useRef<number>();
+  const onIngredientsMouseOver = () => {
+    window.clearTimeout(hoverIngredientsTimeout.current);
+    hoverIngredientsTimeout.current = window.setTimeout(() => setHoverIngredients(true), 100);
+  }
+  const onIngredientsMouseOut = () => {
+    window.clearTimeout(hoverIngredientsTimeout.current);
+    hoverIngredientsTimeout.current = window.setTimeout(() => setHoverIngredients(false), 100);
+  }
+  const addIngredientsToShoppingList = () => {
+    addShoppingItems(recipe.ingredients);
+    history.push('/shoppingList');
+  }
 
   if (mobile) {
     return <>
@@ -227,8 +245,8 @@ export function Recipe(props: IDarkThemeProps) {
       <Header
         darkThemeProps={props}
         navigationLinks={navigationLinks}
-        // navigationIcon={navigationIcon}
-        // onNavigationClick={handleNavigationClick}
+      // navigationIcon={navigationIcon}
+      // onNavigationClick={handleNavigationClick}
       >
         <Dialog
           className='mobile-cancel-dialog'
@@ -364,9 +382,19 @@ export function Recipe(props: IDarkThemeProps) {
               onCategorySelected={handleSetCategory}
             />
           </H3>
-          <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
-            {t('ingredients')}:
+
+          <div className='ingredients-title-wrapper'>
+            <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
+              {t('ingredients')}:
             </H4>
+            <Button
+              text={t('addToShopping')}
+              minimal={true}
+              intent='success'
+              icon='add'
+              onClick={addIngredientsToShoppingList}
+            />
+          </div>
           {state.editable
             ? <TextArea
               className={classNames('ingredients-edit', Classes.EDITABLE_TEXT_INPUT)}
@@ -524,32 +552,47 @@ export function Recipe(props: IDarkThemeProps) {
                       onCategorySelected={handleSetCategory}
                     />
                   </H3>
-                  <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
-                    {t('ingredients')}:
-              </H4>
-                  <DesktopIngredients
-                    ingredients={recipe.ingredients}
-                    loaded={state.loaded}
-                    editable={state.editable}
-                    addIngredient={v => {
-                      setState(state => ({ ...state, dirty: true }));
-                      const ingredients = recipe.ingredients.slice(0);
-                      ingredients.push(v);
-                      setRecipe(recipe => ({ ...recipe, ingredients }));
+                  <div
+                    className='ingredients'
+                    onMouseOver={onIngredientsMouseOver}
+                    onMouseOut={onIngredientsMouseOut}
+                  >
+                    <div className='ingredients-title-wrapper'>
+                      <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
+                        {t('ingredients')}:
+                    </H4>
+                      {hoverIngredients && <Button
+                        text={t('addToShopping')}
+                        minimal={true}
+                        intent='success'
+                        icon='add'
+                        onClick={addIngredientsToShoppingList}
+                      />}
+                    </div>
+                    <DesktopIngredients
+                      ingredients={recipe.ingredients}
+                      loaded={state.loaded}
+                      editable={state.editable}
+                      addIngredient={v => {
+                        setState(state => ({ ...state, dirty: true }));
+                        const ingredients = recipe.ingredients.slice(0);
+                        ingredients.push(v);
+                        setRecipe(recipe => ({ ...recipe, ingredients }));
 
-                    }}
-                    deleteIngredient={index => {
-                      setState(state => ({ ...state, dirty: true }));
-                      const ingredients = recipe.ingredients.filter((_, i) => i !== index);
-                      setRecipe(recipe => ({ ...recipe, ingredients }));
-                    }}
-                    replaceIngredient={(index, v) => {
-                      setState(state => ({ ...state, dirty: true }));
-                      const ingredients = recipe.ingredients.slice(0);
-                      ingredients[index] = v;
-                      setRecipe(recipe => ({ ...recipe, ingredients }));
-                    }}
-                  />
+                      }}
+                      deleteIngredient={index => {
+                        setState(state => ({ ...state, dirty: true }));
+                        const ingredients = recipe.ingredients.filter((_, i) => i !== index);
+                        setRecipe(recipe => ({ ...recipe, ingredients }));
+                      }}
+                      replaceIngredient={(index, v) => {
+                        setState(state => ({ ...state, dirty: true }));
+                        const ingredients = recipe.ingredients.slice(0);
+                        ingredients[index] = v;
+                        setRecipe(recipe => ({ ...recipe, ingredients }));
+                      }}
+                    />
+                  </div>
                 </div>
                 <ImagePart
                   recipe={recipe}
