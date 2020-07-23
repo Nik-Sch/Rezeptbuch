@@ -16,6 +16,7 @@ interface IShoppingItem {
   text: string;
   checked: boolean;
   addedTime: string;
+  id: number;
   checkedTime?: string;
 }
 
@@ -267,17 +268,19 @@ export function ShoppingList(props: IDarkThemeProps) {
   useEffect(() => {
     if (itemsToBeAdded.length > 0) {
       const notChecked = state.notChecked.slice(0);
+      let id = state.nextId;
       for (const item of itemsToBeAdded) {
         notChecked.push({
           text: item,
           checked: false,
-          addedTime: dayjs().toJSON()
+          addedTime: dayjs().toJSON(),
+          id: id++
         });
       }
-      setStateWithServer(state => ({...state, notChecked}))
+      setStateWithServer(state => ({...state, notChecked, nextId: id}))
       itemsToBeAdded.length = 0;
     }
-  }, [setStateWithServer, state.notChecked]);
+  }, [setStateWithServer, state.notChecked, state.nextId]);
 
   // sse
   useEffect(() => {
@@ -292,6 +295,9 @@ export function ShoppingList(props: IDarkThemeProps) {
       }
       setSynced('synced');
     };
+    eventSource.onerror = e => {
+      console.log('[shopping list]', e);
+    }
     return () => {
       eventSource.close();
       // console.log('[shopping list]', 'closed');
@@ -305,10 +311,9 @@ export function ShoppingList(props: IDarkThemeProps) {
 
   const commonProps = {
     updateElement: (newItem: IShoppingItem) => {
-      console.log(newItem.text);
       const notChecked = state.notChecked.slice();
       const checked = state.checked.slice();
-      const oldElemIndex = notChecked.findIndex(v => v.addedTime === newItem.addedTime);
+      const oldElemIndex = notChecked.findIndex(v => v.id === newItem.id);
       if (newItem.checked) {
         notChecked.splice(oldElemIndex, 1);
         checked.push(newItem);
@@ -318,7 +323,7 @@ export function ShoppingList(props: IDarkThemeProps) {
       setStateWithServer(state => ({ ...state, notChecked, checked: checked.sort((a, b) => dayjs(a.addedTime).diff(b.addedTime)) }));
     },
     deleteElement: (elem: IShoppingItem) => {
-      setStateWithServer(state => ({ ...state, notChecked: state.notChecked.filter(e => e.addedTime !== elem.addedTime) }));
+      setStateWithServer(state => ({ ...state, notChecked: state.notChecked.filter(e => e.id !== elem.id) }));
     }
   };
 
@@ -400,12 +405,12 @@ export function ShoppingList(props: IDarkThemeProps) {
               state.notChecked.map((item) => {
                 return <ShoppingListItem
                   item={item}
-                  key={item.addedTime}
+                  key={item.id}
                   commonProps={commonProps}
                 />
               })
               : <DraggableList<IShoppingItem, ICommonProps, ShoppingListItemClassWrapper>
-                itemKey={item => item.addedTime}
+                itemKey={item => `${item.id}`}
                 padding={0}
                 template={ShoppingListItemClassWrapper}
                 list={state.notChecked}
@@ -419,7 +424,8 @@ export function ShoppingList(props: IDarkThemeProps) {
                   const newItem: IShoppingItem = {
                     text: text,
                     checked: false,
-                    addedTime: dayjs().toJSON()
+                    addedTime: dayjs().toJSON(),
+                    id: state.nextId
                   };
                   notChecked.push(newItem);
                   setStateWithServer(state => ({ ...state, notChecked, nextId: state.nextId + 1 }));
@@ -439,12 +445,12 @@ export function ShoppingList(props: IDarkThemeProps) {
               {state.checked.map(item => {
                 return <ShoppingListItem
                   item={item}
-                  key={item.addedTime}
+                  key={item.id}
                   commonProps={{
                     updateElement: (newItem: IShoppingItem) => {
                       const notChecked = state.notChecked.slice();
                       const checked = state.checked.slice();
-                      const oldElemIndex = checked.findIndex(v => v.addedTime === newItem.addedTime);
+                      const oldElemIndex = checked.findIndex(v => v.id === newItem.id);
                       if (!newItem.checked) {
                         checked.splice(oldElemIndex, 1);
                         notChecked.push(newItem);
@@ -454,7 +460,7 @@ export function ShoppingList(props: IDarkThemeProps) {
                       setStateWithServer(state => ({ ...state, notChecked, checked }));
                     },
                     deleteElement: (elem: IShoppingItem) => {
-                      setStateWithServer(state => ({ ...state, checked: state.checked.filter(e => e.addedTime !== elem.addedTime) }));
+                      setStateWithServer(state => ({ ...state, checked: state.checked.filter(e => e.id !== elem.id) }));
                     }
                   }}
                 />
