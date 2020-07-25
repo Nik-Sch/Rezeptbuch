@@ -107,14 +107,20 @@
           text-overflow: ellipsis;
           max-height: 2.4em;
           line-height: 1.2em;
+          margin-bottom: 5px;
         }
         .recipe-category {
           margin-left: inherit;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          margin-bottom: 5px;
+
         }
       }
       .info-wrapper {
         .recipe-description {
-          max-height: 1.2em;
+          max-height: 2.4em;
           max-width: 100%;
         }
       }
