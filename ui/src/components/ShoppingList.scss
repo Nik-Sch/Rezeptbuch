@@ -30,10 +30,11 @@
       }
       .drag-handle {
         margin-right: 10px;
+        cursor: move;
       }
-      .drag-handle.active {
-        cursor: grab;
-      }
+      // .drag-handle.active {
+      //   cursor: grab;
+      // }
 
       .my-editable-text {
         margin-right: 40px;

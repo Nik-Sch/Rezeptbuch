@@ -370,6 +370,7 @@ export default function CommentSection(props: IProps) {
       {props.comments.sort(compareComment).map(c => <Comment
         comment={c}
         username={props.username}
+        key={c.id}
       />)}
     </div>
   </>
