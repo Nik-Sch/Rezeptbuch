@@ -384,7 +384,11 @@ export function ShoppingList(props: IDarkThemeProps) {
   };
 
   const deleteElement = (elem: IShoppingItem) => {
-    setStateWithServer(state => ({ ...state, notChecked: state.notChecked.filter(e => e.id !== elem.id) }));
+    setStateWithServer(state => ({
+      ...state,
+      notChecked: state.notChecked.filter(e => e.id !== elem.id),
+      checked: state.checked.filter(e => e.id !== elem.id),
+    }));
   };
 
   const moveCardNotChecked = useCallback((dragIndex: number, hoverIndex: number) => {
