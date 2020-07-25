@@ -127,7 +127,7 @@ def notifyNewRecipe(recipe, exclude):
             value = json.loads(redisNotificationsDB.get(sub))
             webpush(subscription_info=value['sub'],
                     data=json.dumps(recipe),
-                    vapid_private_key='RHqOa_BNfYzX3awVF30UmDIqVml5NkEbs3AZK31kqDo',
+                    vapid_private_key=os.environ['PUSH_PRIVATE_KEY'],
                     vapid_claims={"sub": "mailto:me@niklas-schelten.de"})
             print('sent to: ', sub)
         except Exception as e:

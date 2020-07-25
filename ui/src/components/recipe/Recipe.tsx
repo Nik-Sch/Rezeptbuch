@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useHistory, Prompt } from 'react-router-dom';
 import recipesHandler, { IRecipe, ICategory, emptyRecipe, getUserInfo } from '../../util/Network';
 import { H1, EditableText, Classes, Button, H3, Card, H5, H4, ButtonGroup, Popover, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton, Tooltip } from '@blueprintjs/core';
@@ -34,7 +34,7 @@ export function Recipe(props: IDarkThemeProps) {
   const history = useHistory();
 
 
-  const [state, setState] = useState({ editable: id === '-1', loaded: false, dirty: false });
+  const [state, setState] = useState({ editing: id === '-1', loaded: false, dirty: false });
   const [recipe, setRecipe] = useState<IRecipe>(emptyRecipe);
   const [imagesToBeDeleted, setImagesToBeDeleted] = useState<string[]>([]);
   const [ingredientsText, setIngredientsText] = useState<string>(''); // for mobile
@@ -60,7 +60,7 @@ export function Recipe(props: IDarkThemeProps) {
     if (typeof id === 'undefined' || id === '-1') {
       setState({
         loaded: true,
-        editable: true,
+        editing: true,
         dirty: false
       })
       setRecipe(emptyRecipe);
@@ -82,7 +82,7 @@ export function Recipe(props: IDarkThemeProps) {
 
         document.title = r.title;
         setState({
-          editable: false,
+          editing: false,
           loaded: true,
           dirty: false
         });
@@ -104,7 +104,7 @@ export function Recipe(props: IDarkThemeProps) {
     }
     if (!state.dirty) {
       AppToasterTop.show({ message: t('recipeNotModified'), intent: 'primary' })
-      setState(state => ({ ...state, editable: false }));
+      setState(state => ({ ...state, editing: false }));
       return;
     }
     setState(state => ({ ...state, dirty: false }));
@@ -134,7 +134,7 @@ export function Recipe(props: IDarkThemeProps) {
 
     if (await recipesHandler.updateRecipe(newRecipe) === true) {
       AppToasterTop.show({ message: t('recipeSaved'), intent: 'success' })
-      setState(state => ({ ...state, editable: false, dirty: false }));
+      setState(state => ({ ...state, editing: false, dirty: false }));
     } else {
       AppToasterTop.show({ message: t('recipeSaveError'), intent: 'warning' })
     }
@@ -145,7 +145,7 @@ export function Recipe(props: IDarkThemeProps) {
       if (typeof id === 'undefined' || recipe.id === -1) {
         history.push('/');
       } else {
-        setState(state => ({ ...state, editable: false }))
+        setState(state => ({ ...state, editing: false }))
       }
     } else if (mobile) {
       setMobileCancelIsOpen(true);
@@ -170,7 +170,7 @@ export function Recipe(props: IDarkThemeProps) {
       }
       document.title = r.title;
       setState({
-        editable: false,
+        editing: false,
         loaded: true,
         dirty: false
       });
@@ -193,7 +193,7 @@ export function Recipe(props: IDarkThemeProps) {
     }
   };
 
-  const handleSetEditable = () => setState(state => ({ ...state, editable: true }));
+  const handleSetEditable = () => setState(state => ({ ...state, editing: true }));
   const handleSetTitle = (v: string) => {
     setRecipe(recipe => ({ ...recipe, title: v }));
     setState(state => ({ ...state, dirty: true }));
@@ -219,18 +219,6 @@ export function Recipe(props: IDarkThemeProps) {
     { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
   ];
 
-  const [hoverIngredients, setHoverIngredients] = useState(false);
-
-
-  const hoverIngredientsTimeout = useRef<number>();
-  const onIngredientsMouseOver = () => {
-    window.clearTimeout(hoverIngredientsTimeout.current);
-    hoverIngredientsTimeout.current = window.setTimeout(() => setHoverIngredients(true), 100);
-  }
-  const onIngredientsMouseOut = () => {
-    window.clearTimeout(hoverIngredientsTimeout.current);
-    hoverIngredientsTimeout.current = window.setTimeout(() => setHoverIngredients(false), 100);
-  }
   const addIngredientsToShoppingList = () => {
     addShoppingItems(recipe.ingredients);
     history.push('/shoppingList');
@@ -297,7 +285,7 @@ export function Recipe(props: IDarkThemeProps) {
           </div>
         </Dialog>
         {state.loaded && <div className='edit-container'>
-          {state.editable ?
+          {state.editing ?
             <>
               <Button
                 text={t('cancel')}
@@ -352,13 +340,13 @@ export function Recipe(props: IDarkThemeProps) {
         <ImagePart
           recipe={recipe}
           setImage={handleSetImage}
-          editable={state.editable}
+          editable={state.editing}
           className='image'
         />
         <div className='text-wrapper'>
           {error && <H3>{t('notFound')}</H3>}
           <H2 className={classNames(state.loaded ? '' : Classes.SKELETON, 'title')}>
-            {state.editable ?
+            {state.editing ?
               <InputGroup
                 value={recipe.title}
                 large={true}
@@ -376,7 +364,7 @@ export function Recipe(props: IDarkThemeProps) {
               canAddCategory={true}
               noResultText={t('noCategoryFound')}
               className={classNames('category-select', Classes.TEXT_MUTED, state.loaded ? '' : Classes.SKELETON)}
-              disabled={!state.editable}
+              disabled={!state.editing}
               placeholder={t('phCategory')}
               category={recipe.category}
               onCategorySelected={handleSetCategory}
@@ -387,15 +375,15 @@ export function Recipe(props: IDarkThemeProps) {
             <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
               {t('ingredients')}:
             </H4>
-            <Button
+            {recipe.ingredients.length > 0 && !state.editing && <Button
               text={t('addToShopping')}
               minimal={true}
               intent='success'
               icon='add'
               onClick={addIngredientsToShoppingList}
-            />
+            />}
           </div>
-          {state.editable
+          {state.editing
             ? <TextArea
               className={classNames('ingredients-edit', Classes.EDITABLE_TEXT_INPUT)}
               growVertically={true}
@@ -432,12 +420,12 @@ export function Recipe(props: IDarkThemeProps) {
           <DescriptionTextArea
             value={recipe.description}
             changeValue={handleSetDescription}
-            editable={state.editable}
-            placeholder={state.editable ? t('phDescription') : t('noDescription')}
+            editable={state.editing}
+            placeholder={state.editing ? t('phDescription') : t('noDescription')}
             className={classNames(state.loaded ? '' : Classes.SKELETON, 'description')}
           />
           <H5 className='user'>
-            {!state.editable && `${t('by')} ${recipe.user.user}.`}
+            {!state.editing && `${t('by')} ${recipe.user.user}.`}
           </H5>
         </div>
       </div>
@@ -468,7 +456,7 @@ export function Recipe(props: IDarkThemeProps) {
           <div className='recipe-container'>
             <Card className='recipe' elevation={2}>
               {state.loaded && <div className='edit-container'>
-                {state.editable ?
+                {state.editing ?
                   <ButtonGroup>
                     <CancelButton
                       handleDiscardClick={handleDiscardClick}
@@ -534,7 +522,7 @@ export function Recipe(props: IDarkThemeProps) {
                   multiline={true}
                   className={classNames(state.loaded ? '' : Classes.SKELETON, 'title')}
                   placeholder={t('phTitle')}
-                  disabled={!state.editable}
+                  disabled={!state.editing}
                   value={recipe.title}
                   onChange={handleSetTitle}
                 />
@@ -546,22 +534,17 @@ export function Recipe(props: IDarkThemeProps) {
                       canAddCategory={true}
                       noResultText={t('noCategoryFound')}
                       className={classNames('category-select', state.loaded ? '' : Classes.SKELETON)}
-                      disabled={!state.editable}
+                      disabled={!state.editing}
                       placeholder={t('phCategory')}
                       initialCategory={recipe.category}
                       onCategorySelected={handleSetCategory}
                     />
                   </H3>
-                  <div
-                    className='ingredients'
-                    onMouseOver={onIngredientsMouseOver}
-                    onMouseOut={onIngredientsMouseOut}
-                  >
                     <div className='ingredients-title-wrapper'>
                       <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
                         {t('ingredients')}:
                     </H4>
-                      {hoverIngredients && <Button
+                      {recipe.ingredients.length > 0 && !state.editing && <Button
                         text={t('addToShopping')}
                         minimal={true}
                         intent='success'
@@ -572,7 +555,7 @@ export function Recipe(props: IDarkThemeProps) {
                     <DesktopIngredients
                       ingredients={recipe.ingredients}
                       loaded={state.loaded}
-                      editable={state.editable}
+                      editable={state.editing}
                       addIngredient={v => {
                         setState(state => ({ ...state, dirty: true }));
                         const ingredients = recipe.ingredients.slice(0);
@@ -592,12 +575,11 @@ export function Recipe(props: IDarkThemeProps) {
                         setRecipe(recipe => ({ ...recipe, ingredients }));
                       }}
                     />
-                  </div>
                 </div>
                 <ImagePart
                   recipe={recipe}
                   setImage={handleSetImage}
-                  editable={state.editable}
+                  editable={state.editing}
                   className='image'
                 />
               </div>
@@ -607,12 +589,12 @@ export function Recipe(props: IDarkThemeProps) {
               <DescriptionTextArea
                 value={recipe.description}
                 changeValue={handleSetDescription}
-                placeholder={state.editable ? t('phDescription') : t('noDescription')}
-                editable={state.editable}
+                placeholder={state.editing ? t('phDescription') : t('noDescription')}
+                editable={state.editing}
                 className={classNames(state.loaded ? '' : Classes.SKELETON, 'description')}
               />
               <H5 className='user'>
-                {!state.editable && `${t('by')} ${recipe.user.user}.`}
+                {!state.editing && `${t('by')} ${recipe.user.user}.`}
               </H5>
             </Card>
           </div>

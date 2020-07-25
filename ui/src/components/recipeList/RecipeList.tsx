@@ -4,9 +4,7 @@ import { Classes, Icon, InputGroup, Button, H3, Collapse, Tooltip } from '@bluep
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { ISort, SortSelect } from '../helpers/SortSelect';
-import { FixedSizeList } from 'react-window';
-import { useMobile, useSessionState, useWindowDimensions, useOnline } from '../helpers/CustomHooks';
-import RSC from 'react-scrollbars-custom';
+import { useMobile, useSessionState, useOnline } from '../helpers/CustomHooks';
 import RecipeListItem from './RecipeListItem';
 import RecipeListMenu, { INavigationLink } from './RecipeListMenu';
 import Header from '../Header';
@@ -20,6 +18,7 @@ import { isNotificationAvailable, registerSW } from '../../pushServiceWorker';
 import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionStorageSearchInIngredients, sessionStorageSortingOrder, sessionStorageFilteredUsers } from '../../util/StorageKeys';
 import { AppToasterBottom } from '../../util/toaster';
 import i18n from '../../util/i18n';
+import { WindowScroller, List } from 'react-virtualized';
 
 const skeletonRecipes = [undefined, undefined, undefined, undefined];
 
@@ -40,46 +39,6 @@ export function NavigationIcon(props: { isOpen: boolean, onClick?: () => void })
   </div>
 }
 
-// https://codesandbox.io/s/bvaughnreact-window-react-scrollbars-custom-pjyxs?file=/index.js
-const CustomScrollbars = (params: {
-  children?: any,
-  forwardedRef: any,
-  onScroll?: any,
-  style?: any,
-  className?: any
-}) => {
-  return (
-    <RSC
-      removeTracksWhenNotUsed={true}
-      className={params.className}
-      style={params.style}
-      scrollerProps={{
-        renderer: (props: any) => {
-          const { elementRef, onScroll: rscOnScroll, ...otherProps } = props;
-          return (
-            <span
-              id='recipe-list-scroller'
-              {...otherProps}
-              onScroll={e => {
-                params.onScroll(e);
-                rscOnScroll(e);
-              }}
-              ref={ref => {
-                params.forwardedRef(ref);
-                elementRef(ref);
-              }}
-            />
-          );
-        }
-      }}
-    >
-      {params.children}
-    </RSC>
-  );
-};
-const CustomScrollbarsVirtualList = React.forwardRef((props, ref) => (
-  <CustomScrollbars {...props} forwardedRef={ref} />
-));
 
 const sortOptions: ISort[] = [
   { key: 'date', textKey: 'sortDate', smallTextKey: 'sortDateSmall' },
@@ -138,7 +97,6 @@ export default function RecipeList(props: IDarkThemeProps) {
   // recipe change
   useEffect(() => {
     const handleRecipesChange = (recipes: IRecipe[], categories: ICategory[], users: IUser[]) => {
-      console.log(recipes);
       setRecipes(recipes);
       for (const category of categories) {
         category.count = recipes.filter(r => r.category.id === category.id).length;
@@ -149,8 +107,8 @@ export default function RecipeList(props: IDarkThemeProps) {
       }
       setUsers(users);
     }
-
     return recipesHandler.subscribe(handleRecipesChange);
+
   }, []);
   // search and sort
   useEffect(() => {
@@ -212,11 +170,6 @@ export default function RecipeList(props: IDarkThemeProps) {
     }, mobile ? 100 : 0);
   }, [recipes, sortingOrder, filteredCategories, filteredUsers, searchString, searchInIngredients, mobile]);
 
-  const { height } = useWindowDimensions();
-  const listRef = React.createRef<FixedSizeList>();
-  const outerRef = React.createRef();
-
-  const getListItemKey = (i: number) => recipesToShow[i]?.id || -0.5 * Math.random();
 
   const handleSearchChange = (value: string) => {
     setSearchString(value);
@@ -250,6 +203,7 @@ export default function RecipeList(props: IDarkThemeProps) {
     onSortSelected={onSortSelected}
   />;
 
+
   return <>
     <Header
       darkThemeProps={props}
@@ -261,7 +215,12 @@ export default function RecipeList(props: IDarkThemeProps) {
           icon={filteredCategories.length > 0 || filteredUsers.length > 0 ? 'filter-keep' : 'filter'}
           intent={filterIsOpen ? 'primary' : 'none'}
           iconSize={24}
-          onClick={() => setFilterIsOpen(!filterIsOpen)}
+          onClick={() => {
+            setFilterIsOpen(!filterIsOpen);
+            if (!filterIsOpen) { // going to open filter
+              window.scrollTo(0, 0);
+            }
+          }}
         />
         <InputGroup
           leftIcon='search'
@@ -319,30 +278,32 @@ export default function RecipeList(props: IDarkThemeProps) {
           <H3 className='error'>
             {t('noRecipesMatching')}
           </H3>}
-        {recipesToShow.length > 0 && <div className='virtual-list-wrapper'>
-          {<FixedSizeList
-            ref={mobile ? undefined : listRef}
-            outerElementType={mobile ? undefined : CustomScrollbarsVirtualList}
-            outerRef={mobile ? undefined : outerRef}
-            itemCount={recipesToShow.length}
-            className='virtual-list'
-            itemSize={150 + 20}
 
-            height={mobile ? height - 60 : height - 105 - 45}
-            width='100%'
-            itemKey={getListItemKey}
-          >
-            {({ index, style, isScrolling }) => {
-              return <RecipeListItem
-                interactive={true}
-                elevation={1}
-                className={`recipe-list-item ${isScrolling ? Classes.SKELETON : ''}`}
-                recipe={recipesToShow[index]}
-                style={style}
+        {recipesToShow.length > 0 &&
+          <WindowScroller>
+            {({ height, isScrolling, onChildScroll, scrollTop, width }) => {
+
+              const listWidth = mobile ? width :
+                Math.min(width, 1280) * 0.75 - 5;
+              return <List
+                autoHeight={true}
+                height={height}
+                isScrolling={isScrolling}
+                onScroll={onChildScroll}
+                rowCount={recipesToShow.length}
+                rowHeight={150 + 20}
+                scrollTop={scrollTop}
+                width={listWidth}
+                rowRenderer={({ index, style, isScrolling }) => <RecipeListItem
+                  interactive={true}
+                  elevation={1}
+                  className={`recipe-list-item`}
+                  recipe={recipesToShow[index]}
+                  style={style}
+                />}
               />
             }}
-          </FixedSizeList >}
-        </div>}
+          </WindowScroller>}
       </div>
     </div>
     {mobile && online && hasWriteAccess && <Link

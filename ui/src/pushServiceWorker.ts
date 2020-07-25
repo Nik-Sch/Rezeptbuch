@@ -1,5 +1,5 @@
 
-const applicationServerPublicKey = 'BK163H43ZdGaaVvzZDFkIf4Jh9zn2VG6jYX5BWfVHVlnMLvjb8VZoMQRjMjPAAgflckyc6enYey5crb8YW9Ieeg';
+const applicationServerPublicKey = process.env.REACT_APP_WEBPUSH_PUBLIC_KEY || '';
 
 let isSubscribed = false;
 let swRegistration: ServiceWorkerRegistration | null = null;
@@ -33,6 +33,7 @@ export const deleteCallback = (callback: ICallback) => {
 }
 
 const notify = () => {
+  console.log('[psw] notify', callbacks);
   for (const cb of callbacks) {
     cb(isSubscribed);
   }
@@ -128,7 +129,7 @@ export function subscribeUser() {
     isSubscribed = true;
     notify();
   }).catch(function (err) {
-    // console.log('Failed to subscribe the user: ', err);
+    console.log('Failed to subscribe the user: ', err);
     notify();
   });
 }

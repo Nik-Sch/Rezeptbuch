@@ -3,7 +3,7 @@ import logoDark from '../static/logo-dark.svg';
 import logo from '../static/logo.svg';
 import logoNoText from '../static/logo-no-text.svg';
 import { Link } from 'react-router-dom';
-import { Navbar, ButtonGroup, Collapse, Classes, Divider } from '@blueprintjs/core';
+import { Navbar, ButtonGroup, Collapse, Classes, Divider, Overlay } from '@blueprintjs/core';
 import { LanguageSelect } from './helpers/LanguageSelect';
 import './Header.scss';
 import classNames from 'classnames';
@@ -53,23 +53,24 @@ export default function Header(props: IHeaderProps) {
           isOpen={menuIsOpen}
           className={classNames('mobile-header-menu', Classes.CARD, Classes.ELEVATION_2)}
         >
-          <div className='settings'>
-            <DarkModeSwitch {...props.darkThemeProps} />
-            <div className='spacer' />
-            <LanguageSelect />
-            {typeof userInfo !== 'undefined' && <LogoutButton />}
-          </div>
-          {props.navigationLinks && <>
-            <Divider />
-            <div className='navigation'>
-              <NavigationLinks navigationLinks={props.navigationLinks} />
+            <div className='settings'>
+              <DarkModeSwitch {...props.darkThemeProps} />
+              <div className='spacer' />
+              <LanguageSelect />
+              {typeof userInfo !== 'undefined' && <LogoutButton />}
             </div>
-          </>}
+            {props.navigationLinks && <>
+              <Divider />
+              <div className='navigation'>
+                <NavigationLinks navigationLinks={props.navigationLinks} />
+              </div>
+            </>}
         </Collapse>
       </header>
+      {menuIsOpen && <div className='mobile-header-menu-clicker' onClick={() => setMenuIsOpen(false)}></div>}
     </>
   } else {
-    return <header className='header-wrapper'>
+    return <header className={classNames('header-wrapper', Classes.FIXED_TOP, Classes.NAVBAR)}>
       <div className={classNames(props.className, 'Desktop-header')}>
         <Link to='/'>
           <img

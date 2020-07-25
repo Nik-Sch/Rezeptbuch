@@ -14,33 +14,33 @@ export default function AskForNotifications() {
   // const [dialogOpen, setDialogOpen] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState(Notification.permission);
 
-  const handleSubscribedChange = (isSubscribed: boolean) => {
-    // console.log('dialog');
-    // setDialogOpen(false);
-    setNotificationPermission(Notification.permission);
-    setSubscribed(isSubscribed);
-  }
 
   useEffect(() => {
+    const handleSubscribedChange = (isSubscribed: boolean) => {
+      console.log('[afn] handleSubscribed', isSubscribed);
+      // setDialogOpen(false);
+      setNotificationPermission(Notification.permission);
+      setSubscribed(isSubscribed);
+    };
     observeSubscription(handleSubscribedChange);
     return () => { deleteCallback(handleSubscribedChange) }
-  });
+  }, []);
 
   if (notificationPermission === 'denied') {
-    // console.log('[afn] permission denied');
+    console.log('[afn] permission denied');
     return null;
   }
   if (denied) {
-    // console.log('[afn] user doesn\'t want');
+    console.log('[afn] user doesn\'t want');
     return null;
   }
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    // console.log('[afn] no push/sw');
+    console.log('[afn] no push/sw');
     return null;
   }
 
   if (subscribed) {
-    // console.log('[afn] already subscribed');
+    console.log('[afn] already subscribed');
     return null;
   }
 
