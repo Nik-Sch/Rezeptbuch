@@ -67,7 +67,11 @@ export default function Header(props: IHeaderProps) {
             </>}
         </Collapse>
       </header>
-      {menuIsOpen && <div className='mobile-header-menu-clicker' onClick={() => setMenuIsOpen(false)}></div>}
+      {menuIsOpen && <div
+      className='mobile-header-menu-clicker'
+      onClick={() => setMenuIsOpen(false)}
+      onTouchStart={() => setMenuIsOpen(false)}
+      />}
     </>
   } else {
     return <header className={classNames('header-wrapper', Classes.FIXED_TOP, Classes.NAVBAR)}>

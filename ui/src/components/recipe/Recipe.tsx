@@ -220,7 +220,7 @@ export function Recipe(props: IDarkThemeProps) {
   ];
 
   const addIngredientsToShoppingList = () => {
-    addShoppingItems(recipe.ingredients);
+    addShoppingItems(recipe.ingredients.filter(showDot));
     history.push('/shoppingList');
   }
 
