@@ -102,9 +102,6 @@ export default function RecipeList(props: IDarkThemeProps) {
     const handleRecipesChange = (recipes: IRecipe[], categories: ICategory[], users: IUser[]) => {
       setRecipes(recipes);
       setCategories(categories);
-      for (const user of users) {
-        user.count = recipes.filter(r => r.user.id === user.id).length;
-      }
       setUsers(users);
     }
     return recipesHandler.subscribe(handleRecipesChange);
