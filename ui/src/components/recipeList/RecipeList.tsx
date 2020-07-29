@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Network';
 import { Classes, Icon, InputGroup, Button, H3, Collapse, Tooltip } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import { ISort, SortSelect } from '../helpers/SortSelect';
 import { useMobile, useSessionState, useOnline } from '../helpers/CustomHooks';
 import RecipeListItem from './RecipeListItem';
-import RecipeListMenu, { INavigationLink } from './RecipeListMenu';
+import RecipeListMenu, { INavigationLink, Counts } from './RecipeListMenu';
 import Header from '../Header';
 
 import './RecipeList.scss'
@@ -69,6 +69,7 @@ function onServiceWorkerUpdate() {
   });
 }
 
+
 export default function RecipeList(props: IDarkThemeProps) {
   document.title = 'Unsere Rezepte';
   const [t] = useTranslation();
@@ -81,9 +82,11 @@ export default function RecipeList(props: IDarkThemeProps) {
 
   const [recipes, setRecipes] = useState<(IRecipe)[]>([]);
   const [categories, setCategories] = useState<ICategory[]>([]);
+  const [categoryCounts, setCategoryCounts] = useState<Counts>([]);
   const [users, setUsers] = useState<IUser[]>([]);
   const [filteredCategories, setFilteredCategories] = useSessionState<ICategory[]>([], sessionStorageFilteredCategories);
   const [filteredUsers, setFilteredUsers] = useSessionState<IUser[]>([], sessionStorageFilteredUsers);
+  const [userCounts, setUserCounts] = useState<Counts>([]);
   const [searchString, setSearchString] = useSessionState<string>('', sessionStorageSearchString);
   const [searchInIngredients, setSearchInIngredients] = useSessionState<boolean>(true, sessionStorageSearchInIngredients);
   const [sortingOrder, setSortingOrder] = useSessionState<{ key: keyof IRecipe, desc: boolean }>({ key: 'date', desc: false }, sessionStorageSortingOrder);
@@ -98,9 +101,6 @@ export default function RecipeList(props: IDarkThemeProps) {
   useEffect(() => {
     const handleRecipesChange = (recipes: IRecipe[], categories: ICategory[], users: IUser[]) => {
       setRecipes(recipes);
-      for (const category of categories) {
-        category.count = recipes.filter(r => r.category.id === category.id).length;
-      }
       setCategories(categories);
       for (const user of users) {
         user.count = recipes.filter(r => r.user.id === user.id).length;
@@ -110,6 +110,49 @@ export default function RecipeList(props: IDarkThemeProps) {
     return recipesHandler.subscribe(handleRecipesChange);
 
   }, []);
+
+
+  const filterRecipeByCategory = useCallback((recipe?: IRecipe) => {
+    if (filteredCategories.length === 0 || !recipe) {
+      return true;
+    }
+    return filteredCategories.findIndex((category) => category.id === recipe.category.id) !== -1
+  }, [filteredCategories]);
+
+  const filterRecipeByUser = useCallback((recipe?: IRecipe) => {
+    if (filteredUsers.length === 0 || !recipe) {
+      return true;
+    }
+    return filteredUsers.findIndex(user => user.id === recipe.user.id) !== -1
+  }, [filteredUsers]);
+
+  const filterRecipeBySearch = useCallback((recipe?: IRecipe) => {
+    if (searchString === '' || !recipe) {
+      return true;
+    }
+    const searchStringLower = searchString.toLocaleLowerCase();
+    return recipe.title.toLocaleLowerCase().includes(searchStringLower)
+      || (searchInIngredients && recipe.ingredients.map(v => v.toLocaleLowerCase().includes(searchStringLower)).reduce((p, c) => p || c, false));
+  }, [searchInIngredients, searchString]);
+
+  // categoryCounts
+  useEffect(() => {
+    const counts: Counts = {};
+    for (const category of categories) {
+      counts[category.id] = recipes.filter(filterRecipeBySearch).filter(filterRecipeByUser).filter(r => r?.category.id === category.id).length;
+    }
+    setCategoryCounts(counts);
+  }, [categories, filterRecipeBySearch, filterRecipeByUser, recipes]);
+
+  // userCounts
+  useEffect(() => {
+    const counts: Counts = {};
+    for (const user of users) {
+      counts[user.id] = recipes.filter(filterRecipeBySearch).filter(filterRecipeByCategory).filter(r => r?.user.id === user.id).length;
+    }
+    setUserCounts(counts);
+  }, [filterRecipeByCategory, filterRecipeBySearch, recipes, users]);
+
   // search and sort
   useEffect(() => {
     const sortRecipes = (r1?: IRecipe, r2?: IRecipe): number => {
@@ -130,29 +173,6 @@ export default function RecipeList(props: IDarkThemeProps) {
       return result * (sortingOrder.desc ? -1 : 1);
     }
 
-    const filterRecipeByCategory = (recipe?: IRecipe) => {
-      if (filteredCategories.length === 0 || !recipe) {
-        return true;
-      }
-      return filteredCategories.findIndex((category) => category.id === recipe.category.id) !== -1
-    }
-
-    const filterRecipeByUser = (recipe?: IRecipe) => {
-      if (filteredUsers.length === 0 || !recipe) {
-        return true;
-      }
-      return filteredUsers.findIndex(user => user.id === recipe.user.id) !== -1
-    }
-
-    const filterRecipeBySearch = (recipe?: IRecipe) => {
-      if (searchString === '' || !recipe) {
-        return true;
-      }
-      const searchStringLower = searchString.toLocaleLowerCase();
-      return recipe.title.toLocaleLowerCase().includes(searchStringLower)
-        || (searchInIngredients && recipe.ingredients.map(v => v.toLocaleLowerCase().includes(searchStringLower)).reduce((p, c) => p || c, false));
-    }
-
     const filterRecipe = (recipe?: IRecipe) => {
       return filterRecipeBySearch(recipe)
         && filterRecipeByCategory(recipe)
@@ -161,14 +181,11 @@ export default function RecipeList(props: IDarkThemeProps) {
     window.clearTimeout(timeout.current);
     timeout.current = window.setTimeout(() => {
       if (recipes) {
-        if (recipes.length > 0) {
-          setRecipesToShow(recipes.sort(sortRecipes).filter(filterRecipe));
-        } else {
-          setRecipesToShow([]);
-        }
+        setRecipesToShow(recipes.sort(sortRecipes).filter(filterRecipe));
+
       }
     }, mobile ? 100 : 0);
-  }, [recipes, sortingOrder, filteredCategories, filteredUsers, searchString, searchInIngredients, mobile]);
+  }, [filterRecipeByCategory, filterRecipeBySearch, filterRecipeByUser, mobile, recipes, sortingOrder.desc, sortingOrder.key]);
 
 
   const handleSearchChange = (value: string) => {
@@ -196,6 +213,8 @@ export default function RecipeList(props: IDarkThemeProps) {
     onCategorySelected={setFilteredCategories}
     selectedCategories={filteredCategories}
     allCategories={categories}
+    categoryCounts={categoryCounts}
+    userCounts={userCounts}
     sortOptions={sortOptions}
     onUserSelected={setFilteredUsers}
     selectedUsers={filteredUsers}

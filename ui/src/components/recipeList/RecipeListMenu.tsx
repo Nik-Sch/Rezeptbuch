@@ -12,6 +12,7 @@ import { UserMultiSelect } from '../helpers/UserMultiSelect';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames';
 
+export type Counts = { [id: number]: number };
 export interface ISearchProps {
   handleSearchChange: (newValue: string) => void;
   handleSearchInIngredientsChange: (newValue: boolean) => void;
@@ -21,10 +22,12 @@ export interface ISearchProps {
   searchInIngredients: boolean;
   selectedCategories: ICategory[];
   allCategories: ICategory[];
+  categoryCounts: Counts;
   sortOptions: ISort[];
   onUserSelected: (users: IUser[]) => void;
   selectedUsers: IUser[];
   allUsers: IUser[];
+  userCounts: Counts;
   darkModeProps: IDarkThemeProps;
 }
 
@@ -72,6 +75,7 @@ export default function RecipeListMenu(myProps: ISearchProps) {
           placeholder={t('filterForUsers')}
           noResultText={t('noUsersFound')}
           onUserSelected={props.onUserSelected}
+          userCounts={props.userCounts}
           selectedUsers={props.selectedUsers}
           allUsers={props.allUsers}
           className='filter-users'
@@ -90,6 +94,7 @@ export default function RecipeListMenu(myProps: ISearchProps) {
           placeholder={t('filterForCategories')}
           noResultText={t('noCategoryFound')}
           onCategorySelected={props.onCategorySelected}
+          categoryCounts={props.categoryCounts}
           selectedCategories={props.selectedCategories}
           allCategories={props.allCategories}
           className='filter-categories'
@@ -129,6 +134,7 @@ export default function RecipeListMenu(myProps: ISearchProps) {
       placeholder={t('filterForUsers')}
       noResultText={t('noUsersFound')}
       onUserSelected={props.onUserSelected}
+      userCounts={props.userCounts}
       selectedUsers={props.selectedUsers}
       allUsers={props.allUsers}
       className='filter-users menu-item'
@@ -138,6 +144,7 @@ export default function RecipeListMenu(myProps: ISearchProps) {
       noResultText={t('noCategoryFound')}
       onCategorySelected={props.onCategorySelected}
       selectedCategories={props.selectedCategories}
+      categoryCounts={props.categoryCounts}
       allCategories={props.allCategories}
       className='filter-categories menu-item'
     />

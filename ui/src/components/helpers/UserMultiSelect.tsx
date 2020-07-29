@@ -4,12 +4,14 @@ import { IUser } from '../../util/Network';
 import React from 'react';
 import { Button, MenuItem } from '@blueprintjs/core';
 import { useMobile } from './CustomHooks';
+import { Counts } from '../recipeList/RecipeListMenu';
 
 
 interface IProps {
   onUserSelected: (users: IUser[]) => void;
   selectedUsers: IUser[];
   allUsers: IUser[];
+  userCounts: Counts;
   placeholder: string;
   className?: string;
   noResultText: string;
@@ -33,7 +35,7 @@ export function UserMultiSelect(props: IProps) {
         className={mobile ? 'mobile-menu-item' : ''}
         icon={isSelected(user) ? "tick" : "blank"}
         onClick={handleClick}
-        label={typeof user.count !== 'undefined' ? `${user.count}` : undefined}
+        label={props.userCounts[user.id]?.toString()}
         text={user.user}
         shouldDismissPopover={false}
       />

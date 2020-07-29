@@ -4,12 +4,14 @@ import { ICategory } from '../../util/Network';
 import React from 'react';
 import { Button, MenuItem } from '@blueprintjs/core';
 import { useMobile } from './CustomHooks';
+import { Counts } from '../recipeList/RecipeListMenu';
 
 
 interface IProps {
   onCategorySelected: (categories: ICategory[]) => void;
   selectedCategories: ICategory[];
   allCategories: ICategory[];
+  categoryCounts: Counts;
   placeholder: string;
   className?: string;
   noResultText: string;
@@ -32,7 +34,7 @@ export function CategoryMultiSelect(props: IProps) {
         key={category.id}
         className={mobile ? 'mobile-menu-item' : ''}
         icon={isSelected(category) ? "tick" : "blank"}
-        label={typeof category.count !== 'undefined' ? `${category.count}` : undefined}
+        label={props.categoryCounts[category.id]?.toString()}
         onClick={handleClick}
         text={category.name}
         shouldDismissPopover={false}

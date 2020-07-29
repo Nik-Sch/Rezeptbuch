@@ -32,7 +32,6 @@ export const emptyRecipe: IRecipe = {
 export interface ICategory {
   id: number;
   name: string;
-  count?: number;
 }
 
 export interface IComment {
@@ -86,7 +85,6 @@ export interface IUser {
   id: number;
   user: string;
   readOnly: boolean;
-  count?: number;
 }
 
 
