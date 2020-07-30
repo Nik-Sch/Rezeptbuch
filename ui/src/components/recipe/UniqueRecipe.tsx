@@ -156,6 +156,9 @@ export function UniqueRecipe(props: IDarkThemeProps) {
                 ingredients={recipe.ingredients}
                 loaded={loaded}
                 editable={false}
+                addIngredient={() => {}}
+                deleteIngredient={() => {}}
+                replaceIngredient={() => {}}
               />
             </div>
             <ImagePart

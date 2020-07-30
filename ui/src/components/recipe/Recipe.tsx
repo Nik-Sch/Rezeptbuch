@@ -233,8 +233,6 @@ export function Recipe(props: IDarkThemeProps) {
       <Header
         darkThemeProps={props}
         navigationLinks={navigationLinks}
-      // navigationIcon={navigationIcon}
-      // onNavigationClick={handleNavigationClick}
       >
         <Dialog
           className='mobile-cancel-dialog'
@@ -556,10 +554,10 @@ export function Recipe(props: IDarkThemeProps) {
                       ingredients={recipe.ingredients}
                       loaded={state.loaded}
                       editable={state.editing}
-                      addIngredient={v => {
+                      addIngredient={(...values: string[]) => {
                         setState(state => ({ ...state, dirty: true }));
                         const ingredients = recipe.ingredients.slice(0);
-                        ingredients.push(v);
+                        ingredients.push(...values);
                         setRecipe(recipe => ({ ...recipe, ingredients }));
 
                       }}

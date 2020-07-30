@@ -32,7 +32,7 @@ interface IItemProps {
 }
 
 function NewShoppingListItem(props: {
-  onConfirm: (value: string) => void;
+  onConfirm: (...value: string[]) => void;
 }) {
   const { t } = useTranslation();
   const mobile = useMobile();
@@ -99,6 +99,13 @@ function NewShoppingListItem(props: {
             ref={input => input?.focus()}
             placeholder={t('addItem')}
             value={text}
+            onPaste={e => {
+              const data = e.clipboardData.getData('text').split('\n').map(v => v.trim()).filter(v => v.length > 0);
+              if (data.length > 1) {
+                props.onConfirm(...data);
+                e.preventDefault();
+              }
+            }}
           />
           : <span className={Classes.EDITABLE_TEXT_CONTENT}>
             {hasValue ? text : t('addItem')}
@@ -513,18 +520,21 @@ export function ShoppingList(props: IDarkThemeProps) {
               })}
             </DndProvider>
             <NewShoppingListItem
-              onConfirm={(text) => {
-                if (text.trim().length > 0) {
-                  const notChecked = state.notChecked.slice();
-                  const newItem: IShoppingItem = {
-                    text: text,
-                    checked: false,
-                    addedTime: dayjs().toJSON(),
-                    id: state.nextId
-                  };
-                  notChecked.push(newItem);
-                  setStateWithServer(state => ({ ...state, notChecked, nextId: state.nextId + 1 }));
+              onConfirm={(...items: string[]) => {
+                const notChecked = state.notChecked.slice();
+                let nextId = state.nextId;
+                for (const text of items) {
+                  if (text.trim().length > 0) {
+                    const newItem: IShoppingItem = {
+                      text,
+                      checked: false,
+                      addedTime: dayjs().toJSON(),
+                      id: nextId++
+                    };
+                    notChecked.push(newItem);
+                  }
                 }
+                setStateWithServer(state => ({ ...state, notChecked, nextId }));
               }}
             />
             {state.checked.length > 0 && !mobile && <Divider />}

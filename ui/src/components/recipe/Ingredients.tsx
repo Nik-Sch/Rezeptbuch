@@ -89,25 +89,22 @@ const IngredientsLine = forwardRef((props: IIngredientsLine, ref) => {
 });
 
 function ExtraIngredientLine(props: {
-  addIngredient?: (ing: string) => void
+  addIngredient: (...ing: string[]) => void
 }) {
   const { t } = useTranslation();
 
-  const [value, setValue] = useState<string>();
+  const [value, setValue] = useState<string>('');
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const hasValue = typeof value !== 'undefined' && value !== '';
+  const hasValue = value !== '';
   const placeholder = t('phIngredients');
 
   const handleConfirm = (shouldRefocus: boolean = false) => {
-    setIsEditing(false);
-    setValue(undefined);
-    if (typeof value !== 'undefined' && value.trim() !== '' && props.addIngredient) {
+    if (value.trim() !== '') {
       props.addIngredient(value);
-      if (shouldRefocus) {
-        setTimeout(() => {
-          setIsEditing(true);
-        }, 0);
-      }
+      setValue('');
+    }
+    if (!shouldRefocus) {
+      setIsEditing(false);
     }
   }
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -115,7 +112,7 @@ function ExtraIngredientLine(props: {
       handleConfirm(true);
     } else if (e.which === Keys.ESCAPE) {
       setIsEditing(false);
-      setValue(undefined);
+      setValue('');
     }
   }
 
@@ -142,6 +139,16 @@ function ExtraIngredientLine(props: {
           ref={input => input?.focus()}
           placeholder={placeholder}
           value={value}
+          onPaste={e => {
+            const data = e.clipboardData.getData('text').split('\n').map(v => v.trim()).filter(v => v.length > 0);
+            if (data.length > 1) {
+              props.addIngredient(...data);
+              setTimeout(() => {
+                setIsEditing(true);
+              }, 100);
+              e.preventDefault();
+            }
+          }}
         />
         : <span className={Classes.EDITABLE_TEXT_CONTENT}>
           {hasValue ? value : placeholder}
@@ -154,65 +161,53 @@ interface IDesktopIngredients {
   ingredients: string[];
   loaded: boolean;
   editable: boolean;
-  addIngredient?: (ing: string) => void;
-  deleteIngredient?: (index: number) => void;
-  replaceIngredient?: (index: number, ing: string) => void;
+  addIngredient: (...ing: string[]) => void;
+  deleteIngredient: (index: number) => void;
+  replaceIngredient: (index: number, ing: string) => void;
 }
 
 export function DesktopIngredients(props: IDesktopIngredients) {
   const [t] = useTranslation();
 
-  if (props.ingredients.length > 0) {
-    const ingredientsRefs: HTMLDivElement[] = [];
-    return <>
-      {props.ingredients.filter(v => v.trim() !== '').map(((line, index) => (
-        <IngredientsLine
-          editable={props.editable}
-          loaded={props.loaded}
-          key={index}
-          line={line}
-          delete={() => {
-            if (props.deleteIngredient) {
-              props.deleteIngredient(index);
-            }
-          }}
-          replace={(v, shouldRefocus) => {
-            if (props.replaceIngredient) {
-              props.replaceIngredient(index, v);
-              if (shouldRefocus && ingredientsRefs[index + 1]) {
-                setTimeout(() => {
-                  ingredientsRefs[index + 1].focus();
-                }, 10);
-              }
-            }
-          }}
-          ref={(v: HTMLDivElement) => {
-            if (v) {
-              ingredientsRefs[index] = v;
-            }
-          }}
-        />
-      )))
-      }
-      {props.editable && <ExtraIngredientLine
-        addIngredient={props.addIngredient}
-      />}
-    </>
-  } else if (props.editable) {
-    return <ExtraIngredientLine
-      addIngredient={props.addIngredient}
-    />;
-  } else if (props.loaded) {
-    return <div className='no-ingredients'>{t('noIngredients')}</div>
-  } else {
-    return <>
-      {[1, 2, 3].map((_, index) => (
+  const ingredientsRefs: HTMLDivElement[] = [];
+  return <>
+    {props.ingredients.filter(v => v.trim() !== '').map(((line, index) => {
+      const handleDelete = () => {
+        props.deleteIngredient(index);
+      };
+      const handleReplace = (v: string, shouldRefocus: boolean) => {
+        props.replaceIngredient(index, v);
+        if (shouldRefocus && ingredientsRefs[index + 1]) {
+          setTimeout(() => {
+            ingredientsRefs[index + 1].focus();
+          }, 10);
+        }
+      };
+      return <IngredientsLine
+        editable={props.editable}
+        loaded={props.loaded}
+        key={index}
+        line={line}
+        delete={handleDelete}
+        replace={handleReplace}
+        ref={v => { if (v) ingredientsRefs[index] = v as HTMLDivElement; }}
+      />
+    }))
+    }
+    {props.loaded && !props.editable && props.ingredients.length === 0 &&
+      <div className='no-ingredients'>{t('noIngredients')}</div>
+    }
+    {!props.loaded &&
+      [1, 2, 3].map((_, index) => (
         <div key={-index} className='ingredients-line'>
           <Icon icon='dot' />
           <span className={classNames('ingredients-line-text', Classes.SKELETON)} />
         </div>
       ))
-      }
-    </>
-  }
+    }
+    {props.editable && <ExtraIngredientLine
+      addIngredient={props.addIngredient}
+    />
+    }
+  </>
 }
