@@ -25,13 +25,14 @@ export function UserMultiSelect(props: IProps) {
   }
 
   const itemRenderer = (user: IUser, { handleClick, modifiers }: IItemRendererProps) => {
-    if (!modifiers.matchesPredicate) {
+    if (!modifiers.matchesPredicate || user.user === 'gast') {
       return null;
     }
     return (
       <MenuItem
         active={modifiers.active}
         key={user.id}
+        disabled={props.userCounts[user.id] === 0}
         className={mobile ? 'mobile-menu-item' : ''}
         icon={isSelected(user) ? "tick" : "blank"}
         onClick={handleClick}
