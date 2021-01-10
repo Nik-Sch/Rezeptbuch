@@ -10,3 +10,4 @@ export const sessionStorageFilteredUsers = 'filteredUsers';
 export const sessionStorageSearchInIngredients = 'searchInIngredients';
 export const sessionStorageSearchString = 'searchString';
 export const sessionStorageSortingOrder = 'sortingOrder';
+export const sessionStorageScrollPosition = 'scrollPosition';

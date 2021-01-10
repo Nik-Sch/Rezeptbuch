@@ -316,6 +316,7 @@ export default function RecipeList(props: IDarkThemeProps) {
                   className={`recipe-list-item`}
                   recipe={recipesToShow[index]}
                   style={style}
+                  key={recipesToShow[index]?.id ?? '-1'}
                 />}
               />
             }}

@@ -114,5 +114,6 @@
   "uploadingFailed": "Uploading failed",
   "retryUploading": "Try again to upload the shopping list.",
   "syncing": "Syncing with the server...",
-  "addToShopping": "Add to shopping list"
+  "addToShopping": "Add to shopping list",
+  "shoppingOffline": "App is offline"
 }

@@ -57,7 +57,7 @@ export function CategoryMultiSelect(props: IProps) {
     }
   };
 
-  const handleTagRemove = (_: string, index: number) => {
+  const handleTagRemove = (_: React.ReactNode, index: number) => {
     const cats = props.selectedCategories.filter((_, i) => i !== index);
     props.onCategorySelected(cats);
   }

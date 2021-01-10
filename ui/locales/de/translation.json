@@ -114,5 +114,6 @@
   "uploaded": "Synchronisiert",
   "uploading": "Zum Server hochladen...",
   "uploadingFailed": "Hochladen fehlgeschlagen",
-  "addToShopping": "Zur Einkaufsliste hinzufügen"
+  "addToShopping": "Zur Einkaufsliste hinzufügen",
+  "shoppingOffline": "App ist offline"
 }

@@ -46,7 +46,7 @@ export function Recipe(props: IDarkThemeProps) {
   const status = getUserInfo();
   const hasWriteAccess = typeof status !== 'undefined' && status.write && status.username === recipe.user.user;
 
-  // onloading stuff
+  // unloading stuff
   useEffect(() => {
     if (state.dirty) {
       window.onbeforeunload = () => true
@@ -57,6 +57,7 @@ export function Recipe(props: IDarkThemeProps) {
 
   // load recipes
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (typeof id === 'undefined' || id === '-1') {
       setState({
         loaded: true,

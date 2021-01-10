@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import Header from "./Header";
-import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Tooltip } from "@blueprintjs/core";
+import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Tooltip, Text } from "@blueprintjs/core";
 import { usePersistentState, useMobile } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
 import { IDarkThemeProps } from "../App";
@@ -20,7 +20,6 @@ interface IShoppingItem {
   checked: boolean;
   addedTime: string;
   id: number;
-  checkedTime?: string;
 }
 
 interface IItemProps {
@@ -261,20 +260,22 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
 });
 
 
-type SyncState = 'initial-fetch' | 'uploading' | 'synced' | 'failed';
+type SyncState = 'initial-fetch' | 'uploading' | 'synced' | 'failed' | 'offline';
 
 export interface IShoppingState {
   notChecked: IShoppingItem[];
   checked: IShoppingItem[];
   nextId: number;
   showChecked: boolean;
+  lastModified: string;
 }
 
 const defaultShoppingState: IShoppingState = {
   notChecked: [],
   checked: [],
   nextId: 0,
-  showChecked: true
+  showChecked: true,
+  lastModified: ''
 }
 
 function CardNoCard(props: { children?: React.ReactNode; className?: string }) {
@@ -295,20 +296,24 @@ export function addShoppingItems(items: string[]) {
 }
 
 export function ShoppingList(props: IDarkThemeProps) {
+  const { t } = useTranslation();
+  const mobile = useMobile();
+  const [online, setOnline] = useState(navigator.onLine);
+
   const [state, setState] = usePersistentState<IShoppingState>(defaultShoppingState, localStorageShoppingList);
 
   const [synced, setSynced] = useState<SyncState>('initial-fetch');
   const setStateWithServer = useCallback((value: IShoppingState | ((state: IShoppingState) => IShoppingState)) => {
     const newState = (typeof value === 'function') ? value(state) : value;
+    newState.lastModified = dayjs().toString();
     setState(newState);
-    setSynced('uploading');
-    uploadShoppingList(newState).then(r => {
-      setSynced(r ? 'synced' : 'failed');
-    });
-  }, [setState, state]);
-
-  const { t } = useTranslation();
-  const mobile = useMobile();
+    if (online) {
+      setSynced('uploading');
+      uploadShoppingList(newState).then(r => {
+        setSynced(r ? 'synced' : 'failed');
+      });
+    }
+  }, [online, setState, state]);
 
   // itemsToBeAdded
   useEffect(() => {
@@ -328,34 +333,63 @@ export function ShoppingList(props: IDarkThemeProps) {
     }
   }, [setStateWithServer, state.notChecked, state.nextId]);
 
+  // online
+  useEffect(() => {
+    const handle = () => {
+      setOnline(navigator.onLine);
+      if (!navigator.onLine) {
+        setSynced('offline');
+      }
+    }
+
+    window.addEventListener('online', handle);
+    window.addEventListener('offline', handle);
+    return () => {
+      window.removeEventListener('online', handle);
+      window.removeEventListener('offline', handle);
+    }
+  }, []);
+
   // sse
   useEffect(() => {
-    let eventSource = new EventSource('/api/shoppingList');
+    if (online) {
+      setSynced('initial-fetch');
+      let eventSource = new EventSource('/api/shoppingList');
 
-    const onMessage = (v: MessageEvent) => {
-      const result: IShoppingState | null = JSON.parse(v.data);
-      if (result) {
-        setState(result);
-        // console.log('[shopping list]', result);
-      } else {
-        // console.log('[shopping list]', null);
-      }
-      setSynced('synced');
-    };
-    const onError = () => {
-      eventSource.close();
-      eventSource = new EventSource('/api/shoppingList');
+      const onMessage = (v: MessageEvent) => {
+        const result: IShoppingState | null = JSON.parse(v.data);
+        if (result) {
+          const timeDiff = dayjs(state.lastModified).diff(result.lastModified);
+          console.log('[ShoppingListSync] remote:', result.lastModified);
+          console.log('[ShoppingListSync] local:', state.lastModified);
+          if (timeDiff < 0 || typeof state.lastModified !== 'string' || state.lastModified.trim() === '') {
+            console.log('[ShoppingListSync] remote state is newer, applying.');
+            setState(result);
+          } else if (timeDiff === 0) {
+            console.log('[ShoppingListSync] state unchanged.');
+          } else {
+            console.log('[ShoppingListSync] local state is newer, uploading...');
+            setStateWithServer(state);
+          }
+        } else {
+        }
+        setSynced('synced');
+      };
+      const onError = () => {
+        eventSource.close();
+        eventSource = new EventSource('/api/shoppingList');
+        eventSource.onmessage = onMessage;
+        eventSource.onerror = onError;
+      };
+
       eventSource.onmessage = onMessage;
       eventSource.onerror = onError;
-    };
-
-    eventSource.onmessage = onMessage;
-    eventSource.onerror = onError;
-    return () => {
-      eventSource.close();
-      // console.log('[shopping list]', 'closed');
-    };
-  }, [setState]);
+      return () => {
+        eventSource.close();
+        console.log('[shopping list]', 'closed');
+      };
+    }
+  }, [online, setState, setStateWithServer, state]);
 
   const navigationLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes') },
@@ -428,7 +462,7 @@ export function ShoppingList(props: IDarkThemeProps) {
   const statusElement = <div
     className={classNames('shopping-list-status-element',
       {
-        [Classes.TEXT_DISABLED]: synced === 'synced',
+        [Classes.TEXT_DISABLED]: synced === 'synced' || synced === 'offline',
       })}
   >
     {synced === 'synced' &&
@@ -453,6 +487,12 @@ export function ShoppingList(props: IDarkThemeProps) {
       </span>
     </>
     }
+    {synced === 'offline' && <>
+      <Icon icon='offline' intent='danger' />
+      <Text className='text'>
+        {t('shoppingOffline')}
+      </Text>
+    </>}
     {synced === 'failed' && <Tooltip content={t('retryUploading')} position='bottom'>
       <Button
         text={t('uploadingFailed')}

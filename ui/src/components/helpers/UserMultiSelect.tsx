@@ -58,7 +58,7 @@ export function UserMultiSelect(props: IProps) {
     }
   };
 
-  const handleTagRemove = (_: string, index: number) => {
+  const handleTagRemove = (_: React.ReactNode, index: number) => {
     const cats = props.selectedUsers.filter((_, i) => i !== index);
     props.onUserSelected(cats);
   }
