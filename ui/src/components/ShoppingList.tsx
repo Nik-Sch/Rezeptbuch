@@ -362,7 +362,11 @@ export function ShoppingList(props: IDarkThemeProps) {
           const timeDiff = dayjs(state.lastModified).diff(result.lastModified);
           console.log('[ShoppingListSync] remote:', result.lastModified);
           console.log('[ShoppingListSync] local:', state.lastModified);
-          if (timeDiff < 0 || typeof state.lastModified !== 'string' || state.lastModified.trim() === '') {
+          if (typeof result.lastModified !== 'string' || result.lastModified.trim() === '') {
+            console.log('[ShoppingListSync] server state has no modifiedTime, setting it.');
+            result.lastModified = dayjs().toString();
+            setStateWithServer(result);
+          } else if (timeDiff < 0 || typeof state.lastModified !== 'string' || state.lastModified.trim() === '') {
             console.log('[ShoppingListSync] remote state is newer, applying.');
             setState(result);
           } else if (timeDiff === 0) {
