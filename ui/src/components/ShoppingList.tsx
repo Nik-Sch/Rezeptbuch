@@ -392,6 +392,8 @@ export function ShoppingList(props: IDarkThemeProps) {
         eventSource.close();
         console.log('[shopping list]', 'closed');
       };
+    } else {
+      setSynced('offline');
     }
   }, [online, setState, setStateWithServer, state]);
 
