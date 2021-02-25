@@ -62,8 +62,7 @@ const IngredientsLine = forwardRef((props: IIngredientsLine, ref) => {
         {
           [Classes.EDITABLE_TEXT_EDITING]: isEditing,
           [Classes.DISABLED]: !props.editable,
-        },
-        'ingredients-line-text'
+        }
       )}
       onFocus={() => {
         if (props.editable) {
@@ -81,7 +80,7 @@ const IngredientsLine = forwardRef((props: IIngredientsLine, ref) => {
           ref={input => input?.focus()}
           value={value}
         />
-        : <span className={Classes.EDITABLE_TEXT_CONTENT}>
+        : <span className={classNames(Classes.EDITABLE_TEXT_CONTENT, 'ingredients-line-text')}>
           {value}
         </span>}
     </div>
@@ -124,8 +123,7 @@ function ExtraIngredientLine(props: {
         {
           [Classes.EDITABLE_TEXT_EDITING]: isEditing,
           [Classes.EDITABLE_TEXT_PLACEHOLDER]: !hasValue
-        },
-        'ingredients-line-text'
+        }
       )}
       onFocus={() => setIsEditing(true)}
       tabIndex={isEditing ? undefined : 0}

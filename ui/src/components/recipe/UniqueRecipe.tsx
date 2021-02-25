@@ -13,6 +13,7 @@ import { useMobile } from '../helpers/CustomHooks';
 import ShareButton from './ShareButton';
 import { DesktopIngredients, showDot } from './Ingredients';
 import { Helmet } from 'react-helmet';
+import DescriptionTextArea from './DescriptionTextArea';
 
 
 export function UniqueRecipe(props: IDarkThemeProps) {
@@ -134,51 +135,62 @@ export function UniqueRecipe(props: IDarkThemeProps) {
       <Header
         darkThemeProps={props}
       />
-      <div className='recipe-container'>
-        <Card className='recipe' elevation={2}>
-          {loaded && <div className='edit-container'>
-            <ShareButton onlyLink={true} />
-          </div>}
-          <H1 className='title-wrapper'>
-            {recipe.title}
-          </H1>
-          <div className='text-image-wrapper'>
-            <div className='text-wrapper'>
-              <H3>
-                <span className={classNames('category-select', loaded ? '' : Classes.SKELETON)}>
-                  {recipe.category.name}
-                </span>
-              </H3>
-              <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
-                {t('ingredients')}:
+      <div className='body'>
+        <div className='main-content unique'>
+          <div className='recipe-container'>
+            <Card className='recipe' elevation={2}>
+              {loaded && <div className='edit-container'>
+                <ShareButton onlyLink={true} />
+              </div>}
+              <H1 className='title-wrapper'>
+                {recipe.title}
+              </H1>
+              <div className='text-image-wrapper'>
+                <div className='text-wrapper'>
+                  <H3>
+                    <span className={classNames('category-select', loaded ? '' : Classes.SKELETON)}>
+                      {recipe.category.name}
+                    </span>
+                  </H3>
+                  <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
+                    {t('ingredients')}:
               </H4>
-              <DesktopIngredients
-                ingredients={recipe.ingredients}
-                loaded={loaded}
-                editable={false}
-                addIngredient={() => {}}
-                deleteIngredient={() => {}}
-                replaceIngredient={() => {}}
-              />
-            </div>
-            <ImagePart
-              recipe={recipe}
-              editable={false}
-              className='image'
-            />
-          </div>
-          <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
-            {t('description')}:
+                  <DesktopIngredients
+                    ingredients={recipe.ingredients}
+                    loaded={loaded}
+                    editable={false}
+                    addIngredient={() => { }}
+                    deleteIngredient={() => { }}
+                    replaceIngredient={() => { }}
+                  />
+                </div>
+                <ImagePart
+                  recipe={recipe}
+                  editable={false}
+                  className='image'
+                />
+              </div>
+              <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
+                {t('description')}:
           </H4>
-          {(recipe.description.trim().length > 0 || !loaded)
-            ? <div className={classNames(loaded ? '' : Classes.SKELETON, 'description')}>
-              {recipe.description}
-            </div>
-            : <div className={classNames(Classes.TEXT_MUTED, 'description')}>
-              {t('noDescription')}
-            </div>
-          }
-        </Card>
+              {/* {(recipe.description.trim().length > 0 || !loaded)
+                ? <div className={classNames(loaded ? '' : Classes.SKELETON, 'description')}>
+                  {recipe.description}
+                </div>
+                : <div className={classNames(Classes.TEXT_MUTED, 'description')}>
+                  {t('noDescription')}
+                </div>
+              } */}
+
+              <DescriptionTextArea
+                value={recipe.description}
+                editable={false}
+                placeholder={t('noDescription')}
+                className={classNames(loaded ? '' : Classes.SKELETON, 'description')}
+              />
+            </Card>
+          </div>
+        </div>
       </div>
     </>
   }

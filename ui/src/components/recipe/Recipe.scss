@@ -38,6 +38,7 @@
       margin: 10px 0;
 
       .text-wrapper {
+        min-width: 0;
         flex: 1 1 0;
         padding-right: 20px;
         .category-select {
@@ -83,9 +84,10 @@
 
     .image {
       cursor: pointer;
-      flex: 1 1 auto;
       margin: 0 20px;
       max-width: 35%;
+      flex: 1 0 30%;
+      align-self: center;
       img {
         max-width: 100%;
         max-height: 50vh;
@@ -97,9 +99,7 @@
         box-shadow: $pt-dark-elevation-shadow-3;
       }
     }
-
-    .image,
-    label {
+    .image-button {
       flex: 0 1 auto;
       align-self: center;
     }
@@ -135,8 +135,11 @@
     height: 20px;
     width: 250px;
   }
+  .ingredients-line .ingredients-line-text {
+    white-space: break-spaces;
+  }
 
-  .ingredients-line .ingredients-line-text.bp3-skeleton {
+  .ingredients-line .bp3-skeleton {
     display: inline-block;
     width: 250px;
     height: 1em;
