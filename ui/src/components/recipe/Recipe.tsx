@@ -364,7 +364,7 @@ export function Recipe(props: IDarkThemeProps) {
               noResultText={t('noCategoryFound')}
               className={classNames('category-select', Classes.TEXT_MUTED, state.loaded ? '' : Classes.SKELETON)}
               disabled={!state.editing}
-              placeholder={t('phCategory')}
+              placeholder={t('phCategoryMobile')}
               category={recipe.category}
               onCategorySelected={handleSetCategory}
             />
