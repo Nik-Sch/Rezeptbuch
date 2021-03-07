@@ -6,7 +6,7 @@ import { Route, BrowserRouter as Router, RouteProps, Redirect, Switch } from 're
 import { Classes, Card, H1, H3 } from '@blueprintjs/core';
 import { fetchUserInfo, getUserInfo } from './util/Network';
 import { LoginPage } from './components/LoginPage';
-import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
+import { usePersistentImmer, useMobile } from './components/helpers/CustomHooks';
 import { localStorageDarkTheme } from './util/StorageKeys';
 import { UniqueRecipe } from './components/recipe/UniqueRecipe';
 import { ShoppingList } from './components/ShoppingList';
@@ -68,10 +68,10 @@ function NotFound(props: IDarkThemeProps) {
 
 function App() {
 
-  const [darkTheme, setDarkTheme] = usePersistentState(false, localStorageDarkTheme);
+  const [darkTheme, setDarkTheme] = usePersistentImmer(false, localStorageDarkTheme);
   const handleThemeChange = (theme: boolean) => {
     changeThemeClass(theme);
-    setDarkTheme(theme);
+    setDarkTheme(() => theme);
   }
   useEffect(() => {
     changeThemeClass(darkTheme);

@@ -19,6 +19,7 @@ import DescriptionTextArea from './DescriptionTextArea';
 import CommentSection from './CommentSection';
 import { INavigationLink, NavigationLinks } from '../recipeList/RecipeListMenu';
 import { addShoppingItems } from '../ShoppingList';
+import { useImmer } from 'use-immer';
 
 function verifyRecipe(recipe: IRecipe): boolean {
   return recipe.title.trim() !== '' &&
@@ -34,9 +35,9 @@ export function Recipe(props: IDarkThemeProps) {
   const history = useHistory();
 
 
-  const [state, setState] = useState({ editing: id === '-1', loaded: false, dirty: false });
+  const [state, setState] = useImmer({ editing: id === '-1', loaded: false, dirty: false });
   const [recipe, setRecipe] = useState<IRecipe>(emptyRecipe);
-  const [imagesToBeDeleted, setImagesToBeDeleted] = useState<string[]>([]);
+  const [imagesToBeDeleted, setImagesToBeDeleted] = useImmer<string[]>([]);
   const [ingredientsText, setIngredientsText] = useState<string>(''); // for mobile
   const [mobileCancelIsOpen, setMobileCancelIsOpen] = useState(false);
   const [mobileDeleteIsOpen, setMobileDeleteIsOpen] = useState(false);
@@ -59,11 +60,11 @@ export function Recipe(props: IDarkThemeProps) {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (typeof id === 'undefined' || id === '-1') {
-      setState({
+      setState(() => ({
         loaded: true,
         editing: true,
         dirty: false
-      })
+      }));
       setRecipe(emptyRecipe);
       document.title = t('newRecipe');
     } else {
@@ -82,11 +83,11 @@ export function Recipe(props: IDarkThemeProps) {
         }
 
         document.title = r.title;
-        setState({
+        setState(() => ({
           editing: false,
           loaded: true,
           dirty: false
-        });
+        }));
         setRecipe(r);
         setIngredientsText(r.ingredients.reduce((previous, current, index) => {
           return index === 0 ? current : `${previous}\n${current}`;
@@ -96,7 +97,7 @@ export function Recipe(props: IDarkThemeProps) {
       recipesHandler.subscribe(handleRecipesChange);
       return () => { recipesHandler.unsubscribe(handleRecipesChange); };
     }
-  }, [id, t]);
+  }, [id, t, setState]);
 
   const saveRecipe = async () => {
     if (!verifyRecipe(recipe)) {
@@ -105,16 +106,16 @@ export function Recipe(props: IDarkThemeProps) {
     }
     if (!state.dirty) {
       AppToasterTop.show({ message: t('recipeNotModified'), intent: 'primary' })
-      setState(state => ({ ...state, editing: false }));
+      setState(draft => { draft.editing = false });
       return;
     }
-    setState(state => ({ ...state, dirty: false }));
+    setState(draft => { draft.dirty = false });
     for (const img of imagesToBeDeleted) {
       if (img !== recipe.image && img.trim() !== '') {
         await recipesHandler.deleteImage(img);
       }
     }
-    setImagesToBeDeleted([]);
+    setImagesToBeDeleted(() => []);
     let newRecipe: IRecipe = JSON.parse(JSON.stringify(recipe));
     if (mobile) {
       newRecipe.ingredients = ingredientsText.split('\n').filter(v => v.trim().length > 0);
@@ -135,7 +136,10 @@ export function Recipe(props: IDarkThemeProps) {
 
     if (await recipesHandler.updateRecipe(newRecipe) === true) {
       AppToasterTop.show({ message: t('recipeSaved'), intent: 'success' })
-      setState(state => ({ ...state, editing: false, dirty: false }));
+      setState(draft => {
+        draft.editing = false;
+        draft.dirty = false;
+      });
     } else {
       AppToasterTop.show({ message: t('recipeSaveError'), intent: 'warning' })
     }
@@ -158,10 +162,10 @@ export function Recipe(props: IDarkThemeProps) {
       setMobileCancelIsOpen(false);
     }
     if (typeof id === 'undefined' || recipe.id === -1) {
-      setState(state => ({ ...state, dirty: false }));
+      setState(draft => { draft.dirty = false });
       setTimeout(() => history.push('/'), 0);
     } else {
-      setState(state => ({ ...state, dirty: false }));
+      setState(draft => { draft.dirty = false });
       const r = recipesHandler.getRecipeOnce(recipe.id);
       if (typeof r === 'undefined') {
         console.debug('recipe not found, deleted? Dunno what to do.');
@@ -170,11 +174,11 @@ export function Recipe(props: IDarkThemeProps) {
         return;
       }
       document.title = r.title;
-      setState({
+      setState(() => ({
         editing: false,
         loaded: true,
         dirty: false
-      });
+      }));
       setRecipe(r);
       setIngredientsText(r.ingredients.reduce((previous, current, index) => {
         return index === 0 ? current : `${previous}\n${current}`;
@@ -194,25 +198,23 @@ export function Recipe(props: IDarkThemeProps) {
     }
   };
 
-  const handleSetEditable = () => setState(state => ({ ...state, editing: true }));
+  const handleSetEditable = () => setState(draft => { draft.editing = true });
   const handleSetTitle = (v: string) => {
     setRecipe(recipe => ({ ...recipe, title: v }));
-    setState(state => ({ ...state, dirty: true }));
+    setState(draft => { draft.dirty = true });
   };
   const handleSetDescription = (v: string | undefined) => {
     setRecipe(recipe => ({ ...recipe, description: v ?? '' }));
-    setState(state => ({ ...state, dirty: true }));
+    setState(draft => { draft.dirty = true });
   };
   const handleSetCategory = (category: ICategory) => {
     setRecipe(recipe => ({ ...recipe, category }));
-    setState(state => ({ ...state, dirty: true }));
+    setState(draft => { draft.dirty = true });
   };
   const handleSetImage = (image: string) => {
     setRecipe(recipe => ({ ...recipe, image }));
-    setState(state => ({ ...state, dirty: true }));
-    const deletable = imagesToBeDeleted.slice(0);
-    deletable.push(recipe.image);
-    setImagesToBeDeleted(deletable);
+    setState(draft => { draft.dirty = true });
+    setImagesToBeDeleted(draft => { draft.push(recipe.image) });
   };
 
   const navigationLinks: INavigationLink[] = [
@@ -390,7 +392,7 @@ export function Recipe(props: IDarkThemeProps) {
               placeholder={t('phIngredients')}
               onChange={(event) => {
                 setIngredientsText(event.target.value);
-                setState(state => ({ ...state, dirty: true }));
+                setState(draft => { draft.dirty = true });
               }}
             />
             : state.loaded
@@ -539,41 +541,41 @@ export function Recipe(props: IDarkThemeProps) {
                       onCategorySelected={handleSetCategory}
                     />
                   </H3>
-                    <div className='ingredients-title-wrapper'>
-                      <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
-                        {t('ingredients')}:
+                  <div className='ingredients-title-wrapper'>
+                    <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
+                      {t('ingredients')}:
                     </H4>
-                      {recipe.ingredients.length > 0 && !state.editing && <Button
-                        text={t('addToShopping')}
-                        minimal={true}
-                        intent='success'
-                        icon='add'
-                        onClick={addIngredientsToShoppingList}
-                      />}
-                    </div>
-                    <DesktopIngredients
-                      ingredients={recipe.ingredients}
-                      loaded={state.loaded}
-                      editable={state.editing}
-                      addIngredient={(...values: string[]) => {
-                        setState(state => ({ ...state, dirty: true }));
-                        const ingredients = recipe.ingredients.slice(0);
-                        ingredients.push(...values);
-                        setRecipe(recipe => ({ ...recipe, ingredients }));
+                    {recipe.ingredients.length > 0 && !state.editing && <Button
+                      text={t('addToShopping')}
+                      minimal={true}
+                      intent='success'
+                      icon='add'
+                      onClick={addIngredientsToShoppingList}
+                    />}
+                  </div>
+                  <DesktopIngredients
+                    ingredients={recipe.ingredients}
+                    loaded={state.loaded}
+                    editable={state.editing}
+                    addIngredient={(...values: string[]) => {
+                      setState(draft => { draft.dirty = true });
+                      const ingredients = recipe.ingredients.slice(0);
+                      ingredients.push(...values);
+                      setRecipe(recipe => ({ ...recipe, ingredients }));
 
-                      }}
-                      deleteIngredient={index => {
-                        setState(state => ({ ...state, dirty: true }));
-                        const ingredients = recipe.ingredients.filter((_, i) => i !== index);
-                        setRecipe(recipe => ({ ...recipe, ingredients }));
-                      }}
-                      replaceIngredient={(index, v) => {
-                        setState(state => ({ ...state, dirty: true }));
-                        const ingredients = recipe.ingredients.slice(0);
-                        ingredients[index] = v;
-                        setRecipe(recipe => ({ ...recipe, ingredients }));
-                      }}
-                    />
+                    }}
+                    deleteIngredient={index => {
+                      setState(draft => { draft.dirty = true });
+                      const ingredients = recipe.ingredients.filter((_, i) => i !== index);
+                      setRecipe(recipe => ({ ...recipe, ingredients }));
+                    }}
+                    replaceIngredient={(index, v) => {
+                      setState(draft => { draft.dirty = true });
+                      const ingredients = recipe.ingredients.slice(0);
+                      ingredients[index] = v;
+                      setRecipe(recipe => ({ ...recipe, ingredients }));
+                    }}
+                  />
                 </div>
                 <ImagePart
                   recipe={recipe}

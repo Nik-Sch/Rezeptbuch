@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import Header from "./Header";
 import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Tooltip, Text } from "@blueprintjs/core";
-import { usePersistentState, useMobile } from "./helpers/CustomHooks";
+import { usePersistentImmer, useMobile } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
 import { IDarkThemeProps } from "../App";
 import { INavigationLink, NavigationLinks } from "./recipeList/RecipeListMenu";
@@ -300,13 +300,13 @@ export function ShoppingList(props: IDarkThemeProps) {
   const mobile = useMobile();
   const [online, setOnline] = useState(navigator.onLine);
 
-  const [state, setState] = usePersistentState<IShoppingState>(defaultShoppingState, localStorageShoppingList);
+  const [state, setState] = usePersistentImmer<IShoppingState>(defaultShoppingState, localStorageShoppingList);
 
   const [synced, setSynced] = useState<SyncState>('initial-fetch');
   const setStateWithServer = useCallback((value: IShoppingState | ((state: IShoppingState) => IShoppingState)) => {
     const newState = (typeof value === 'function') ? value(state) : value;
     newState.lastModified = dayjs().toString();
-    setState(newState);
+    setState(() => newState);
     if (online) {
       setSynced('uploading');
       uploadShoppingList(newState).then(r => {
@@ -368,7 +368,7 @@ export function ShoppingList(props: IDarkThemeProps) {
             setStateWithServer(result);
           } else if (timeDiff < 0 || typeof state.lastModified !== 'string' || state.lastModified.trim() === '') {
             console.log('[ShoppingListSync] remote state is newer, applying.');
-            setState(result);
+            setState(() => result);
           } else if (timeDiff === 0) {
             console.log('[ShoppingListSync] state unchanged.');
           } else {

@@ -4,7 +4,7 @@ import { Classes, Icon, InputGroup, Button, H3, Collapse, Tooltip } from '@bluep
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { ISort, SortSelect } from '../helpers/SortSelect';
-import { useMobile, useSessionState, useOnline } from '../helpers/CustomHooks';
+import { useMobile, useSessionImmer, useOnline } from '../helpers/CustomHooks';
 import RecipeListItem from './RecipeListItem';
 import RecipeListMenu, { INavigationLink, Counts } from './RecipeListMenu';
 import Header from '../Header';
@@ -84,12 +84,12 @@ export default function RecipeList(props: IDarkThemeProps) {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [categoryCounts, setCategoryCounts] = useState<Counts>([]);
   const [users, setUsers] = useState<IUser[]>([]);
-  const [filteredCategories, setFilteredCategories] = useSessionState<ICategory[]>([], sessionStorageFilteredCategories);
-  const [filteredUsers, setFilteredUsers] = useSessionState<IUser[]>([], sessionStorageFilteredUsers);
+  const [filteredCategories, setFilteredCategories] = useSessionImmer<ICategory[]>([], sessionStorageFilteredCategories);
+  const [filteredUsers, setFilteredUsers] = useSessionImmer<IUser[]>([], sessionStorageFilteredUsers);
   const [userCounts, setUserCounts] = useState<Counts>([]);
-  const [searchString, setSearchString] = useSessionState<string>('', sessionStorageSearchString);
-  const [searchInIngredients, setSearchInIngredients] = useSessionState<boolean>(true, sessionStorageSearchInIngredients);
-  const [sortingOrder, setSortingOrder] = useSessionState<{ key: keyof IRecipe, desc: boolean }>({ key: 'date', desc: false }, sessionStorageSortingOrder);
+  const [searchString, setSearchString] = useSessionImmer<string>('', sessionStorageSearchString);
+  const [searchInIngredients, setSearchInIngredients] = useSessionImmer<boolean>(true, sessionStorageSearchInIngredients);
+  const [sortingOrder, setSortingOrder] = useSessionImmer<{ key: keyof IRecipe, desc: boolean }>({ key: 'date', desc: false }, sessionStorageSortingOrder);
   const [recipesToShow, setRecipesToShow] = useState<(IRecipe | undefined)[]>(skeletonRecipes);
   const [filterIsOpen, setFilterIsOpen] = useState(false);
   const timeout = useRef<number>();
@@ -179,18 +179,20 @@ export default function RecipeList(props: IDarkThemeProps) {
     timeout.current = window.setTimeout(() => {
       if (recipes) {
         setRecipesToShow(recipes.sort(sortRecipes).filter(filterRecipe));
-
       }
     }, mobile ? 100 : 0);
   }, [filterRecipeByCategory, filterRecipeBySearch, filterRecipeByUser, mobile, recipes, sortingOrder.desc, sortingOrder.key]);
 
 
   const handleSearchChange = (value: string) => {
-    setSearchString(value);
+    setSearchString(() => value);
   }
 
   const onSortSelected = (v: ISort, d: boolean) => {
-    setSortingOrder({ key: v.key, desc: d })
+    setSortingOrder(draft => {
+      draft.key = v.key;
+      draft.desc = d;
+    })
   };
 
   const searchClearButton = searchString.length === 0
@@ -205,15 +207,15 @@ export default function RecipeList(props: IDarkThemeProps) {
     darkModeProps={props}
     searchString={searchString}
     handleSearchChange={handleSearchChange}
-    handleSearchInIngredientsChange={v => setSearchInIngredients(v)}
+    handleSearchInIngredientsChange={v => setSearchInIngredients(() => v)}
     searchInIngredients={searchInIngredients}
-    onCategorySelected={setFilteredCategories}
+    onCategorySelected={categories => setFilteredCategories(() => categories)}
     selectedCategories={filteredCategories}
     allCategories={categories}
     categoryCounts={categoryCounts}
     userCounts={userCounts}
     sortOptions={sortOptions}
-    onUserSelected={setFilteredUsers}
+    onUserSelected={users => setFilteredUsers(() => users)}
     selectedUsers={filteredUsers}
     allUsers={users}
     onSortSelected={onSortSelected}

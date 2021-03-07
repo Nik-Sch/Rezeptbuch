@@ -11,6 +11,7 @@ import { loginToRecipes, createAccount } from "../util/Network";
 import classNames from "classnames";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { AppToasterTop } from "../util/toaster";
+import { useImmer } from "use-immer";
 
 export function LoginPage(props: IDarkThemeProps) {
   const history = useHistory();
@@ -19,8 +20,8 @@ export function LoginPage(props: IDarkThemeProps) {
   const [t] = useTranslation();
 
   const [login, setLogin] = useState(true); // 'login' | 'register'
-  const [details, setDetails] = useState({ username: '', password: '', password2: '' });
-  const [visited, setVisited] = useState({ username: false, password: false, password2: false });
+  const [details, setDetails] = useImmer({ username: '', password: '', password2: '' });
+  const [visited, setVisited] = useImmer({ username: false, password: false, password2: false });
   const usernameWarning = visited.username && details.username.trim() === '';
   const passwordWarning = visited.password && details.password.trim() === '';
   const password2Warning = visited.password2 && (details.password2.trim() === '' || details.password !== details.password2);
@@ -40,7 +41,7 @@ export function LoginPage(props: IDarkThemeProps) {
     event.preventDefault();
     if (login) {
       if (details.username.trim() === '' || details.password.trim() === '') {
-        setVisited({ username: true, password: true, password2: true });
+        setVisited(() => ({ username: true, password: true, password2: true }));
         return;
       }
       setIsSubmitting(true);
@@ -52,7 +53,7 @@ export function LoginPage(props: IDarkThemeProps) {
       }
     } else {
       if (details.username.trim() === '' || details.password.trim() === '' || details.password !== details.password2) {
-        setVisited({ username: true, password: true, password2: true });
+        setVisited(() => ({ username: true, password: true, password2: true }));
         return;
       }
       setIsSubmitting(true);
@@ -136,10 +137,10 @@ export function LoginPage(props: IDarkThemeProps) {
               value={details.username}
               intent={usernameWarning ? 'danger' : 'none'}
               disabled={isSubmitting}
-              onBlur={() => setVisited(visited => ({ ...visited, username: true }))}
+              onBlur={() => setVisited(draft => { draft.username = true })}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 const value = event.currentTarget.value;
-                setDetails(details => ({ ...details, username: value }));
+                setDetails(draft => { draft.username = value });
               }}
             />
           </FormGroup>
@@ -160,10 +161,10 @@ export function LoginPage(props: IDarkThemeProps) {
               disabled={isSubmitting}
               rightElement={lockButton}
               type={showPassword ? 'text' : 'password'}
-              onBlur={() => setVisited(visited => ({ ...visited, password: true }))}
+              onBlur={() => setVisited(draft => { draft.password = true })}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 const value = event.currentTarget.value;
-                setDetails(details => ({ ...details, password: value }))
+                setDetails(draft => { draft.password = value })
               }}
             />
           </FormGroup>
@@ -190,10 +191,10 @@ export function LoginPage(props: IDarkThemeProps) {
                   disabled={isSubmitting}
                   rightElement={lockButton2}
                   type={showPassword2 ? 'text' : 'password'}
-                  onBlur={() => setVisited(visited => ({ ...visited, password2: true }))}
+                  onBlur={() => setVisited(draft => { draft.password2 = true })}
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     const value = event.currentTarget.value;
-                    setDetails(details => ({ ...details, password2: value }))
+                    setDetails(draft => { draft.password2 = value })
                   }}
                 />
               </FormGroup>

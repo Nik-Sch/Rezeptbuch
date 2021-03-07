@@ -1,4 +1,6 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect } from 'react';
+import { useImmer } from 'use-immer';
+import { Draft } from "immer";
 import variables from '../../util/variables.scss';
 
 function getWindowDimensions() {
@@ -47,15 +49,15 @@ export function useOnline() {
   return online;
 }
 
-export function usePersistentState<T>(initialValue: T, storageKey: string): [T, Dispatch<SetStateAction<T>>] {
-  return useStoredState(window.localStorage, initialValue, storageKey);
+export function usePersistentImmer<T>(initialValue: T, storageKey: string): [T, (f: (draft: Draft<T>) => void | T) => void] {
+  return useStoredImmer(window.localStorage, initialValue, storageKey);
 }
 
-export function useSessionState<T>(initialValue: T, storageKey: string): [T, Dispatch<SetStateAction<T>>] {
-  return useStoredState(window.sessionStorage, initialValue, storageKey);
+export function useSessionImmer<T>(initialValue: T, storageKey: string): [T, (f: (draft: Draft<T>) => void | T) => void] {
+  return useStoredImmer(window.sessionStorage, initialValue, storageKey);
 }
 
-function useStoredState<T>(storage: Storage, initialValue: T, storageKey: string): [T, Dispatch<SetStateAction<T>>] {
+function useStoredImmer<T>(storage: Storage, initialValue: T, storageKey: string): [T, (f: (draft: Draft<T>) => void | T) => void] {
   let value: T;
   try {
     const item = storage.getItem(storageKey);
@@ -67,7 +69,7 @@ function useStoredState<T>(storage: Storage, initialValue: T, storageKey: string
   } catch (err) {
     value = initialValue;
   }
-  const [state, setState] = useState<T>(value);
+  const [state, setState] = useImmer<T>(value);
 
   useEffect(() => {
     storage.setItem(storageKey, JSON.stringify(state));
