@@ -23,8 +23,6 @@ services:
   api:
     build: ./api
     restart: always
-    volumes:
-      - ./api:/usr/src/app # only for debugging
     environment:
       - MYSQL_HOST=db
       - IMAGE_DIRECTORY=/usr/src/app/images
@@ -50,38 +48,18 @@ services:
   rezeptbuch:
     build: ./proxy
     container_name: rezeptbuch
-    ports:
-      - 80:80
-      - 443:443
     restart: always
-    volumes:
-      - ./selfsigned:/certs:ro
     depends_on:
       - ui
     networks:
       - rezeptbuch
-      # - system-proxy_default
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    restart: always
-    ports:
-      - 81:80
-    environment:
-      - PMA_HOST=db
-    depends_on:
-      - db
-    networks:
-      - rezeptbuch
+      - system-proxy_default
 
 volumes:
-  images:
-  db:
   redisStorage:
-
 
 networks:
   rezeptbuch:
     driver: bridge
-  # system-proxy_default:
-  #   external: true
+  system-proxy_default:
+    external: true
