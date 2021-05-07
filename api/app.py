@@ -444,7 +444,6 @@ class ImageAPI(Resource):
             return send_file(output, attachment_filename='img.jpg', mimetype='image/jpeg')
         except IOError:
             abort(404)
-        return send_from_directory(IMAGE_FOLDER, name)
 
     def delete(self, name):
         userName = session.get('userName', None)
