@@ -25,7 +25,9 @@ services:
     restart: always
     environment:
       - MYSQL_HOST=db
-      - IMAGE_DIRECTORY=/usr/src/app/images
+      - IMAGE_DIRECTORY=/usr/src/images
+    volumes:
+      - images:/usr/src/images
     env_file:
       - db.env
       - api/.env
@@ -57,6 +59,7 @@ services:
 
 volumes:
   redisStorage:
+  images:
 
 networks:
   rezeptbuch:

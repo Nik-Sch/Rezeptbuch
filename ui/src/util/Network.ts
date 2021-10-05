@@ -3,7 +3,7 @@ import { Base64 } from 'js-base64';
 import { set, get, del } from 'idb-keyval';
 import axios from 'axios';
 import { localStorageUserInfo, localStorageUserChecksum, localStorageRecipeChecksum, localStorageCommentChecksum, localStorageCategoryChecksum } from "./StorageKeys";
-import { IShoppingState as IShoppingList } from "../components/ShoppingList";
+import { IShoppingItem } from "../components/ShoppingList";
 
 const RECIPE_CACHE = 'recipes';
 const CATEGORY_CACHE = 'categories';
@@ -545,11 +545,11 @@ export async function logout() {
   }
 }
 
-export async function uploadShoppingList(items: IShoppingList) {
+export async function updateShoppingItem(items: IShoppingItem[], method: 'DELETE'|'POST'|'PUT') {
   const headers = getHeaders();
   headers.append('Content-Type', 'application/json');
   const result = await fetch('/api/shoppingList', {
-    method: 'POST',
+    method: method,
     body: JSON.stringify(items),
     headers
   });

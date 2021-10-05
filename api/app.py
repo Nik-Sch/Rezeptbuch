@@ -80,23 +80,20 @@ def status():
 
 
 def event_stream(username, exclude):
-    data = redisShoppingListDB.get(username)
-    if type(data) is bytes:
-        yield 'data: %s\n\n' % data.decode('utf-8')
-    else:
-        yield 'data: null\n\n'
+    data = redisShoppingListDB.hvals(username)
+    data = [json.loads(x) for x in data]
+    yield 'data: %s\n\n' % json.dumps(data)
     pubsub = redisShoppingListDB.pubsub()
     pubsub.subscribe(username)
-    print('starting', exclude)
+    print('starting')
     for message in pubsub.listen():
         if message['type'] == 'message':
             m = json.loads(message['data'])
-            # print(exclude, 'received', m['origin'], type(m['data'])) 
-            if m['origin'] != exclude:
-                print(exclude, 'sending')
-                yield 'data: %s\n\n' % m['data']
+            # print('pubsub', exclude, repr(m)) 
+            # if m['origin'] != exclude:
+            yield 'data: %s\n\n' % m['data']
 
-@app.route('/shoppingList', methods=['GET', 'POST'])
+@app.route('/shoppingList', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def shoppingList():
     userName = session.get('userName', None)
     if (userName != None):
@@ -106,15 +103,20 @@ def shoppingList():
             resp.headers['X-Accel-Buffering'] = 'No'
             resp.headers['Cache-Control'] = 'no-transform' # for npm dev
             return resp
-        elif request.method == 'POST':
-            string = json.dumps(request.json)
-            redisShoppingListDB.set(userName, string)
-            toPublish = {}
-            toPublish['data'] = string
-            toPublish['origin'] = session.get('id', -1)
-            # print('publishing', userName, json.dumps(toPublish))
-            redisShoppingListDB.publish(userName, json.dumps(toPublish))
-            return make_response('', 200)
+        elif request.method == 'POST' or request.method == 'PUT':
+            for item in request.json:
+                redisShoppingListDB.hset(userName, item['id'], json.dumps(item))
+        elif request.method == 'DELETE':
+            for item in request.json:
+                redisShoppingListDB.hdel(userName, item['id'])
+        data = redisShoppingListDB.hvals(userName)
+        data = [json.loads(x) for x in data]
+        toPublish = {}
+        toPublish['data'] = json.dumps(data)
+        toPublish['origin'] = session.get('id', -1)
+        # print(json.dumps(toPublish))
+        redisShoppingListDB.publish(userName, json.dumps(toPublish))
+        return make_response('', 200)
     else:
         return unauthorized()
 
@@ -395,7 +397,7 @@ class CategoryListAPI(Resource):
 
 
 # images
-IMAGE_FOLDER = './images/'
+IMAGE_FOLDER = '../images/'
 
 class ImageListAPI(Resource):
     def post(self):
