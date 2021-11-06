@@ -36,8 +36,12 @@
       // }
 
       .my-editable-text {
-        margin-right: 40px;
         flex-grow: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .my-editable-text.bp3-editable-text-editing {
+        overflow: visible;
       }
       .new-icon {
         margin-right: 10px;
