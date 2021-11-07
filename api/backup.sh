@@ -1,4 +1,5 @@
 #!/bin/sh
+echo $(date)
 cd $IMAGE_DIRECTORY
 mysqldump -h $MYSQL_HOST -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" > $IMAGE_DIRECTORY/backup.sql
 git add .
