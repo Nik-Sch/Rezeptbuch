@@ -93,7 +93,6 @@
     "semver": "6.3.0",
     "source-map-explorer": "^2.4.2",
     "style-loader": "0.23.1",
-    "svg-to-react-cli": "^1.5.0",
     "terser-webpack-plugin": "2.3.5",
     "ts-pnp": "1.1.6",
     "typescript": "^3.7.5",

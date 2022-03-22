@@ -1,0 +1,15 @@
+{
+  "folders": [
+    {
+      "path": "ui"
+    },
+    {
+      "path": "api"
+    }
+  ],
+  "settings": {
+    "i18n-ally.localesPaths": [
+      "locales"
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 
 # Stage 1 - the build process
-FROM node:13.12-alpine as build-deps
+FROM node:14.19-alpine3.15 as build-deps
 WORKDIR /usr/src/app
 # Installs latest Chromium (63) package.
 RUN apk update && apk upgrade && \

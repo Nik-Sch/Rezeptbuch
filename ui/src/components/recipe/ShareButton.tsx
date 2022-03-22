@@ -19,7 +19,7 @@ async function shareLink(link?: string) {
   }
   if ('clipboard' in navigator) {
     try {
-      await navigator.clipboard.writeText(shareLink);
+      await (navigator as any).clipboard.writeText(shareLink);
       AppToasterTop.show({ message: i18n.t('linkCopied') });
       return;
     } catch { }
