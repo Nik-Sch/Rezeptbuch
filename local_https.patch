@@ -1,0 +1,90 @@
+diff --git a/docker-compose.yml b/docker-compose.yml
+index e7d87b3..e0e6b24 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -51,28 +51,33 @@ services:
+     build: ./proxy
+     container_name: rezeptbuch
+     restart: always
++    ports:
++      - "80:80"
++      - "443:443"
+     depends_on:
+       - ui
++    volumes:
++      - ./selfsigned:/certs:ro
+     networks:
+       - rezeptbuch
+-      - system-proxy_default
++      # - system-proxy_default
+ 
+ volumes:
+   redisStorage:
+-    driver: local
+-    driver_opts:
+-      o: bind
+-      type: none
+-      device: /home/niklas/rezeptbuch/db
++    # driver: local
++    # driver_opts:
++    #   o: bind
++    #   type: none
++    #   device: /home/niklas/rezeptbuch/db
+   images:
+-    driver: local
+-    driver_opts:
+-      o: bind
+-      type: none
+-      device: /home/niklas/rezeptbuch/images
++    # driver: local
++    # driver_opts:
++    #   o: bind
++    #   type: none
++    #   device: /home/niklas/rezeptbuch/images
+ 
+ networks:
+   rezeptbuch:
+     driver: bridge
+-  system-proxy_default:
+-    external: true
++  # system-proxy_default:
++  #   external: true
+diff --git a/proxy/nginx.conf b/proxy/nginx.conf
+index 25ebbb9..a36f9f9 100644
+--- a/proxy/nginx.conf
++++ b/proxy/nginx.conf
+@@ -33,20 +33,20 @@ http {
+ 
+     server {
+         listen 80;
+-    #     return 301 https://$host$request_uri;
+-    # }
+-
+-    # server {
+-    #     listen 443 ssl http2;
+-
+-    #     ssl_certificate /certs/niklaspc.de.crt;
+-    #     ssl_certificate_key /certs/niklaspc.de.key;
+-    #     ssl_early_data on;
+-    #     ssl_prefer_server_ciphers off;
+-    #     ssl_session_timeout 1d;
+-    #     ssl_session_cache shared:SSL:50m;
+-    #     ssl_session_tickets off;
+-    #     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
++        return 301 https://$host$request_uri;
++    }
++
++    server {
++        listen 443 ssl http2;
++
++        ssl_certificate /certs/niklaspc.de.crt;
++        ssl_certificate_key /certs/niklaspc.de.key;
++        ssl_early_data on;
++        ssl_prefer_server_ciphers off;
++        ssl_session_timeout 1d;
++        ssl_session_cache shared:SSL:50m;
++        ssl_session_tickets off;
++        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+ 
+ 
+         root /var/www/html;
