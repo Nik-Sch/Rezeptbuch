@@ -1,22 +1,31 @@
 import React, { useState } from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { IDarkThemeProps } from "../App";
 import Header from "./Header";
 import { useMobile } from "./helpers/CustomHooks";
-import { Classes, Card, H1, FormGroup, InputGroup, Tooltip, Button, Intent, Callout, H4 } from "@blueprintjs/core";
+import { Classes, Card, H1, FormGroup, InputGroup, Button, Intent, Callout, H4 } from "@blueprintjs/core";
 import { useTranslation } from "react-i18next";
 
 import './LoginPage.scss';
-import { loginToRecipes, createAccount } from "../util/Network";
+import { loginToRecipes, createAccount, getUserInfo } from "../util/Network";
 import classNames from "classnames";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { AppToasterTop } from "../util/toaster";
+import { Classes as Classes2, Tooltip2 } from "@blueprintjs/popover2";
+import '@blueprintjs/popover2/src/blueprint-popover2.scss';
+import { useEffect } from "react";
 
-export function LoginPage(props: IDarkThemeProps) {
-  const history = useHistory();
-  const location = useLocation();
+export function LoginPage(props: IDarkThemeProps & {setAuthenticated: (success: boolean) => void}) {
+  const navigate = useNavigate();
   const mobile = useMobile();
   const [t] = useTranslation();
+
+  useEffect(() => {
+    if (typeof getUserInfo() !== 'undefined') {
+      props.setAuthenticated(true);
+      navigate('/');
+    }
+  });
 
   const [login, setLogin] = useState(true); // 'login' | 'register'
   const [details, setDetails] = useState({ username: '', password: '', password2: '' });
@@ -33,10 +42,7 @@ export function LoginPage(props: IDarkThemeProps) {
   const [showPassword2, setShowPassword2] = useState(false);
   const [wrongCredentials, setWrongCredentials] = useState(false);
 
-
-  const previousLocation: any = location.state || { from: { pathname: "/" } };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (login) {
       if (details.username.trim() === '' || details.password.trim() === '') {
@@ -44,57 +50,76 @@ export function LoginPage(props: IDarkThemeProps) {
         return;
       }
       setIsSubmitting(true);
-      const success = await loginToRecipes(details.username, details.password);
-      if (success) {
-        history.replace(previousLocation.from || '/');
-      } else {
-        setWrongCredentials(true);
-      }
+      loginToRecipes(details.username, details.password).then(success => {
+        if (success) {
+          props.setAuthenticated(true);
+          navigate('/', {replace: true});
+        } else {
+          setWrongCredentials(true);
+        }
+      });
     } else {
       if (details.username.trim() === '' || details.password.trim() === '' || details.password !== details.password2) {
         setVisited({ username: true, password: true, password2: true });
         return;
       }
       setIsSubmitting(true);
-      const created = await createAccount(details.username, details.password);
-      if (created) {
-        AppToasterTop.show({ message: t('accountCreated'), intent: 'success' });
-        const success = await loginToRecipes(details.username, details.password);
-        if (success) {
-          history.replace(previousLocation.from || '/');
+      createAccount(details.username, details.password).then(async created => {
+        if (created) {
+          AppToasterTop.show({ message: t('accountCreated'), intent: 'success' });
+          const success = await loginToRecipes(details.username, details.password);
+          if (success) {
+            props.setAuthenticated(true);
+            navigate('/', {replace: true});
+          } else {
+            AppToasterTop.show({ message: t('accountError'), intent: 'danger' })
+          }
         } else {
-          AppToasterTop.show({ message: t('accountError'), intent: 'danger' })
+          AppToasterTop.show({ message: t('accountErrorExists'), intent: 'warning' })
         }
-      } else {
-        AppToasterTop.show({ message: t('accountErrorExists'), intent: 'warning' })
-      }
+      });
     }
     setIsSubmitting(false);
   }
 
   const lockButton = (
-    <Tooltip content={`${showPassword ? "Hide" : "Show"} Password`} disabled={isSubmitting}>
+    <Tooltip2
+    content={`${showPassword ? "Hide" : "Show"} Password`}
+    disabled={isSubmitting}
+    position='right'
+    popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+    renderTarget={({isOpen, ref, ...tooltipProps}) => (
       <Button
+        {...tooltipProps}
+        elementRef={ref as any}
         icon={showPassword ? "unlock" : "lock"}
         intent={Intent.WARNING}
         minimal={true}
         disabled={isSubmitting}
         onClick={() => setShowPassword(!showPassword)}
         tabIndex={-1}
-      />
-    </Tooltip>
+      />)}
+    />
   );
   const lockButton2 = (
-    <Tooltip content={`${showPassword2 ? "Hide" : "Show"} Password`} disabled={isSubmitting}>
+    <Tooltip2
+    content={`${showPassword2 ? "Hide" : "Show"} Password`}
+    popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+    disabled={isSubmitting}
+    position='right'
+    renderTarget={({isOpen, ref, ...tooltipProps}) => (
       <Button
-        icon={showPassword2 ? "unlock" : "lock"}
+        {...tooltipProps}
+        elementRef={ref as any}
+        icon={showPassword ? "unlock" : "lock"}
         intent={Intent.WARNING}
         minimal={true}
         disabled={isSubmitting}
         onClick={() => setShowPassword2(!showPassword2)}
         tabIndex={-1}
+      />)}
       />
-    </Tooltip>
+
   );
 
   return <>
@@ -102,7 +127,7 @@ export function LoginPage(props: IDarkThemeProps) {
       darkThemeProps={props}
       className='login-header'
     />
-    <div className='card-wrapper'>
+    <div className='card-wrapper page'>
       {wrongCredentials && <Callout intent='danger' className='error-callout'>
         <H4 className='error-callout-content'>
           {t('wrongCredentials')}

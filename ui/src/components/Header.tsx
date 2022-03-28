@@ -75,7 +75,7 @@ export default function Header(props: IHeaderProps) {
     </>
   } else {
     return <header className={classNames('header-wrapper', Classes.FIXED_TOP, Classes.NAVBAR)}>
-      <div className={classNames(props.className, 'Desktop-header')}>
+      <div className={classNames(props.className, 'desktop-header')}>
         <Link to='/'>
           <img
             src={props.darkThemeProps.darkTheme ? logoDark : logo}

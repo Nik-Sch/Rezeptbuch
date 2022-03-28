@@ -1,7 +1,7 @@
 @import "../util/variables.scss";
 @import "~@blueprintjs/core/lib/scss/variables";
 
-body {
+.page {
   padding-top: 85px;
   @media only screen and (max-width: $mobile-width), (max-height: $mobile-width) {
     padding-top: $pt-navbar-height;
@@ -12,7 +12,7 @@ body {
   height: 85px;
   box-shadow: none;
 
-  .Desktop-header {
+  .desktop-header {
     max-width: 1280px;
     margin: auto;
     margin-top: 5px;
@@ -70,11 +70,11 @@ body {
     .recipe-search {
       margin-left: 5px;
 
-      .bp3-input {
+      .#{$bp-ns}-input {
         transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
         width: 45vw;
       }
-      .bp3-input:focus {
+      .#{$bp-ns}-input:focus {
         width: 55vw;
       }
     }
@@ -96,7 +96,7 @@ body {
       display: flex;
       align-items: center;
 
-      .bp3-switch {
+      .#{$bp-ns}-switch {
         margin-bottom: 0;
       }
 

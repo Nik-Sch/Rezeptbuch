@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Callout, H4, Button } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { observeSubscription, deleteCallback, subscribeUser } from '../pushServiceWorker';

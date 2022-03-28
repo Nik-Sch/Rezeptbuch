@@ -1,3 +1,5 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
 .shopping-list-wrapper {
   margin: 20px 15px;
 
@@ -40,7 +42,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .my-editable-text.bp3-editable-text-editing {
+      .my-editable-text.#{$bp-ns}-editable-text-editing {
         overflow: visible;
       }
       .new-icon {
@@ -88,7 +90,7 @@
   }
 }
 
-.bp3-dark .shopping-list-status-element .my-spinner:after {
+.#{$bp-ns}-dark .shopping-list-status-element .my-spinner:after {
   border: 2.3px solid #fff;
   border-color: #fff transparent #fff transparent;
 

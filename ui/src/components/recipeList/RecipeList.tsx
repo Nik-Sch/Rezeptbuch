@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Network';
-import { Classes, Icon, InputGroup, Button, H3, Collapse, Tooltip } from '@blueprintjs/core';
+import { Classes, Icon, InputGroup, Button, H3, Collapse, Card } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { ISort, SortSelect } from '../helpers/SortSelect';
@@ -19,6 +19,7 @@ import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionSt
 import { AppToasterBottom } from '../../util/toaster';
 import i18n from '../../util/i18n';
 import { WindowScroller, List } from 'react-virtualized';
+import { Tooltip2 } from '@blueprintjs/popover2';
 
 const skeletonRecipes = [undefined, undefined, undefined, undefined];
 
@@ -259,23 +260,26 @@ export default function RecipeList(props: IDarkThemeProps) {
     <div className='body'>
       {!mobile && recipeListMenu}
       <div className='main-content'>
-        {!mobile && <div className='header'>
-          <Tooltip
+        {!mobile && <Card className='header' elevation={2}>
+          <Tooltip2
             disabled={online && hasWriteAccess}
             content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWrite')}
             position='bottom'
-          >
-            <Link
-              to={(online && hasWriteAccess) ? '/recipes/new' : ''}
-              className={classNames('add-recipe', Classes.BUTTON, Classes.INTENT_PRIMARY, (online && hasWriteAccess) ? '' : Classes.DISABLED)}
-              role='button'
-            >
-              <Icon icon='add' />
-              <span className={Classes.BUTTON_TEXT}>
-                {t('newRecipe')}
-              </span>
-            </Link>
-          </Tooltip>
+            renderTarget={({ isOpen, ref, ...tooltipProps }) => (
+              <Link
+                {...tooltipProps}
+                ref={ref}
+                to={(online && hasWriteAccess) ? '/recipes/new' : ''}
+                className={classNames('add-recipe', Classes.BUTTON, Classes.INTENT_PRIMARY, (online && hasWriteAccess) ? '' : Classes.DISABLED)}
+                role='button'
+              >
+                <Icon icon='add' />
+                <span className={Classes.BUTTON_TEXT}>
+                  {t('newRecipe')}
+                </span>
+              </Link>
+            )}
+          />
 
           <SortSelect
             defaultDesc={false}
@@ -284,7 +288,7 @@ export default function RecipeList(props: IDarkThemeProps) {
             items={sortOptions}
             onSelected={onSortSelected}
           />
-        </div>}
+        </Card>}
         {isNotificationAvailable() && <AskForNotifications />}
         {recipes.length === 0 && recipesToShow.length === 0 &&
           <H3 className='error'>

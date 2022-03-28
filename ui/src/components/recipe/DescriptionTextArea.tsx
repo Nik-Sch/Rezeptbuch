@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef, KeyboardEventHandler, useCallback } from "react";
 import recipesHandler, { IRecipe } from "../../util/Network";
 import { IQueryListRendererProps, IItemRendererProps, QueryList, ItemPredicate } from "@blueprintjs/select";
-import { ITextAreaProps, Classes, MenuItem, Popover, Position, Keys, Tooltip } from "@blueprintjs/core";
+import { TextAreaProps, Classes, MenuItem, Position } from "@blueprintjs/core";
 import classNames from "classnames";
 
 import './DescriptionTextArea.scss';
 import { useMobile } from "../helpers/CustomHooks";
 import { Link } from "react-router-dom";
+import { Popover2, Tooltip2 } from "@blueprintjs/popover2";
 
-interface IDescriptionTextAreaProps extends ITextAreaProps {
+interface IDescriptionTextAreaProps extends TextAreaProps {
   changeValue?: (v: string | undefined) => void;
   value?: string;
   editable: boolean;
@@ -155,18 +156,13 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
   }
 
   const handleTextAreaKeyPress: KeyboardEventHandler<HTMLTextAreaElement> = event => {
-    const { which } = event;
-    if (which === Keys.ESCAPE) {
+    console.log(event);
+    const { key } = event;
+    if (key === 'Escape') {
       setIsOpen(false);
       event.preventDefault();
-    } else if (which === Keys.ENTER) {
+    } else if (key === 'Enter') {
       event.preventDefault();
-    }
-  }
-
-  const handlePopoverInteraction = (b: boolean) => {
-    if (!b) {
-      setIsOpen(false);
     }
   }
 
@@ -208,9 +204,9 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
           <em>{matchedRecipe.category.name}</em>
         </>;
         tokens.push(
-        <Tooltip key={lastIndex} content={tooltipContent} >
-          <Link to={`/recipes/${match[1]}`}>{match[0]}</Link>
-        </Tooltip>
+          <Tooltip2 key={lastIndex} content={tooltipContent} position='top'>
+            <Link to={`/recipes/${match[1]}`}>{match[0]}</Link>
+          </Tooltip2>
         );
       } else {
         tokens.push(match[0]);
@@ -225,17 +221,21 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
 
 
   const renderer = (listProps: IQueryListRendererProps<IRecipe>) => {
-    return <Popover
-      autoFocus={true}
-      enforceFocus={true}
+    return <Popover2
+      autoFocus={false}
+      enforceFocus={false}
       isOpen={isOpen}
       position={Position.BOTTOM_LEFT}
       className={classNames(listProps.className)}
-      onInteraction={handlePopoverInteraction}
       popoverClassName={classNames('description-select-popover')}
       onOpened={handlePopoverOpened}
       onClosing={() => textArea.current?.focus()}
       minimal={true}
+      content={
+        <div onKeyDown={listProps.handleKeyDown} onKeyUp={listProps.handleKeyUp}>
+          {listProps.itemList}
+        </div>
+      }
     >
       <div
         style={{ width: '100%' }}
@@ -253,10 +253,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
           style={{ height: textAreaHeight }}
         />
       </div>
-      <div onKeyDown={listProps.handleKeyDown} onKeyUp={listProps.handleKeyUp}>
-        {listProps.itemList}
-      </div>
-    </Popover>
+    </Popover2>
   }
 
   const updateHeight = useCallback(() => {
@@ -274,7 +271,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
         // line height could be 0 if the isNaN block from getLineHeight kicks in
         // scrollHeight = clamp(scrollHeight, minLines * lineHeight, maxLines * lineHeight);
       }
-       // at least about 3 lines
+      // at least about 3 lines
       let lineHeightBoundary = parentElement ? getLineHeight(parentElement) * 3 : 0;
       if (mobile) { // plus 20px padding for mobile
         lineHeightBoundary += 20;
@@ -284,7 +281,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
       scrollHeight = Math.max(scrollHeight,
         getFontSize(contentElement.current) + 1,
         lineHeightBoundary);
-      
+
       // IE11 & Edge needs a small buffer so text does not shift prior to resizing
       // if (Browser.isEdge()) {
       //   scrollWidth += BUFFER_WIDTH_EDGE;

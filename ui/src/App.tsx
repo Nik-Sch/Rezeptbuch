@@ -1,17 +1,19 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import './App.scss';
 import RecipeList from './components/recipeList/RecipeList';
 import { Recipe } from './components/recipe/Recipe';
-import { Route, BrowserRouter as Router, RouteProps, Redirect, Switch } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes, Navigate } from 'react-router-dom';
 import { Classes, Card, H1, H3 } from '@blueprintjs/core';
 import { fetchUserInfo, getUserInfo } from './util/Network';
 import { LoginPage } from './components/LoginPage';
 import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
 import { localStorageDarkTheme } from './util/StorageKeys';
-import { UniqueRecipe } from './components/recipe/UniqueRecipe';
 import { ShoppingList } from './components/ShoppingList';
 import Header from './components/Header';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
+import { UniqueRecipe } from './components/recipe/UniqueRecipe';
+import { Helmet } from 'react-helmet';
 
 function changeThemeClass(darkTheme: boolean) {
   if (darkTheme) {
@@ -24,26 +26,6 @@ function changeThemeClass(darkTheme: boolean) {
 export interface IDarkThemeProps {
   darkTheme: boolean;
   onDarkThemeChanged: (theme: boolean) => void;
-}
-
-function PrivateRoute({ children, ...rest }: RouteProps) {
-  return (
-    <Route
-      {...rest}
-      render={({ location }) =>
-        typeof getUserInfo() !== 'undefined' ? (
-          children
-        ) : (
-            <Redirect
-              to={{
-                pathname: "/login",
-                state: { from: location }
-              }}
-            />
-          )
-      }
-    />
-  );
 }
 
 function NotFound(props: IDarkThemeProps) {
@@ -77,36 +59,54 @@ function App() {
     changeThemeClass(darkTheme);
   }, [darkTheme]);
 
+  const [authenticated, setAuthenticated] = useState(typeof getUserInfo() !== 'undefined');
   useEffect(() => {
-    fetchUserInfo(); // just make sure to always check the status
+    (async () => {
+      const result = await fetchUserInfo(); // just make sure to always check the status
+      setAuthenticated(typeof result !== 'undefined');
+    })();
   }, []);
   const mobile = useMobile();
 
   const routes = [
-    { path: '/', Component: RecipeList, R: PrivateRoute },
-    { path: '/recipes/:id', Component: Recipe, R: PrivateRoute },
-    { path: '/shoppingList', Component: ShoppingList, R: PrivateRoute },
-    { path: '/uniqueRecipes/:id', Component: UniqueRecipe, R: Route },
-    { path: '/login', Component: LoginPage, R: Route },
-    { path: undefined, Component: NotFound, R: Route },
+    { path: '/', Component: RecipeList, priv: true },
+    { path: '/recipes/:id', Component: Recipe, priv: true },
+    { path: '/shoppingList', Component: ShoppingList, priv: true },
+    { path: '/uniqueRecipes/:id', Component: UniqueRecipe, priv: false },
+    { path: '*', Component: NotFound, priv: false },
   ]
 
   return (
     <div className={mobile ? 'mobile' : ''}>
+    <Helmet>
+      <meta name="color-scheme" content={darkTheme ? 'dark' : 'light'} />
+    </Helmet>
       <Router>
-        <Switch>
-          {routes.map(({ path, Component, R }) => (
-            <R key={path || 'undefined'} exact path={path}>
-              <div className='page'>
-                <Component
-                  darkTheme={darkTheme}
-                  onDarkThemeChanged={handleThemeChange}
-                />
-              </div>
-            </R>
+        <Routes>
+          <Route
+            path='/login'
+            element={
+              <LoginPage
+                darkTheme={darkTheme}
+                onDarkThemeChanged={handleThemeChange}
+                setAuthenticated={(success) => setAuthenticated(success)}
+              />
+            }
+          />
+          {routes.map(({ path, Component, priv }) => (
+            <Route
+              key={path || 'undefined'}
+              path={path}
+              element={priv && !authenticated
+                ? <Navigate to='/login' />
+                : <div className='page'>
+                  <Component
+                    darkTheme={darkTheme}
+                    onDarkThemeChanged={handleThemeChange}
+                  />
+                </div>} />
           ))}
-          {/* <Redirect to='404' /> */}
-        </Switch>
+        </Routes>
       </Router>
     </div>
   );

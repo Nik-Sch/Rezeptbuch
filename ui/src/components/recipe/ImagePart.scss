@@ -1,17 +1,17 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
-.bp3-dialog.image-dialog {
+.#{$bp-ns}-dialog.image-dialog {
   width: unset;
   padding: 5px 5px;
   margin: 0;
-  .bp3-dialog-body {
+  .#{$bp-ns}-dialog-body {
     max-width: calc(100vw - 85px);
     max-height: calc(100vh - 85px);
     border-radius: 6px;
   }
 }
 
-.bp3-dialog.image-dialog .mobile-image{
+.#{$bp-ns}-dialog.image-dialog .mobile-image{
   max-width: calc(100vw - 20px);
   max-height: calc(100vh - 20px);
   border-radius: 6px;

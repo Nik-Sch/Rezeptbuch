@@ -1,6 +1,6 @@
 import { Select, IItemRendererProps } from '@blueprintjs/select';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, MenuItem, ButtonGroup, Classes } from '@blueprintjs/core';
 import { IRecipe } from '../../util/Network';
 import classNames from 'classnames';

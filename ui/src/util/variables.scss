@@ -1,11 +1,15 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
 $mobile-width: 700px;
 // $background-dark: hsl(206, 6%, 14%);
 // $background-dark-card: hsl(206, 10%, 18%);
-$background-dark: #293742;
-$background-dark-card: #30404d;
+// $background-dark: #293742;
+$background-dark-card: $dark-gray4 !default;
+$content-background-color: $light-gray5;
+$dark-content-background-color: $dark-gray3;
 
 :export {
   mobileWidth: $mobile-width;
-  backgroundDark: $background-dark;
-  backgroundDarkCard: $background-dark-card;
+  // backgroundDark: $background-dark;
+  // backgroundDarkCard: $background-dark-card;
 }

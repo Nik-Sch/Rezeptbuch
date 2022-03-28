@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import Header from "./Header";
-import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Tooltip, Text } from "@blueprintjs/core";
+import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text } from "@blueprintjs/core";
 import { usePersistentState, useMobile } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
 import { IDarkThemeProps } from "../App";
@@ -14,7 +14,7 @@ import { useDrag, useDrop, DropTargetMonitor, DndProvider, XYCoord } from 'react
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import update from 'immutability-helper';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface IShoppingItem {
   text: string;
@@ -30,7 +30,7 @@ interface IItemProps {
   deleteElement: (elem: IShoppingItem) => void;
   index: number;
   moveCard: (dragIndex: number, hoverIndex: number) => void;
-  dndFinised: () => void;
+  dndFinished: () => void;
 }
 
 function NewShoppingListItem(props: {
@@ -131,7 +131,7 @@ interface DragItem {
 const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
   const ref = useRef<HTMLDivElement>(null);
   const type = props.item.checked ? 'checked' : 'notChecked';
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<DragItem, void>(() => ({
     accept: type,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       if (!ref.current) {
@@ -155,14 +155,15 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
       props.moveCard(dragIndex, hoverIndex);
       item.index = hoverIndex;
     }
-  });
+  }));
   const [{ isDragging }, drag] = useDrag({
-    item: { type, id: props.item.id, index: props.index },
-    collect: (monitor: any) => ({
+    type,
+    item: () => ({ id: props.item.id, index: props.index }),
+    collect: (monitor) => ({
       isDragging: monitor.isDragging()
     }),
     end: () => {
-      props.dndFinised();
+      props.dndFinished();
     }
   });
   // drag(drop(ref));
@@ -182,9 +183,9 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
     setIsEditing(false);
   }
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.which === Keys.ENTER) {
+    if (e.key === 'Enter') {
       handleConfirm(true);
-    } else if (e.which === Keys.ESCAPE) {
+    } else if (e.key === 'Escape') {
       setIsEditing(false);
       setText(props.item.text);
     }
@@ -309,6 +310,21 @@ export function ShoppingList(props: IDarkThemeProps) {
 
   const [synced, setSynced] = useState<SyncState>('initial-fetch');
 
+  const [updateQueue, setUpdateQueue] = useState<{
+    items: IShoppingItem[],
+    method: 'DELETE' | 'POST' | 'PUT'
+  }[]>([]);
+
+  const updateItems = useCallback(async (items: IShoppingItem[], method: 'DELETE' | 'POST' | 'PUT') => {
+    if (online) {
+      setSynced('uploading');
+      await updateShoppingItem(items, method);
+      setSynced('synced');
+    } else {
+      setUpdateQueue(updateQueue.concat({ items, method }));
+    }
+  }, [online, updateQueue]);
+
   // itemsToBeAdded
   useEffect(() => {
     if (itemsToBeAdded.length > 0) {
@@ -323,22 +339,28 @@ export function ShoppingList(props: IDarkThemeProps) {
       });
       itemsToBeAdded.splice(0, itemsToBeAdded.length);
       (async () => {
-        setSynced('uploading');
-        await updateShoppingItem(items, 'POST');
-        setSynced('synced');
+        await updateItems(items, 'POST');
         // comes over the sse
         // setState({ ...state, items: state.items.concat(items) });
       })();
-      
+
     }
-  }, [state]);
+  }, [state, updateItems]);
 
   // online
   useEffect(() => {
-    const handle = () => {
+    const handle = async () => {
       setOnline(navigator.onLine);
       if (!navigator.onLine) {
         setSynced('offline');
+      } else if (updateQueue.length > 0) {
+        setSynced('uploading');
+        let element = updateQueue.shift();
+        while (typeof element !== 'undefined') {
+          await updateShoppingItem(element.items, element.method);
+          element = updateQueue.shift();
+        }
+        setSynced('synced');
       }
     }
 
@@ -348,7 +370,7 @@ export function ShoppingList(props: IDarkThemeProps) {
       window.removeEventListener('online', handle);
       window.removeEventListener('offline', handle);
     }
-  }, []);
+  }, [updateQueue]);
 
   // sse
   useEffect(() => {
@@ -360,7 +382,7 @@ export function ShoppingList(props: IDarkThemeProps) {
         const result: IShoppingItem[] | null = JSON.parse(v.data);
         console.log("sse message: ", v);
         if (result) {
-          setState(state => ({...state, items: result}));
+          setState(state => ({ ...state, items: result }));
         }
         setSynced('synced');
       };
@@ -380,7 +402,7 @@ export function ShoppingList(props: IDarkThemeProps) {
     } else {
       setSynced('offline');
     }
-  }, [online]);
+  }, [online, setState]);
 
   const navigationLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes') },
@@ -399,40 +421,37 @@ export function ShoppingList(props: IDarkThemeProps) {
       newPosition = state.items.filter(v => v.checked).reduce((p, v) => Math.max(p, v.position), 0) + 1;
     }
     const newItem = update(changedItem, {
-      position: {$set: newPosition}
+      position: { $set: newPosition }
     });
-    setState({...state, items: state.items.map(v => v.id === newItem.id ? newItem : v)});
+    setState({ ...state, items: state.items.map(v => v.id === newItem.id ? newItem : v) });
     (async () => {
-      setSynced('uploading');
-      await updateShoppingItem([newItem], 'PUT');
-      setSynced('synced');
+      await updateItems([newItem], 'PUT');
     })();
-      //   notChecked[oldElemIndexNotChecked] = newItem;
-      //   if (shouldRefocus && notCheckedRefs[oldElemIndexNotChecked + 1]) {
-      //     notCheckedRefs[oldElemIndexNotChecked + 1].focus();
-      //   }
-      // }
-      // if (oldElemIndexChecked !== -1) {
-      //   checked[oldElemIndexChecked] = newItem;
-      //   if (shouldRefocus && checkedRefs[oldElemIndexChecked + 1]) {
-      //     checkedRefs[oldElemIndexChecked + 1].focus();
-      //   }
-      // }
+    //   notChecked[oldElemIndexNotChecked] = newItem;
+    //   if (shouldRefocus && notCheckedRefs[oldElemIndexNotChecked + 1]) {
+    //     notCheckedRefs[oldElemIndexNotChecked + 1].focus();
+    //   }
+    // }
+    // if (oldElemIndexChecked !== -1) {
+    //   checked[oldElemIndexChecked] = newItem;
+    //   if (shouldRefocus && checkedRefs[oldElemIndexChecked + 1]) {
+    //     checkedRefs[oldElemIndexChecked + 1].focus();
+    //   }
+    // }
   };
 
   const deleteElement = (item: IShoppingItem) => {
     setState({ ...state, items: state.items.filter(v => v.id !== item.id) });
     (async () => {
-      setSynced('uploading');
-      await updateShoppingItem([item], 'DELETE');
-      setSynced('synced')
+      await updateItems([item], 'DELETE');
     })();
   };
 
-  const moveCardNotChecked = useCallback((dragIndex: number, hoverIndex: number) => {
-    const list = state.items.filter(v => !v.checked).sort((v, w) => v.position - w.position);
-    const dragItem = list[dragIndex];
-    const newItems = update(list, {
+  const moveCardNotChecked = (dragIndex: number, hoverIndex: number) => {
+    setState(state => {
+      const list = state.items.filter(v => !v.checked).sort((v, w) => v.position - w.position);
+      const dragItem = list[dragIndex];
+      const newItems = update(list, {
         $splice: [
           [dragIndex, 1],
           [hoverIndex, 0, dragItem]
@@ -443,25 +462,28 @@ export function ShoppingList(props: IDarkThemeProps) {
           item.position = i;
         }
       });
-      setState({...state, items: state.items.filter(v => v.checked).concat(newItems)});
-  }, [state]);
+      return { ...state, items: state.items.filter(v => v.checked).concat(newItems) }
+    });
+  };
 
-  const moveCardChecked = useCallback((dragIndex: number, hoverIndex: number) => {
-    const list = state.items.filter(v => v.checked).sort((v, w) => v.position - w.position);
-    const dragItem = list[dragIndex];
-    const newItems = update(list, {
-      $splice: [
-        [dragIndex, 1],
-        [hoverIndex, 0, dragItem]
-      ]
+  const moveCardChecked = (dragIndex: number, hoverIndex: number) => {
+    setState(state => {
+      const list = state.items.filter(v => v.checked).sort((v, w) => v.position - w.position);
+      const dragItem = list[dragIndex];
+      const newItems = update(list, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, dragItem]
+        ]
+      });
+      newItems.forEach((item, i) => {
+        if (item.position !== i) {
+          item.position = i;
+        }
+      });
+      return { ...state, items: state.items.filter(v => !v.checked).concat(newItems) }
     });
-    newItems.forEach((item, i) => {
-      if (item.position !== i) {
-        item.position = i;
-      }
-    });
-    setState({ ...state, items: state.items.filter(v => !v.checked).concat(newItems) });
-  }, [state]);
+  };
 
   const statusElement = <div
     className={classNames('shopping-list-status-element',
@@ -513,8 +535,8 @@ export function ShoppingList(props: IDarkThemeProps) {
         intent='warning'
         iconSize={24}
         onClick={() => {
-            updateShoppingItem(state.items, 'DELETE');
           setState({ ...state, items: [] });
+          updateItems(state.items, 'DELETE');
         }}
       />
     </Header>
@@ -535,11 +557,7 @@ export function ShoppingList(props: IDarkThemeProps) {
               intent='warning'
               onClick={() => {
                 setState({ ...state, items: [] });
-                (async () => {
-                  setSynced('uploading');
-                  await updateShoppingItem(state.items, 'DELETE');
-                  setSynced('synced');
-                })();
+                updateItems(state.items, 'DELETE');
               }}
             />
           </div>}
@@ -553,13 +571,7 @@ export function ShoppingList(props: IDarkThemeProps) {
                   deleteElement={deleteElement}
                   updateElement={updateElement}
                   moveCard={moveCardNotChecked}
-                  dndFinised={() => {
-                    (async () => {
-                      setSynced('uploading');
-                      await updateShoppingItem(state.items, 'PUT');
-                      setSynced('synced');
-                    })();
-                  }}
+                  dndFinished={() => updateItems(state.items, 'PUT')}
                   index={index}
                   ref={(v: HTMLDivElement) => {
                     if (v) {
@@ -581,11 +593,7 @@ export function ShoppingList(props: IDarkThemeProps) {
                   };
                 });
                 setState(state => ({ ...state, items: state.items.concat(items) }));
-                (async () => {
-                  setSynced('uploading');
-                  await updateShoppingItem(items, 'POST');
-                  setSynced('synced');
-                })();
+                updateItems(items, 'POST');
               }}
             />
             {state.items.filter(v => v.checked).length > 0 && !mobile && <Divider />}
@@ -606,13 +614,7 @@ export function ShoppingList(props: IDarkThemeProps) {
                     updateElement={updateElement}
                     deleteElement={deleteElement}
                     moveCard={moveCardChecked}
-                    dndFinised={() => {
-                      (async () => {
-                        setSynced('uploading');
-                        await updateShoppingItem(state.items, 'PUT');
-                        setSynced('synced');
-                      })();
-                    }}
+                    dndFinished={() => updateItems(state.items, 'PUT')}
                     index={index}
                     ref={(v: HTMLDivElement) => {
                       if (v) {

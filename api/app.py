@@ -9,7 +9,7 @@ from requests.auth import HTTPDigestAuth
 from datetime import timedelta
 import requests
 import hashlib
-from PIL import Image
+from PIL import Image, ExifTags
 from flask_session import Session
 from pywebpush import webpush
 from uuid import uuid4
@@ -418,7 +418,11 @@ class ImageListAPI(Resource):
                     fb = file.read(65536)
                 name = hash.hexdigest() + '.jpg'
                 jpg = Image.open(file).convert('RGB')
-                jpg.save(IMAGE_FOLDER + name)
+                try:
+                    exif = jpg.info['exif']
+                    jpg.save(IMAGE_FOLDER + name, exif=exif)
+                except:
+                    jpg.save(IMAGE_FOLDER + name)
                 response = jsonify({'name': name})
                 response.status_code = 201
                 response.autocorrect_location_header = False
@@ -441,7 +445,10 @@ class ImageAPI(Resource):
             im = Image.open(IMAGE_FOLDER + name)
             im.thumbnail((w, h), Image.ANTIALIAS)
             output = io.BytesIO()
-            im.save(output, format='JPEG')
+            try:
+                im.save(output, format='JPEG', exif=im.info['exif'])
+            except:
+                im.save(output, format='JPEG')
             output.seek(0)
             return send_file(output, attachment_filename='img.jpg', mimetype='image/jpeg')
         except IOError:

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Classes, Button, Popover, Dialog, ProgressBar, Intent, H5 } from '@blueprintjs/core';
+import { Classes, Button, Dialog, ProgressBar, Intent, H5 } from '@blueprintjs/core';
 import { MyImage } from '../helpers/Image';
 import { AppToasterTop } from '../../util/toaster';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import './ImagePart.scss'
 import { useMobile, useWindowDimensions } from '../helpers/CustomHooks';
 import recipesHandler, { IRecipe } from '../../util/Network';
+import { Classes as Classes2, Popover2 } from '@blueprintjs/popover2';
 
 export interface IImagePartProps {
   recipe: IRecipe,
@@ -23,6 +24,7 @@ export default function ImagePart(props: IImagePartProps) {
   const { width, height } = useWindowDimensions();
 
   const [showImage, setShowImage] = useState<boolean>(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [fileSelected, setFileSelected] = useState<boolean>(false);
   const [uploadImageText, setUploadImageText] = useState<string>();
 
@@ -44,6 +46,7 @@ export default function ImagePart(props: IImagePartProps) {
   }
 
   const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsPopoverOpen(false);
     setFileSelected(true);
     if (event.target.files) {
       const uploadToastKey = AppToasterTop.show(renderUploadProgress(0));
@@ -107,40 +110,53 @@ export default function ImagePart(props: IImagePartProps) {
       </div>
     } else {
       return <div className={props.className}>
-        <Popover
-          wrapperTagName='div'
-          popoverClassName={Classes.POPOVER_CONTENT_SIZING}
-          interactionKind='hover'
+        <Popover2
+          // wrapperTagName='div'
+          // usePortal={false}
+          popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+          interactionKind='click'
+          onInteraction={(newState) => {
+            if (newState) {
+              setIsPopoverOpen(true);
+            } else {
+              setIsPopoverOpen(false);
+            }
+          }}
           position='left'
+          isOpen={isPopoverOpen}
+          content={
+            <div>
+              <H5>{t('editImageTitle')}</H5>
+              <p>{t('editImageDescription')}</p>
+              <div className='popover-edit-image'>
+                <MyFileInput
+                  className='popover-left file-input'
+                  text={uploadImageText}
+                  onInputChange={handleFileInputChange}
+                  hasSelection={fileSelected}
+                  icon='edit'
+                />
+                <Button
+                  text={t('delete')}
+                  intent='danger'
+                  rightIcon='delete'
+                  large={false}
+                  className='delete-image'
+                  onClick={handleDeleteImageClick}
+                />
+              </div>
+            </div>
+          }
         >
           <MyImage
             size={height / 2}
             fallback={false}
             recipe={props.recipe}
+            imageProps={{
+              onMouseOver: () => setIsPopoverOpen(true)
+            }}
           />
-
-          <div>
-            <H5>{t('editImageTitle')}</H5>
-            <p>{t('editImageDescription')}</p>
-            <div className='popover-edit-image'>
-              <MyFileInput
-                className='popover-left file-input'
-                text={uploadImageText}
-                onInputChange={handleFileInputChange}
-                hasSelection={fileSelected}
-                icon='edit'
-              />
-              <Button
-                text={t('delete')}
-                intent='danger'
-                rightIcon='delete'
-                large={false}
-                className='delete-image'
-                onClick={handleDeleteImageClick}
-              />
-            </div>
-          </div>
-        </Popover>
+        </Popover2>
       </div>
     }
   } else {

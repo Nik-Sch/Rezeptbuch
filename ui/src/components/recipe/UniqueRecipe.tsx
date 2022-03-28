@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { IRecipe, emptyRecipe, fetchUniqueRecipe } from '../../util/Network';
 import { H1, Classes, H3, Card, H4, Icon, H2 } from '@blueprintjs/core';

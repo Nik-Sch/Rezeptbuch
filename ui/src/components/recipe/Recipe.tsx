@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useHistory, Prompt } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import recipesHandler, { IRecipe, ICategory, emptyRecipe, getUserInfo } from '../../util/Network';
-import { H1, EditableText, Classes, Button, H3, Card, H5, H4, ButtonGroup, Popover, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton, Tooltip } from '@blueprintjs/core';
+import { H1, EditableText, Classes, Button, H3, Card, H5, H4, ButtonGroup, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton } from '@blueprintjs/core';
 
 import { AppToasterTop } from '../../util/toaster';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,8 @@ import DescriptionTextArea from './DescriptionTextArea';
 import CommentSection from './CommentSection';
 import { INavigationLink, NavigationLinks } from '../recipeList/RecipeListMenu';
 import { addShoppingItems } from '../ShoppingList';
+import { usePrompt } from '../helpers/ReactRouterHooks';
+import { Classes as Classes2, Popover2, Tooltip2 } from '@blueprintjs/popover2';
 
 function verifyRecipe(recipe: IRecipe): boolean {
   return recipe.title.trim() !== '' &&
@@ -31,7 +33,7 @@ export function Recipe(props: IDarkThemeProps) {
     id = undefined;
   }
   const [t] = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
 
 
   const [state, setState] = useState({ editing: id === '-1', loaded: false, dirty: false });
@@ -125,7 +127,7 @@ export function Recipe(props: IDarkThemeProps) {
     if (typeof id === 'undefined' || recipe.id === -1) {
       const newId = await recipesHandler.addRecipe(newRecipe);
       if (newId) {
-        history.push(`/recipes/${newId}`);
+        navigate(`/recipes/${newId}`);
         AppToasterTop.show({ message: t('recipeCreated'), intent: 'success' });
       } else {
         AppToasterTop.show({ message: t('recipeCreatedError'), intent: 'success' });
@@ -144,7 +146,7 @@ export function Recipe(props: IDarkThemeProps) {
   const handleCancelClick = () => {
     if (!state.dirty) {
       if (typeof id === 'undefined' || recipe.id === -1) {
-        history.push('/');
+        navigate('/');
       } else {
         setState(state => ({ ...state, editing: false }))
       }
@@ -159,14 +161,14 @@ export function Recipe(props: IDarkThemeProps) {
     }
     if (typeof id === 'undefined' || recipe.id === -1) {
       setState(state => ({ ...state, dirty: false }));
-      setTimeout(() => history.push('/'), 0);
+      setTimeout(() => navigate('/'), 0);
     } else {
       setState(state => ({ ...state, dirty: false }));
       const r = recipesHandler.getRecipeOnce(recipe.id);
       if (typeof r === 'undefined') {
         console.debug('recipe not found, deleted? Dunno what to do.');
         AppToasterTop.show({ message: 'Something unexpected happend.', intent: 'danger' })
-        setTimeout(() => history.push('/'), 0);
+        setTimeout(() => navigate('/'), 0);
         return;
       }
       document.title = r.title;
@@ -188,7 +190,7 @@ export function Recipe(props: IDarkThemeProps) {
         setMobileDeleteIsOpen(false);
       }
       AppToasterTop.show({ message: t('recipeDeleted'), intent: 'success' });
-      history.push('/');
+      navigate('/');
     } else {
       AppToasterTop.show({ message: t('recipeNotDeleted'), intent: 'warning' });
     }
@@ -222,15 +224,14 @@ export function Recipe(props: IDarkThemeProps) {
 
   const addIngredientsToShoppingList = () => {
     addShoppingItems(recipe.ingredients.filter(showDot));
-    history.push('/shoppingList');
+    navigate('/shoppingList');
   }
+
+
+  usePrompt(t('leavingWarning'), state.dirty);
 
   if (mobile) {
     return <>
-      <Prompt
-        when={state.dirty}
-        message={t('leavingWarning')}
-      />
       <Header
         darkThemeProps={props}
         navigationLinks={navigationLinks}
@@ -292,7 +293,7 @@ export function Recipe(props: IDarkThemeProps) {
                 minimal={true}
                 large={true}
               />
-              <Tooltip
+              <Tooltip2
                 disabled={online}
                 content={t('tooltipOffline')}
                 position='bottom'
@@ -304,12 +305,12 @@ export function Recipe(props: IDarkThemeProps) {
                   intent='primary'
                   onClick={online ? saveRecipe : undefined}
                 />
-              </Tooltip>
+              </Tooltip2>
             </>
             :
             <>
               <ShareButton recipe={recipe} />
-              <Tooltip
+              <Tooltip2
                 disabled={online && hasWriteAccess}
                 content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
                 position='bottom'
@@ -330,7 +331,7 @@ export function Recipe(props: IDarkThemeProps) {
                     intent='danger'
                   />
                 </>
-              </Tooltip>
+              </Tooltip2>
             </>
           }
         </div>}
@@ -438,10 +439,6 @@ export function Recipe(props: IDarkThemeProps) {
     </>
   } else {
     return <>
-      <Prompt
-        when={state.dirty}
-        message={t('leavingWarning')}
-      />
       <Header
         darkThemeProps={props}
       />
@@ -464,7 +461,7 @@ export function Recipe(props: IDarkThemeProps) {
                         onClick={handleCancelClick}
                       />}
                     />
-                    <Tooltip
+                    <Tooltip2
                       disabled={online}
                       content={t('tooltipOffline')}
                       position='bottom'
@@ -476,12 +473,12 @@ export function Recipe(props: IDarkThemeProps) {
                         intent='primary'
                         onClick={saveRecipe}
                       />
-                    </Tooltip>
+                    </Tooltip2>
                   </ButtonGroup>
                   :
                   <ButtonGroup>
                     <ShareButton recipe={recipe} />
-                    <Tooltip
+                    <Tooltip2
                       disabled={online && hasWriteAccess}
                       content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
                       position='bottom'
@@ -493,12 +490,12 @@ export function Recipe(props: IDarkThemeProps) {
                         text={t('editRecipe')}
                         onClick={handleSetEditable}
                       />
-                    </Tooltip>
+                    </Tooltip2>
                     <DeleteButton
                       handleDeleteClick={handleDeleteClick}
                       disabled={!(online && hasWriteAccess)}
                       popoverTarget={
-                        <Tooltip
+                        <Tooltip2
                           disabled={online && hasWriteAccess}
                           content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
                           position='bottom'
@@ -509,7 +506,7 @@ export function Recipe(props: IDarkThemeProps) {
                             intent='warning'
                             icon='trash'
                           />
-                        </Tooltip>
+                        </Tooltip2>
                       }
                     />
                   </ButtonGroup>
@@ -539,41 +536,41 @@ export function Recipe(props: IDarkThemeProps) {
                       onCategorySelected={handleSetCategory}
                     />
                   </H3>
-                    <div className='ingredients-title-wrapper'>
-                      <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
-                        {t('ingredients')}:
+                  <div className='ingredients-title-wrapper'>
+                    <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
+                      {t('ingredients')}:
                     </H4>
-                      {recipe.ingredients.length > 0 && !state.editing && <Button
-                        text={t('addToShopping')}
-                        minimal={true}
-                        intent='success'
-                        icon='add'
-                        onClick={addIngredientsToShoppingList}
-                      />}
-                    </div>
-                    <DesktopIngredients
-                      ingredients={recipe.ingredients}
-                      loaded={state.loaded}
-                      editable={state.editing}
-                      addIngredient={(...values: string[]) => {
-                        setState(state => ({ ...state, dirty: true }));
-                        const ingredients = recipe.ingredients.slice(0);
-                        ingredients.push(...values);
-                        setRecipe(recipe => ({ ...recipe, ingredients }));
+                    {recipe.ingredients.length > 0 && !state.editing && <Button
+                      text={t('addToShopping')}
+                      minimal={true}
+                      intent='success'
+                      icon='add'
+                      onClick={addIngredientsToShoppingList}
+                    />}
+                  </div>
+                  <DesktopIngredients
+                    ingredients={recipe.ingredients}
+                    loaded={state.loaded}
+                    editable={state.editing}
+                    addIngredient={(...values: string[]) => {
+                      setState(state => ({ ...state, dirty: true }));
+                      const ingredients = recipe.ingredients.slice(0);
+                      ingredients.push(...values);
+                      setRecipe(recipe => ({ ...recipe, ingredients }));
 
-                      }}
-                      deleteIngredient={index => {
-                        setState(state => ({ ...state, dirty: true }));
-                        const ingredients = recipe.ingredients.filter((_, i) => i !== index);
-                        setRecipe(recipe => ({ ...recipe, ingredients }));
-                      }}
-                      replaceIngredient={(index, v) => {
-                        setState(state => ({ ...state, dirty: true }));
-                        const ingredients = recipe.ingredients.slice(0);
-                        ingredients[index] = v;
-                        setRecipe(recipe => ({ ...recipe, ingredients }));
-                      }}
-                    />
+                    }}
+                    deleteIngredient={index => {
+                      setState(state => ({ ...state, dirty: true }));
+                      const ingredients = recipe.ingredients.filter((_, i) => i !== index);
+                      setRecipe(recipe => ({ ...recipe, ingredients }));
+                    }}
+                    replaceIngredient={(index, v) => {
+                      setState(state => ({ ...state, dirty: true }));
+                      const ingredients = recipe.ingredients.slice(0);
+                      ingredients[index] = v;
+                      setRecipe(recipe => ({ ...recipe, ingredients }));
+                    }}
+                  />
                 </div>
                 <ImagePart
                   recipe={recipe}
@@ -584,7 +581,7 @@ export function Recipe(props: IDarkThemeProps) {
               </div>
               <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
                 {t('description')}:
-          </H4>
+              </H4>
               <DescriptionTextArea
                 value={recipe.description}
                 changeValue={handleSetDescription}
@@ -615,29 +612,31 @@ function CancelButton(props: {
   popoverTarget: React.ReactNode;
 }) {
   const [t] = useTranslation();
-  return <Popover
-    popoverClassName={Classes.POPOVER_CONTENT_SIZING}
+  return <Popover2
+    popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
     defaultIsOpen={false}
     position='bottom'
+    content={
+      <div>
+        <H5>{t('confirmCancelTitle')}</H5>
+        <p>{t('confirmCancel')}</p>
+        <div className='popover-button-container'>
+          <Button
+            text={t('cancel')}
+            className={'popover-left ' + Classes.POPOVER_DISMISS}
+          />
+          <Button
+            text={t('discardChanges')}
+            intent='danger'
+            className={Classes.POPOVER_DISMISS}
+            onClick={props.handleDiscardClick}
+          />
+        </div>
+      </div>
+    }
   >
     {props.popoverTarget}
-    <div>
-      <H5>{t('confirmCancelTitle')}</H5>
-      <p>{t('confirmCancel')}</p>
-      <div className='popover-button-container'>
-        <Button
-          text={t('cancel')}
-          className={'popover-left ' + Classes.POPOVER_DISMISS}
-        />
-        <Button
-          text={t('discardChanges')}
-          intent='danger'
-          className={Classes.POPOVER_DISMISS}
-          onClick={props.handleDiscardClick}
-        />
-      </div>
-    </div>
-  </Popover>
+  </Popover2>
 }
 
 function DeleteButton(props: {
@@ -648,8 +647,8 @@ function DeleteButton(props: {
   const [t] = useTranslation();
 
 
-  return <Popover
-    popoverClassName={Classes.POPOVER_CONTENT_SIZING}
+  return <Popover2
+    popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
     defaultIsOpen={false}
     disabled={props.disabled}
     position='bottom'
@@ -673,5 +672,5 @@ function DeleteButton(props: {
     }
   >
     {props.popoverTarget}
-  </Popover>
+  </Popover2>
 }

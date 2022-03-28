@@ -1,5 +1,4 @@
 @import "~@blueprintjs/core/lib/scss/variables";
-@import "../../util/variables.scss";
 
 .page {
   .body {
@@ -11,20 +10,21 @@
       max-width: 100%;
     }
     .main-content {
-      // margin-top: 15px;
       margin-right: 15px;
       flex: 0 1 75%;
       max-width: 75%;
 
       .header {
         position: sticky;
-        top: 85px;
+        top: 105px;
         padding: 20px 15px;
-        margin: 0 0;
-        background-color: #fff;
+        margin: 0 15px 35px 15px;
         z-index: 10;
         display: flex;
         justify-content: space-between;
+        .sort-button {
+          margin-right: 0;
+        }
       }
 
       .notification-asker {
@@ -35,14 +35,6 @@
           flex-direction: row;
           justify-content: space-between;
         }
-      }
-
-      .ScrollbarsCustom-Track:hover {
-        background: rgba(0, 0, 0, 0.2) none repeat scroll 0% 0% !important;
-        cursor: pointer;
-      }
-      .ScrollbarsCustom-Track {
-        margin-right: 10px;
       }
 
       a {
@@ -71,10 +63,6 @@
     border: none;
     outline: none;
   }
-}
-
-.bp3-dark .page .body .main-content .header {
-  background-color: $background-dark;
 }
 
 .mobile .page .body .main-content {
@@ -114,7 +102,7 @@
   background: $dark-gray1;
 }
 
-.bp3-dark {
+.#{$bp-ns}-dark {
   #nav-icon2 span {
     background: $light-gray5;
   }

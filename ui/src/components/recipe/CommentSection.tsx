@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import recipesHandler, { IComment } from "../../util/Network";
-import { Divider, Classes, H5, ButtonGroup, Button, Popover, TextArea, H3, Dialog, Tooltip, AnchorButton } from "@blueprintjs/core";
+import { Divider, Classes, H5, ButtonGroup, Button, TextArea, H3, Dialog, AnchorButton } from "@blueprintjs/core";
 import './CommentSection.scss';
 import classNames from "classnames";
 import { useTranslation } from "react-i18next";
@@ -11,9 +11,99 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import i18n from "../../util/i18n";
 import { AppToasterTop } from "../../util/toaster";
 import { useMobile, useOnline } from "../helpers/CustomHooks";
+import { Classes as Classes2, Popover2, Tooltip2 } from "@blueprintjs/popover2";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
+
+interface ICommentControlProps {
+  isEditing: boolean;
+  enableEditing: () => void;
+  disableEditing: () => void;
+  deleteComment: () => Promise<void>;
+
+  deleteOpen: boolean;
+  setDeleteOpen: (v: boolean) => void;
+  saveComment: () => Promise<void>;
+}
+
+function CommentControl(props: ICommentControlProps) {
+  const [t] = useTranslation();
+  const mobile = useMobile();
+  const online = useOnline();
+
+  const deletePopoverContent = <>
+    <H5>{t('confirmDeleteTitle')}</H5>
+    <p>{t('confirmDelete')}</p>
+    <div className='popover-button-container'>
+      <Button
+        text={t('cancel')}
+        className={'popover-left ' + Classes.POPOVER_DISMISS}
+      />
+      <Button
+        text={t('deleteComment')}
+        intent='danger'
+        className={Classes.POPOVER_DISMISS}
+        onClick={props.deleteComment}
+      />
+    </div>
+  </>
+
+  if (props.isEditing) {
+    return <ButtonGroup
+      vertical={!mobile}
+      alignText='right'
+      minimal={true}
+    >
+      <AnchorButton
+        text={t('cancel')}
+        icon='undo'
+        onClick={() => {
+          props.disableEditing();
+        }}
+      />
+      <AnchorButton
+        text={t('save')}
+        icon='floppy-disk'
+        disabled={!online}
+        intent='primary'
+        onClick={props.saveComment}
+      />
+    </ButtonGroup>
+  } else {
+    return <ButtonGroup
+      vertical={true}
+      minimal={true}
+      alignText='right'
+    >
+      <AnchorButton
+        rightIcon='edit'
+        text={t('edit')}
+        disabled={!online}
+        intent='primary'
+        onClick={() => props.enableEditing()}
+      />
+      <Popover2
+        isOpen={props.deleteOpen}
+        popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+        position='left'
+        disabled={!online}
+        content={deletePopoverContent}
+        onClose={() => props.setDeleteOpen(false)}
+        renderTarget={({ isOpen, ref, ...popoverProps }) => (
+          <Button
+            {...popoverProps}
+            elementRef={ref as any}
+            rightIcon='delete'
+            text={t('delete')}
+            intent='danger'
+            disabled={!online}
+            onClick={() => props.setDeleteOpen(true)}
+          />)}
+      />
+    </ButtonGroup>
+  }
+}
 
 interface ICommentProps {
   comment: IComment;
@@ -43,7 +133,7 @@ function Comment(props: ICommentProps) {
     setDeleteDialogIsOpen(false);
   }
 
-  const editComment = async () => {
+  const saveComment = async () => {
     if (newText === props.comment.text) {
       AppToasterTop.show({ message: t('commentNotModified') });
     } else if (await recipesHandler.updateComment({ ...props.comment, text: newText })) {
@@ -54,23 +144,6 @@ function Comment(props: ICommentProps) {
     setIsEditing(false);
   }
 
-  const deletePopoverContent = <div>
-    <H5>{t('confirmDeleteTitle')}</H5>
-    <p>{t('confirmDelete')}</p>
-    <div className='popover-button-container'>
-      <Button
-        text={t('cancel')}
-        className={'popover-left ' + Classes.POPOVER_DISMISS}
-      />
-      <Button
-        text={t('deleteComment')}
-        intent='danger'
-        className={Classes.POPOVER_DISMISS}
-        onClick={deleteComment}
-      />
-    </div>
-  </div>
-
   const mobileMorePopoverContent = <div>
     <ButtonGroup
       minimal={true}
@@ -80,7 +153,10 @@ function Comment(props: ICommentProps) {
       <Button
         text={t('edit')}
         className={'popover-left ' + Classes.POPOVER_DISMISS}
-        onClick={() => setIsEditing(true)}
+        onClick={() => {
+          setNewText(props.comment.text);
+          setIsEditing(true);
+        }}
       />
       <Button
         text={t('delete')}
@@ -153,13 +229,13 @@ function Comment(props: ICommentProps) {
         </div>}
         {mobile && props.username === props.comment.user.user &&
           <div className='more'>
-            <Popover
+            <Popover2
               minimal={true}
               content={mobileMorePopoverContent}
               position='left-top'
               disabled={!online}
             >
-              <Tooltip
+              <Tooltip2
                 content={t('tooltipOffline')}
                 disabled={online}
               >
@@ -169,8 +245,8 @@ function Comment(props: ICommentProps) {
                   icon='more'
                   style={{ transform: 'rotate(90deg)' }}
                 />
-              </Tooltip>
-            </Popover>
+              </Tooltip2>
+            </Popover2>
           </div>}
       </div>
       <div className='comment-text'>
@@ -191,62 +267,26 @@ function Comment(props: ICommentProps) {
     </div>
     {(hover || deleteOpen || isEditing) &&
       <div className='comment-controls'>
-        <Tooltip
+        <Tooltip2
           content={t('tooltipOffline')}
           disabled={online}
-        >
-          {isEditing
-            ? <ButtonGroup
-              vertical={!mobile}
-              alignText='right'
-              minimal={true}
-            >
-              <AnchorButton
-                text={t('cancel')}
-                icon='undo'
-                onClick={() => {
-                  setIsEditing(false);
+          renderTarget={({ isOpen, ref, ...tooltipProps }) => (
+            <div ref={ref} {...tooltipProps}>
+              <CommentControl
+                isEditing={isEditing}
+                enableEditing={() => {
+                  setNewText(props.comment.text)
+                  setIsEditing(true);
                 }}
+                disableEditing={() => setIsEditing(false)}
+                deleteComment={deleteComment}
+                deleteOpen={deleteOpen}
+                setDeleteOpen={setDeleteOpen}
+                saveComment={saveComment}
               />
-              <AnchorButton
-                text={t('save')}
-                icon='floppy-disk'
-                disabled={!online}
-                intent='primary'
-                onClick={editComment}
-              />
-            </ButtonGroup>
-            : <ButtonGroup
-              vertical={true}
-              minimal={true}
-              alignText='right'
-            >
-              <AnchorButton
-                rightIcon='edit'
-                text={t('edit')}
-                disabled={!online}
-                intent='primary'
-                onClick={() => setIsEditing(true)}
-              />
-              <Popover
-                isOpen={deleteOpen}
-                popoverClassName={Classes.POPOVER_CONTENT_SIZING}
-                position='left'
-                disabled={!online}
-                content={deletePopoverContent}
-                onClose={() => setDeleteOpen(false)}
-              >
-                <AnchorButton
-                  rightIcon='delete'
-                  text={t('delete')}
-                  intent='danger'
-                  disabled={!online}
-                  onClick={() => setDeleteOpen(true)}
-                />
-              </Popover>
-            </ButtonGroup>
-          }
-        </Tooltip>
+            </div>
+          )}
+        />
       </div>
     }
   </div>
@@ -323,7 +363,7 @@ function NewComment(props: { username: string, recipeId: number }) {
               setNewText('');
             }}
           />
-          <Tooltip
+          <Tooltip2
             content={t('tooltipOffline')}
             disabled={online}
           >
@@ -334,7 +374,7 @@ function NewComment(props: { username: string, recipeId: number }) {
               intent='primary'
               onClick={addComment}
             />
-          </Tooltip>
+          </Tooltip2>
         </ButtonGroup>
       </div>
     }

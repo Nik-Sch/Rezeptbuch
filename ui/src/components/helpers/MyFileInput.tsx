@@ -60,7 +60,7 @@ export function MyFileInput(props: IMyFileInputProps) {
 
   return <>
     <label className={classNames(labelClasses, 'my-file-input', large ? Classes.LARGE : '')} >
-      <Icon iconSize={large ? Icon.SIZE_LARGE : Icon.SIZE_STANDARD} icon={icon} />
+      <Icon size={large ? 20 : 16} icon={icon} />
       <span className='text'>{text}</span>
       <input
         {...inputProps}

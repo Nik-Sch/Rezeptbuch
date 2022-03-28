@@ -5,11 +5,15 @@
     },
     {
       "path": "api"
+    },
+    {
+      "path": "ui.old"
     }
   ],
   "settings": {
     "i18n-ally.localesPaths": [
-      "locales"
+      "locales",
+      "src/static/locales"
     ]
   }
 }

@@ -9,7 +9,8 @@ interface IProps {
   className?: string;
   fallback: boolean;
   size: number;
-  onClick?: MouseEventHandler<HTMLImageElement>
+  onClick?: MouseEventHandler<HTMLImageElement>;
+  imageProps?:  React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
 }
 
 export function MyImage(props: IProps) {
@@ -38,6 +39,7 @@ export function MyImage(props: IProps) {
   }).reduce((p, c, i) => i === 0 ? c : `${p}, ${c}`, '');
 
   return <img
+    {...props.imageProps}
     alt={t('altImage')}
     loading='lazy'
     srcSet={srcSet}

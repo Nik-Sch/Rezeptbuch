@@ -1,20 +1,20 @@
-import { Tooltip, AnchorButton } from "@blueprintjs/core";
-import React from "react";
+import { AnchorButton } from "@blueprintjs/core";
 import { logout, getUserInfo } from "../../util/Network";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useMobile, useOnline } from "./CustomHooks";
 import { useTranslation } from "react-i18next";
+import { Tooltip2 } from "@blueprintjs/popover2";
 
 export default function LogoutButton() {
   const mobile = useMobile();
-  const history = useHistory();
+  const navigate = useNavigate();
   const online = useOnline();
   const { t } = useTranslation();
   if (typeof getUserInfo() === 'undefined') {
     return null;
   }
 
-  return <Tooltip
+  return <Tooltip2
     content={online ? t('logout') : t('tooltipOffline')}
     position='bottom'
   >
@@ -29,10 +29,10 @@ export default function LogoutButton() {
         if (online) {
           (async () => {
             await logout();
-            history.push('/login');
+            navigate('/login');
           })();
         }
       }}
     />
-  </Tooltip>
+  </Tooltip2>
 }

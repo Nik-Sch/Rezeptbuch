@@ -1,33 +1,33 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 @import "util/variables";
-@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,500;0,600;1,500&family=Ubuntu:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,500;0,600;1,500&family=Ubuntu:wght@400;700&display=swap");
 
 body,
-.bp3-button,
-.bp3-input,
-.bp3-input-ghost {
+.#{$bp-ns}-button,
+.#{$bp-ns}-input,
+.#{$bp-ns}-input-ghost {
   font-family: "Ubuntu", sans-serif;
 }
 body {
   width: 100%;
 }
-
-.App {
-  padding: 10px;
-  text-align: center;
-  width: 100%;
+.page {
   min-height: 100vh;
-  height: inherit;
+  background-color: $content-background-color;
 }
 
-.bp3-dark {
-  background-color: $background-dark;
-  .bp3-card {
-    background-color: $background-dark-card;
+.#{$ns}-dark {
+  .page {
+    background-color: $dark-content-background-color;
   }
 }
 
-.bp3-dialog {
+// toast container was position: absolute and scrolled with the page
+.#{$ns}-toast-container.#{$ns}-toast-container-inline {
+  position: fixed;
+}
+
+.#{$bp-ns}-dialog {
   margin: 30px 20px;
 }
 

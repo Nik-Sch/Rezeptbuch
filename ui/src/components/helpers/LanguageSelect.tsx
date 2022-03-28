@@ -5,7 +5,7 @@ import { Button, MenuItem } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { ILanguage, availableLanguages } from '../../util/i18n';
 
-import 'flag-icon-css/sass/flag-icon.scss';
+import 'flag-icons/sass/flag-icons.scss';
 
 interface IProps {
   className?: string;
@@ -15,8 +15,7 @@ export function LanguageSelect(props: IProps) {
   const [, i18n] = useTranslation();
   const LangSelect = Select.ofType<ILanguage>();
 
-  const [selected, setSelected] = useState(availableLanguages.find((v) => v.key === i18n.language));
-
+  const [selected, setSelected] = useState(availableLanguages.find((v) => i18n.language.startsWith(v.key)));
   const itemRenderer = (lang: ILanguage, { handleClick, modifiers }: IItemRendererProps) => {
     if (!modifiers.matchesPredicate) {
       return null;
@@ -29,7 +28,7 @@ export function LanguageSelect(props: IProps) {
         onClick={handleClick}
         text={lang.name}
         label={''}
-        labelClassName={`flag-icon flag-icon-${flagKey}`}
+        labelClassName={`fi fi-${flagKey}`}
       />
     );
   };
@@ -49,7 +48,7 @@ export function LanguageSelect(props: IProps) {
       filterable={false}
       popoverProps={{position: 'bottom-right'}}
     >
-      <Button text={<span className={`flag-icon flag-icon-${flagKey}`}/>} rightIcon='caret-down' />
+      <Button text={<span className={`fi fi-${flagKey}`}/>} rightIcon='caret-down' />
     </LangSelect>
   );
 }

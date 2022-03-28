@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Button, InputGroup, Tooltip, Divider, Classes, Icon, IconName } from '@blueprintjs/core';
+import { Card, Button, InputGroup, Divider, Classes, Icon, IconName } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { SortSelect, ISort } from '../helpers/SortSelect';
@@ -11,6 +11,7 @@ import { useMobile } from '../helpers/CustomHooks';
 import { UserMultiSelect } from '../helpers/UserMultiSelect';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames';
+import { Tooltip2 } from '@blueprintjs/popover2';
 
 export type Counts = { [id: number]: number };
 export interface ISearchProps {
@@ -104,7 +105,7 @@ export default function RecipeListMenu(myProps: ISearchProps) {
   }
 
   const searchInIngredientsButton = (
-    <Tooltip
+    <Tooltip2
       content={props.searchInIngredients ? t('tooltipSearchInIngredients') : t('tooltipNotSearchInIngredients')}
     >
       <Button
@@ -113,7 +114,7 @@ export default function RecipeListMenu(myProps: ISearchProps) {
         minimal={true}
         onClick={() => props.handleSearchInIngredientsChange(!props.searchInIngredients)}
       />
-    </Tooltip>
+    </Tooltip2>
   );
   return <Card className='menu'>
     <NavigationLinks
