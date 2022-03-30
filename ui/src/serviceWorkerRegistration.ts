@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 
 const applicationServerPublicKey = process.env.REACT_APP_WEBPUSH_PUBLIC_KEY || '';
 
@@ -23,12 +24,12 @@ type ICallback = (isSubscribed: boolean) => void;
 
 const callbacks: ICallback[] = [];
 
-export const observeSubscription = (callback: ICallback) => {
+const observeSubscription = (callback: ICallback) => {
   callbacks.push(callback);
   callback(isSubscribed);
 }
 
-export const deleteCallback = (callback: ICallback) => {
+const deleteCallback = (callback: ICallback) => {
   callbacks.splice(callbacks.findIndex(a => a === callback), 1);
 }
 
@@ -37,6 +38,22 @@ const notify = () => {
   for (const cb of callbacks) {
     cb(isSubscribed);
   }
+}
+
+export function useSWSubscribed(def: boolean) {
+  const [subscribed, setSubscribed] = useState(def);
+  useEffect(() => {
+    const handle = (v: boolean) => {
+      setSubscribed(v);
+    }
+
+    observeSubscription(handle);
+    return () => {
+      deleteCallback(handle);
+    }
+  }, []);
+
+  return subscribed;
 }
 
 type IConfig = {
@@ -93,9 +110,9 @@ export function registerSW(config: IConfig) {
       return;
     }
 
-    navigator.serviceWorker.register('/push-service-worker.js')
+    navigator.serviceWorker.register(`${process.env.PUBLIC_URL}/service-worker.js`)
       .then(function (swReg) {
-        // console.log('Service Worker is registered');
+        console.log('Service Worker is registered');
 
         swRegistration = swReg;
         successAndUpdateCalls(swReg, config);
@@ -115,23 +132,25 @@ export function registerSW(config: IConfig) {
   }
 }
 
-export function subscribeUser() {
+export async function subscribeUser() {
   const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
   if (swRegistration === null) {
     console.error('swRegistration is null');
-    return;
+    return false;
   }
-  swRegistration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: applicationServerKey
-  }).then(function (subscription) {
-    updateSubscriptionOnServer(subscription);
+  try {
+    const sub = await swRegistration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: applicationServerKey
+    });
+    updateSubscriptionOnServer(sub);
     isSubscribed = true;
-    notify();
-  }).catch(function (err) {
-    console.log('Failed to subscribe the user: ', err);
-    notify();
-  });
+  } catch (err) {
+    isSubscribed = false;
+    console.log(`Failed to subscribe the user: `, err);
+  }
+  notify();
+  return isSubscribed;
 }
 
 export function isNotificationAvailable() {

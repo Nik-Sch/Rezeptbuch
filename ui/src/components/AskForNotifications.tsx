@@ -1,58 +1,58 @@
 import { useState, useEffect } from 'react';
 import { Callout, H4, Button } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
-import { observeSubscription, deleteCallback, subscribeUser } from '../pushServiceWorker';
+import { subscribeUser, useSWSubscribed } from '../serviceWorkerRegistration';
 import { usePersistentState } from './helpers/CustomHooks';
 
 export default function AskForNotifications() {
 
   const [t] = useTranslation();
 
-  const [subscribed, setSubscribed] = useState(false);
+  const subscribed = useSWSubscribed(true);
 
   const [denied, setDenied] = usePersistentState(false, 'noNotifications');
-  // const [dialogOpen, setDialogOpen] = useState(false);
-  const [notificationPermission, setNotificationPermission] = useState(Notification.permission);
 
+  const [showing, setShowing] = useState(false);
 
   useEffect(() => {
-    const handleSubscribedChange = (isSubscribed: boolean) => {
-      console.log('[afn] handleSubscribed', isSubscribed);
-      // setDialogOpen(false);
-      setNotificationPermission(Notification.permission);
-      setSubscribed(isSubscribed);
-    };
-    observeSubscription(handleSubscribedChange);
-    return () => { deleteCallback(handleSubscribedChange) }
-  }, []);
+    (async () => {
+      if (Notification.permission === 'denied') {
+        console.log('[afn] permission denied');
+        setShowing(false);
+        return;
+      }
+      if (denied) {
+        console.log('[afn] user doesn\'t want');
+        setShowing(false);
+        return;
+      }
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.log('[afn] no push/sw');
+        setShowing(false);
+        return;
+      }
+      if (subscribed) {
+        console.log('[afn] already subscribed');
+        setShowing(false);
+        return;
+      }
+      // check if sw is registered
+      const regs = await (await navigator.serviceWorker.getRegistrations()).filter(r => r.active !== null);
+      if (regs.length === 0) {
+        console.log('[afn] sw not registered');
+        setShowing(false);
+        return;
+      }
+      console.log(`[afn] showing ${subscribed} ${regs}`);
+      setShowing(true);
+    })();
+  }, [denied, subscribed]);
 
-  if (notificationPermission === 'denied') {
-    console.log('[afn] permission denied');
-    return null;
-  }
-  if (denied) {
-    console.log('[afn] user doesn\'t want');
-    return null;
-  }
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.log('[afn] no push/sw');
-    return null;
-  }
-
-  if (subscribed) {
-    console.log('[afn] already subscribed');
+  if (!showing) {
     return null;
   }
 
   return <>
-    {/* <Dialog
-      isOpen={dialogOpen}
-      icon='notifications'
-      title={t('notificationDialog')}
-      canEscapeKeyClose={false}
-      canOutsideClickClose={false}
-      isCloseButtonShown={false}
-    /> */}
     <Callout
       intent='primary'
       icon='notifications'
@@ -72,9 +72,12 @@ export default function AskForNotifications() {
         large={true}
         intent='success'
         rightIcon='notifications-updated'
-        onClick={() => {
-          // setDialogOpen(true);
-          subscribeUser();
+        onClick={async () => {
+          const success = await subscribeUser();
+          console.log(`[afn] subscribe success: ${success}`);
+          if (!success) {
+            setShowing(false);
+          }
         }}
       />
     </Callout>

@@ -14,7 +14,7 @@ import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 import { IDarkThemeProps } from '../../App';
 import AskForNotifications from '../AskForNotifications';
-import { isNotificationAvailable, registerSW } from '../../pushServiceWorker';
+import { isNotificationAvailable, registerSW } from '../../serviceWorkerRegistration';
 import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionStorageSearchInIngredients, sessionStorageSortingOrder, sessionStorageFilteredUsers } from '../../util/StorageKeys';
 import { AppToasterBottom } from '../../util/toaster';
 import i18n from '../../util/i18n';
