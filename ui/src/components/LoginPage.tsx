@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { IDarkThemeProps } from "../App";
 import Header from "./Header";
 import { useMobile } from "./helpers/CustomHooks";
@@ -17,13 +17,16 @@ import { useEffect } from "react";
 
 export function LoginPage(props: IDarkThemeProps & {setAuthenticated: (success: boolean) => void}) {
   const navigate = useNavigate();
+  const location = useLocation();
   const mobile = useMobile();
   const [t] = useTranslation();
+
+  const from = (location.state as any)?.from?.pathname || '/';
 
   useEffect(() => {
     if (typeof getUserInfo() !== 'undefined') {
       props.setAuthenticated(true);
-      navigate('/');
+      navigate(from, {replace: true});
     }
   });
 
@@ -53,7 +56,7 @@ export function LoginPage(props: IDarkThemeProps & {setAuthenticated: (success: 
       loginToRecipes(details.username, details.password).then(success => {
         if (success) {
           props.setAuthenticated(true);
-          navigate('/', {replace: true});
+          navigate(from, {replace: true});
         } else {
           setWrongCredentials(true);
         }
@@ -70,7 +73,7 @@ export function LoginPage(props: IDarkThemeProps & {setAuthenticated: (success: 
           const success = await loginToRecipes(details.username, details.password);
           if (success) {
             props.setAuthenticated(true);
-            navigate('/', {replace: true});
+            navigate(from, {replace: true});
           } else {
             AppToasterTop.show({ message: t('accountError'), intent: 'danger' })
           }

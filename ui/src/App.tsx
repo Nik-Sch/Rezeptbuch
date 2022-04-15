@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import './App.scss';
 import RecipeList from './components/recipeList/RecipeList';
 import { Recipe } from './components/recipe/Recipe';
-import { Route, BrowserRouter as Router, Routes, Navigate } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes, Navigate, useLocation } from 'react-router-dom';
 import { Classes, Card, H1, H3 } from '@blueprintjs/core';
 import { fetchUserInfo, getUserInfo } from './util/Network';
 import { LoginPage } from './components/LoginPage';
@@ -75,12 +75,11 @@ function App() {
     { path: '/uniqueRecipes/:id', Component: UniqueRecipe, priv: false },
     { path: '*', Component: NotFound, priv: false },
   ]
-
   return (
     <div className={mobile ? 'mobile' : ''}>
-    <Helmet>
-      <meta name="color-scheme" content={darkTheme ? 'dark' : 'light'} />
-    </Helmet>
+      <Helmet>
+        <meta name="color-scheme" content={darkTheme ? 'dark' : 'light'} />
+      </Helmet>
       <Router>
         <Routes>
           <Route
@@ -97,8 +96,15 @@ function App() {
             <Route
               key={path || 'undefined'}
               path={path}
-              element={priv && !authenticated
-                ? <Navigate to='/login' />
+              element={priv ?
+                <RequireAuth authenticated={authenticated}>
+                  <div className='page'>
+                    <Component
+                      darkTheme={darkTheme}
+                      onDarkThemeChanged={handleThemeChange}
+                    />
+                  </div>
+                </RequireAuth>
                 : <div className='page'>
                   <Component
                     darkTheme={darkTheme}
@@ -110,6 +116,24 @@ function App() {
       </Router>
     </div>
   );
+}
+
+function RequireAuth({ authenticated, children }: { authenticated: boolean, children: JSX.Element }) {
+  let location = useLocation();
+
+  if (!authenticated) {
+    // Redirect them to the /login page, but save the current location they were
+    // trying to go to when they were redirected. This allows us to send them
+    // along to that page after they login, which is a nicer user experience
+    // than dropping them off on the home page.
+    return <Navigate
+      to="/login"
+      state={{ from: location }}
+      replace={true}
+    />;
+  }
+
+  return children;
 }
 
 export default App;
