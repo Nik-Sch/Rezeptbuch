@@ -52,7 +52,7 @@
   "askNotifications": "Allow notification access",
   "notificationDialog": "Click on allow.",
   "updateNow": "Update now",
-  "linkCopied": "The link was successfully copied to the clipboard.",
+  "linkCopied": "Link copied to clipboard",
   "linkDidntCopied": "Neither sharing nor copying to clipboard is possible on this device. You may just copy the url.",
   "share": "Share",
   "tooltipOffline": "You are currently offline.",
@@ -108,7 +108,7 @@
   "addItem": "Add an item...",
   "checkedItems": "{{count}} completed item",
   "checkedItems_plural": "{{count}} completed items",
-  "deleteAll": "Delete all items",
+  "deleteAll": "Clear list",
   "uploaded": "Saved to server",
   "uploading": "Saving to server...",
   "uploadingFailed": "Uploading failed",
@@ -116,5 +116,13 @@
   "syncing": "Syncing with the server...",
   "addToShopping": "Add to shopping list",
   "shoppingOffline": "App is offline",
-  "phCategoryMobile": "Choose a Category..."
+  "phCategoryMobile": "Choose a Category...",
+  "createNewShoppingList": "New Shopping List",
+  "shoppingListShare": "Share the shopping list with anyone",
+  "shoppingListNoShare": "You need to create a new shopping list to share it",
+  "newShoppingListPlaceholder": "Shopping List Name...",
+  "createNewList": "Create new shopping list",
+  "deleteShoppingList": "Delete shopping list '{{name}}'?",
+  "selectShoppingList": "Choose shopping list",
+  "add": "Add"
 }

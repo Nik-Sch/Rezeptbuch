@@ -79,46 +79,49 @@ def status():
         return unauthorized()
 
 
-def event_stream(username, exclude):
-    data = redisShoppingListDB.hvals(username)
+def shoppinglist_stream(list_id):
+    data = redisShoppingListDB.hvals(list_id)
     data = [json.loads(x) for x in data]
     yield 'data: %s\n\n' % json.dumps(data)
     pubsub = redisShoppingListDB.pubsub()
-    pubsub.subscribe(username)
+    pubsub.subscribe(list_id)
     print('starting')
     for message in pubsub.listen():
         if message['type'] == 'message':
             m = json.loads(message['data'])
-            # print('pubsub', exclude, repr(m)) 
-            # if m['origin'] != exclude:
             yield 'data: %s\n\n' % m['data']
 
+def handleShoppingList(list_id: str):
+    if request.method == 'GET':
+        resp = Response(shoppinglist_stream(list_id),
+                                mimetype="text/event-stream")
+        resp.headers['X-Accel-Buffering'] = 'No'
+        resp.headers['Cache-Control'] = 'no-transform' # for npm dev
+        return resp
+    elif request.method == 'POST' or request.method == 'PUT':
+        for item in request.json:
+            redisShoppingListDB.hset(list_id, item['id'], json.dumps(item))
+    elif request.method == 'DELETE':
+        for item in request.json:
+            redisShoppingListDB.hdel(list_id, item['id'])
+    data = redisShoppingListDB.hvals(list_id)
+    data = [json.loads(x) for x in data]
+    toPublish = {}
+    toPublish['data'] = json.dumps(data)
+    redisShoppingListDB.publish(list_id, json.dumps(toPublish))
+    return make_response('', 200)
+
 @app.route('/shoppingList', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def shoppingList():
-    userName = session.get('userName', None)
-    if (userName != None):
-        if request.method == 'GET':
-            resp = Response(event_stream(userName, session.get('id', -1)),
-                                    mimetype="text/event-stream")
-            resp.headers['X-Accel-Buffering'] = 'No'
-            resp.headers['Cache-Control'] = 'no-transform' # for npm dev
-            return resp
-        elif request.method == 'POST' or request.method == 'PUT':
-            for item in request.json:
-                redisShoppingListDB.hset(userName, item['id'], json.dumps(item))
-        elif request.method == 'DELETE':
-            for item in request.json:
-                redisShoppingListDB.hdel(userName, item['id'])
-        data = redisShoppingListDB.hvals(userName)
-        data = [json.loads(x) for x in data]
-        toPublish = {}
-        toPublish['data'] = json.dumps(data)
-        toPublish['origin'] = session.get('id', -1)
-        # print(json.dumps(toPublish))
-        redisShoppingListDB.publish(userName, json.dumps(toPublish))
-        return make_response('', 200)
+def privateShoppingList():
+    user_name = session.get('userName', None)
+    if (user_name != None):
+        return handleShoppingList(user_name)
     else:
         return unauthorized()
+
+@app.route('/shoppingLists/<string:list_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def publicShoppingList(list_id: str):
+    return handleShoppingList(list_id)
 
 def notifyNewRecipe(recipe, exclude):
     print('sending notifications, but not to ', exclude)

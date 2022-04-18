@@ -72,6 +72,7 @@ function App() {
     { path: '/', Component: RecipeList, priv: true },
     { path: '/recipes/:id', Component: Recipe, priv: true },
     { path: '/shoppingList', Component: ShoppingList, priv: true },
+    { path: '/shoppingLists/:listKey/:listName', Component: ShoppingList, priv: false },
     { path: '/uniqueRecipes/:id', Component: UniqueRecipe, priv: false },
     { path: '*', Component: NotFound, priv: false },
   ]

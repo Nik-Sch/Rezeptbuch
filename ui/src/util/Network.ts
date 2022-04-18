@@ -514,6 +514,7 @@ export async function loginToRecipes(user: string, password: string) {
   const headers = getHeaders();
   headers.append('Authorization', 'Basic ' + Base64.encode(`${user}:${password}`));
   const result = await fetch(`/api/login`, { headers });
+  localStorage.clear()
   if (result.status === 200) {
     recipesHandler.fetchData();
     await fetchUserInfo();
@@ -532,6 +533,7 @@ export async function createAccount(user: string, password: string) {
     headers,
   });
   console.log(await result.text());
+  localStorage.clear()
   return result.status === 200;
 }
 
@@ -545,10 +547,15 @@ export async function logout() {
   }
 }
 
-export async function updateShoppingItem(items: IShoppingItem[], method: 'DELETE'|'POST'|'PUT') {
+export function getShoppingListUrl(listKey: string) {
+  return listKey === 'default' ? '/api/shoppingList' : `/api/shoppingLists/${listKey}`;
+}
+
+export async function updateShoppingItem(listKey: string, items: IShoppingItem[], method: 'DELETE'|'POST'|'PUT') {
   const headers = getHeaders();
   headers.append('Content-Type', 'application/json');
-  const result = await fetch('/api/shoppingList', {
+  const url = getShoppingListUrl(listKey);
+  const result = await fetch(url, {
     method: method,
     body: JSON.stringify(items),
     headers
