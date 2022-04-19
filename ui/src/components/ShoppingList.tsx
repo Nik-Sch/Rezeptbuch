@@ -883,7 +883,7 @@ export function ShoppingList(props: IDarkThemeProps) {
     >
       {statusElement}
       <Icon
-        className={classNames(Classes.BUTTON, Classes.MINIMAL)}
+        className={classNames(Classes.BUTTON, Classes.MINIMAL, state.active === 'default' && Classes.DISABLED)}
         icon='share'
         intent='primary'
         iconSize={24}

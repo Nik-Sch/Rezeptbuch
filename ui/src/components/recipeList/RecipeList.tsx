@@ -311,7 +311,7 @@ export default function RecipeList(props: IDarkThemeProps) {
                 isScrolling={isScrolling}
                 onScroll={onChildScroll}
                 rowCount={recipesToShow.length}
-                rowHeight={150 + 20}
+                rowHeight={(mobile ? 175 : 150) + 20}
                 scrollTop={scrollTop}
                 width={listWidth}
                 rowRenderer={({ index, style, isScrolling }) => <RecipeListItem

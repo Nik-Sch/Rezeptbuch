@@ -16,6 +16,7 @@
     .recipe-image {
       width: 110px;
       height: 110px;
+      border-radius: 5px;
       object-fit: cover;
     }
   }
@@ -94,35 +95,61 @@
 
 .mobile {
   .recipe-list-item {
+    display: flex;
+    flex-direction: column;
+    height: 175px;
     // margin: 15px;
-    .recipe-text-wrapper {
-      max-width: calc(100vw - 200px);
-      flex-direction: column;
-      padding-left: 20px;
+    .recipe-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      // text-align: center;
+      margin-bottom: 10px;
+    }
 
-      .title-category-wrapper {
-        flex-direction: column;
-        max-height: unset;
-        .recipe-title {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-height: 2.4em;
-          line-height: 1.2em;
-          margin-bottom: 5px;
-        }
-        .recipe-category {
-          margin-left: inherit;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          margin-bottom: 5px;
+    .content-wrapper {
+      display: flex;
+      height: calc(175px - 40px - 35px);
 
+      .thumbnail {
+        width: 100px;
+        height: 100px;
+        min-width: 100px;
+        min-height: 100px;
+        border-radius: 5px;
+        .recipe-image {
+          width: 100px;
+          height: 100px;
+          border-radius: 5px;
+          object-fit: cover;
         }
       }
-      .info-wrapper {
-        .recipe-description {
-          max-height: 2.4em;
-          max-width: 100%;
+
+      .recipe-text-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-content: space-between;
+
+        .recipe-category {
+          font-family: "Montserrat Alternates", sans-serif;
+          font-style: italic;
+          white-space: nowrap;
+          text-align: end;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          margin: 10px 0 0 0;
+
+        }
+
+        .info-wrapper {
+          .recipe-description {
+            max-width: 80%;
+            white-space: pre-line;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            max-height: calc(4 * 1.15em);
+            line-height: 1.15em;
+          }
         }
       }
     }
