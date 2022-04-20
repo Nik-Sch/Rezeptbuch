@@ -101,7 +101,7 @@
   "filterForUsers": "Filter for users...",
   "noUsersFound": "No user matching",
   "tooltipNoWriteRecipe": "You cannot edit this recipe.",
-  "shoppingList": "Shopping List",
+  "shoppingList": "Shopping Lists",
   "404Header": "404",
   "404Text": "Your site couldn't be found :/",
   "recipes": "Recipes",
@@ -112,9 +112,8 @@
   "uploaded": "Saved to server",
   "uploading": "Saving to server...",
   "uploadingFailed": "Uploading failed",
-  "retryUploading": "Try again to upload the shopping list.",
   "syncing": "Syncing with the server...",
-  "addToShopping": "Add to shopping list",
+  "addToShopping": "Add to a shopping list",
   "shoppingOffline": "App is offline",
   "phCategoryMobile": "Choose a Category...",
   "createNewShoppingList": "New Shopping List",
@@ -124,5 +123,8 @@
   "createNewList": "Create new shopping list",
   "deleteShoppingList": "Delete shopping list '{{name}}'?",
   "selectShoppingList": "Choose shopping list",
-  "add": "Add"
+  "add": "Add",
+  "filter": "Filter and Sort",
+  "ok": "Ok",
+  "shoppingListName": "{{name}} Shopping List"
 }

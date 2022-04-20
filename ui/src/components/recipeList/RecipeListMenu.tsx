@@ -22,6 +22,8 @@ export interface ISearchProps {
   searchString: string;
   searchInIngredients: boolean;
   selectedCategories: ICategory[];
+  selectedSortValue: ISort;
+  selectedSortDesc: boolean;
   allCategories: ICategory[];
   categoryCounts: Counts;
   sortOptions: ISort[];
@@ -71,7 +73,6 @@ export default function RecipeListMenu(myProps: ISearchProps) {
 
   if (mobile) {
     return <div className='menu'>
-      <div className='control'>
         <UserMultiSelect
           placeholder={t('filterForUsers')}
           noResultText={t('noUsersFound')}
@@ -81,16 +82,6 @@ export default function RecipeListMenu(myProps: ISearchProps) {
           allUsers={props.allUsers}
           className='filter-users'
         />
-        <div className='sort-recipes-wrapper'>
-          <SortSelect
-            fill={true}
-            defaultDesc={false}
-            defaultIndex={0}
-            className='sort-recipes'
-            items={props.sortOptions}
-            onSelected={props.onSortSelected}
-          />
-        </div>
         <CategoryMultiSelect
           placeholder={t('filterForCategories')}
           noResultText={t('noCategoryFound')}
@@ -100,7 +91,15 @@ export default function RecipeListMenu(myProps: ISearchProps) {
           allCategories={props.allCategories}
           className='filter-categories'
         />
-      </div>
+        <Divider/>
+        <SortSelect
+          fill={true}
+          className='sort-recipes'
+          items={props.sortOptions}
+          onSelected={props.onSortSelected}
+          selectedValue={props.selectedSortValue}
+          selectedDesc={props.selectedSortDesc}
+        />
     </div>
   }
 
@@ -121,7 +120,7 @@ export default function RecipeListMenu(myProps: ISearchProps) {
       navigationLinks={menuLinks}
     />
 
-    <Divider className='menu-item'/>
+    <Divider className='menu-item' />
 
     <InputGroup
       leftIcon='search'

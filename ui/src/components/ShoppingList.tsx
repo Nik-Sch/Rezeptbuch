@@ -16,7 +16,7 @@ import { TouchBackend } from 'react-dnd-touch-backend';
 import update from 'immutability-helper';
 import { v4 as uuidv4 } from 'uuid';
 import { Select } from "@blueprintjs/select";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Popover2, Tooltip2, Classes as Classes2 } from "@blueprintjs/popover2";
 import { shareLink } from "./recipe/ShareButton";
 
@@ -350,7 +350,6 @@ function ShoppingListSelect(props: {
     }}
   />;
 
-
   return <ButtonGroup>
     <Dialog
       isOpen={deleteKey !== null}
@@ -416,12 +415,13 @@ function ShoppingListSelect(props: {
         />
         : null}
       itemsEqual='key'
+      activeItem={{key: props.parentState.active, value: props.parentState.lists[props.parentState.active]}}
       resetOnClose={true}
       noResults={<MenuItem disabled={true} text="No results." />}
       onItemSelect={item => props.onItemSelect(item.key, item.value)}
     >
       <Button
-        text={`${parentState.lists[parentState.active].name ?? 'Private'} Shopping List`}
+        text={t('shoppingListName', {name: parentState.lists[parentState.active].name ?? 'Private'})}
         rightIcon='double-caret-vertical'
         large={true}
       />

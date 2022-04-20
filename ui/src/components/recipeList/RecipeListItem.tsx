@@ -1,6 +1,5 @@
-import React from 'react';
 import { IRecipe } from '../../util/Network';
-import { ICardProps, Card, H5, H3, H4, Classes } from '@blueprintjs/core';
+import { CardProps, Card, H5, H3, Classes } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { MyImage } from '../helpers/Image';
 import dayjs from 'dayjs';
@@ -14,7 +13,7 @@ import classNames from 'classnames';
 
 dayjs.extend(localizedFormat);
 
-interface IRecipeListItemProps extends ICardProps {
+interface IRecipeListItemProps extends CardProps {
   recipe?: IRecipe
 }
 
