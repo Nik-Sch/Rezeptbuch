@@ -7,7 +7,7 @@ chardet==3.0.4
 click==6.7
 cryptography==3.2
 dnspython==1.16.0
-eventlet==0.25.1
+eventlet==0.31.0
 Flask==1.0.2
 Flask-Compress==1.4.0
 Flask-HTTPAuth==3.2.4
@@ -19,10 +19,10 @@ gunicorn==20.0.4
 http-ece==1.1.0
 idna==2.9
 itsdangerous==0.24
-Jinja2==2.10.1
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 monotonic==1.5
-Pillow==7.1.0
+Pillow==9.0.1
 py-vapid==1.7.0
 pycodestyle==2.5.0
 pycparser==2.20
@@ -32,9 +32,8 @@ python-dateutil==2.7.3
 pytz==2018.5
 pywebpush==1.11.0
 redis==3.5.2
-requests==2.23.0
 six==1.11.0
-urllib3==1.25.8
+urllib3==1.26.5
 Werkzeug==0.15.5
 zope.event==4.4
 zope.interface==5.1.0

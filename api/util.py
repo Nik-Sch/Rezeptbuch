@@ -4,7 +4,6 @@ import pysodium
 import os
 from flask_restful import fields, marshal
 from flask import make_response
-from dateutil import parser
 
 
 class Database:

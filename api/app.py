@@ -1,15 +1,12 @@
 import os
-from flask import Flask, request, jsonify, abort, make_response, redirect, url_for, send_from_directory, send_file, session, Response
+from flask import Flask, request, jsonify, abort, make_response, send_from_directory, send_file, session, Response
 from flask_restful import Api, Resource, reqparse
 from flask_httpauth import HTTPBasicAuth
 from flask_compress import Compress
 from util import Database
-from werkzeug.utils import secure_filename
-from requests.auth import HTTPDigestAuth
 from datetime import timedelta
-import requests
 import hashlib
-from PIL import Image, ExifTags
+from PIL import Image
 from flask_session import Session
 from pywebpush import webpush
 from uuid import uuid4
