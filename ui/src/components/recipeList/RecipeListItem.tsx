@@ -1,6 +1,5 @@
-import React from 'react';
 import { IRecipe } from '../../util/Network';
-import { ICardProps, Card, H5, H3, H4, Classes } from '@blueprintjs/core';
+import { CardProps, Card, H5, H3, Classes } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { MyImage } from '../helpers/Image';
 import dayjs from 'dayjs';
@@ -14,7 +13,7 @@ import classNames from 'classnames';
 
 dayjs.extend(localizedFormat);
 
-interface IRecipeListItemProps extends ICardProps {
+interface IRecipeListItemProps extends CardProps {
   recipe?: IRecipe
 }
 
@@ -34,21 +33,21 @@ const RecipeListItem = (myProps: IRecipeListItemProps) => {
       style={style}
     >
       <Card {...props}>
-        <div className={classNames('thumbnail', recipe ? '' : Classes.SKELETON)}>
-          {recipe && <MyImage
-            size={150}
-            className='recipe-image'
-            fallback={true}
-            recipe={recipe}
-          />}
-        </div>
-        <div className='recipe-text-wrapper'>
-          <div className='title-category-wrapper'>
-            <H4 className={classNames('recipe-title', recipe ? '' : Classes.SKELETON)}>{recipe?.title}</H4>
-            <H5 className={classNames('recipe-category', Classes.INTENT_PRIMARY, Classes.ICON, recipe ? '' : Classes.SKELETON)}>{recipe?.category.name}</H5>
+        <H3 className={classNames('recipe-title', recipe ? '' : Classes.SKELETON)}>{recipe?.title}</H3>
+        <div className='content-wrapper'>
+          <div className={classNames('thumbnail', recipe ? '' : Classes.SKELETON)}>
+            {recipe && <MyImage
+              size={150}
+              className='recipe-image'
+              fallback={true}
+              recipe={recipe}
+            />}
           </div>
-          <div className='info-wrapper'>
-            <div className={classNames('recipe-description', 'ellipsis', Classes.TEXT_MUTED, recipe ? '' : Classes.SKELETON)}>{recipe?.description}</div>
+          <div className='recipe-text-wrapper'>
+            <div className='info-wrapper'>
+              <div className={classNames('recipe-description', 'ellipsis', Classes.TEXT_MUTED, recipe ? '' : Classes.SKELETON)}>{recipe?.description}</div>
+            </div>
+            <H5 className={classNames('recipe-category', Classes.INTENT_PRIMARY, Classes.ICON, recipe ? '' : Classes.SKELETON)}>{recipe?.category.name}</H5>
           </div>
         </div>
       </Card>

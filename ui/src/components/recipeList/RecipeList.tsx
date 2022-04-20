@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Network';
-import { Classes, Icon, InputGroup, Button, H3, Collapse, Card } from '@blueprintjs/core';
+import { Classes, Icon, InputGroup, Button, H3, Card, Dialog } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { ISort, SortSelect } from '../helpers/SortSelect';
@@ -42,8 +42,8 @@ export function NavigationIcon(props: { isOpen: boolean, onClick?: () => void })
 
 
 const sortOptions: ISort[] = [
-  { key: 'date', textKey: 'sortDate', smallTextKey: 'sortDateSmall' },
-  { key: 'title', textKey: 'sortTitle', smallTextKey: 'sortTitleSmall' },
+  { key: 'date', textKey: 'sortDate'},
+  { key: 'title', textKey: 'sortTitle' },
 ];
 
 function onServiceWorkerSuccess() {
@@ -90,7 +90,7 @@ export default function RecipeList(props: IDarkThemeProps) {
   const [userCounts, setUserCounts] = useState<Counts>([]);
   const [searchString, setSearchString] = useSessionState<string>('', sessionStorageSearchString);
   const [searchInIngredients, setSearchInIngredients] = useSessionState<boolean>(true, sessionStorageSearchInIngredients);
-  const [sortingOrder, setSortingOrder] = useSessionState<{ key: keyof IRecipe, desc: boolean }>({ key: 'date', desc: false }, sessionStorageSortingOrder);
+  const [sortingOrder, setSortingOrder] = useSessionState<{ sortValue: ISort, desc: boolean }>({ sortValue: {key: 'date', textKey: 'sortDate'}, desc: false }, sessionStorageSortingOrder);
   const [recipesToShow, setRecipesToShow] = useState<(IRecipe | undefined)[]>(skeletonRecipes);
   const [filterIsOpen, setFilterIsOpen] = useState(false);
   const timeout = useRef<number>();
@@ -151,6 +151,11 @@ export default function RecipeList(props: IDarkThemeProps) {
     setUserCounts(counts);
   }, [filterRecipeByCategory, filterRecipeBySearch, recipes, users]);
 
+  // #27 (scroll to top on filter)
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [filterRecipeByCategory, filterRecipeBySearch, filterRecipeByUser])
+
   // search and sort
   useEffect(() => {
     const sortRecipes = (r1?: IRecipe, r2?: IRecipe): number => {
@@ -158,7 +163,7 @@ export default function RecipeList(props: IDarkThemeProps) {
         return 0;
       }
       let result = 0;
-      switch (sortingOrder.key) {
+      switch (sortingOrder.sortValue.key) {
         case 'date':
           result = dayjs(r2.date).diff(dayjs(r1.date));
           break;
@@ -183,7 +188,7 @@ export default function RecipeList(props: IDarkThemeProps) {
 
       }
     }, mobile ? 100 : 0);
-  }, [filterRecipeByCategory, filterRecipeBySearch, filterRecipeByUser, mobile, recipes, sortingOrder.desc, sortingOrder.key]);
+  }, [filterRecipeByCategory, filterRecipeBySearch, filterRecipeByUser, mobile, recipes, sortingOrder.desc, sortingOrder.sortValue.key]);
 
 
   const handleSearchChange = (value: string) => {
@@ -191,7 +196,7 @@ export default function RecipeList(props: IDarkThemeProps) {
   }
 
   const onSortSelected = (v: ISort, d: boolean) => {
-    setSortingOrder({ key: v.key, desc: d })
+    setSortingOrder({ sortValue: v, desc: d })
   };
 
   const searchClearButton = searchString.length === 0
@@ -218,6 +223,8 @@ export default function RecipeList(props: IDarkThemeProps) {
     selectedUsers={filteredUsers}
     allUsers={users}
     onSortSelected={onSortSelected}
+    selectedSortDesc={sortingOrder.desc}
+    selectedSortValue={sortingOrder.sortValue}
   />;
 
 
@@ -251,11 +258,25 @@ export default function RecipeList(props: IDarkThemeProps) {
       </>}
     </Header>
     {mobile &&
-      <Collapse
+      <Dialog
         isOpen={filterIsOpen}
+        onClose={() => setFilterIsOpen(false)}
+        title={t('filter')}
       >
-        {recipeListMenu}
-      </Collapse>
+        <div className={classNames(Classes.DIALOG_BODY, 'mobile')}>
+          {recipeListMenu}
+        </div>
+        <div className={Classes.DIALOG_FOOTER}>
+          <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+            <Button
+              text={t('ok')}
+              intent='success'
+              large={true}
+              onClick={() => setFilterIsOpen(false)}
+            />
+          </div>
+        </div>
+      </Dialog>
     }
     <div className='body'>
       {!mobile && recipeListMenu}
@@ -282,11 +303,11 @@ export default function RecipeList(props: IDarkThemeProps) {
           />
 
           <SortSelect
-            defaultDesc={false}
-            defaultIndex={0}
             className='sort-recipes'
             items={sortOptions}
             onSelected={onSortSelected}
+            selectedDesc={sortingOrder.desc}
+            selectedValue={sortingOrder.sortValue}
           />
         </Card>}
         {isNotificationAvailable() && <AskForNotifications />}
@@ -311,7 +332,7 @@ export default function RecipeList(props: IDarkThemeProps) {
                 isScrolling={isScrolling}
                 onScroll={onChildScroll}
                 rowCount={recipesToShow.length}
-                rowHeight={150 + 20}
+                rowHeight={(mobile ? 175 : 150) + 20}
                 scrollTop={scrollTop}
                 width={listWidth}
                 rowRenderer={({ index, style, isScrolling }) => <RecipeListItem

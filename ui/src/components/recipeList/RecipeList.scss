@@ -10,6 +10,7 @@
       max-width: 100%;
     }
     .main-content {
+      min-height: 50vh; // fix for weird behaviour in the top margin of the left menu
       margin-right: 15px;
       flex: 0 1 75%;
       max-width: 75%;

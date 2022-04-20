@@ -1,5 +1,19 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
+.create-shopping-list-popover {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  .#{$bp-ns}-button {
+    margin-top: 10px;
+  }
+}
+
+.shopping-list-select-list {
+  width: fit-content;
+  margin: auto;
+}
+
 .shopping-list-wrapper {
   margin: 20px 15px;
 
@@ -7,10 +21,17 @@
     display: flex;
     justify-content: flex-end;
     margin-right: 20px;
+    margin-bottom: 10px;
+  }
+
+  .shopping-list-head {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 20px 20px 26px;
   }
 
   .shopping-list {
-    margin: 20px;
+    margin: 20px 0;
 
     .fake-divider {
       margin: 5px;

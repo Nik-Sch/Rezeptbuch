@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import Header from "./Header";
-import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text } from "@blueprintjs/core";
+import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text, MenuItem, AnchorButton, ButtonGroup, InputGroup, Dialog, Radio, RadioGroup } from "@blueprintjs/core";
 import { usePersistentState, useMobile } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
 import { IDarkThemeProps } from "../App";
@@ -9,12 +9,16 @@ import dayjs from "dayjs";
 import './ShoppingList.scss';
 import classNames from "classnames";
 import { localStorageShoppingList } from "../util/StorageKeys";
-import { updateShoppingItem } from "../util/Network";
+import { getShoppingListUrl, getUserInfo, updateShoppingItem } from "../util/Network";
 import { useDrag, useDrop, DropTargetMonitor, DndProvider, XYCoord } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import update from 'immutability-helper';
 import { v4 as uuidv4 } from 'uuid';
+import { Select } from "@blueprintjs/select";
+import { useNavigate, useParams } from "react-router-dom";
+import { Popover2, Tooltip2, Classes as Classes2 } from "@blueprintjs/popover2";
+import { shareLink } from "./recipe/ShareButton";
 
 export interface IShoppingItem {
   text: string;
@@ -269,14 +273,27 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
 
 type SyncState = 'initial-fetch' | 'uploading' | 'synced' | 'offline';
 
-export interface IShoppingState {
+
+export interface ISingleShoppingList {
   items: IShoppingItem[];
-  showChecked: boolean;
+  name?: string;
 }
 
-const defaultShoppingState: IShoppingState = {
+export interface IShoppingListState {
+  lists: { [key: string]: ISingleShoppingList };
+  showChecked: boolean;
+  active: string;
+}
+
+const defaultShoppingList: ISingleShoppingList = {
   items: [],
-  showChecked: true
+  name: 'Private'
+}
+
+const defaultState: IShoppingListState = {
+  lists: { 'default': defaultShoppingList },
+  showChecked: true,
+  active: 'default'
 }
 
 function CardNoCard(props: { children?: React.ReactNode; className?: string }) {
@@ -296,56 +313,228 @@ export function addShoppingItems(items: string[]) {
   itemsToBeAdded.push(...items);
 }
 
-export function ShoppingList(props: IDarkThemeProps) {
+function ShoppingListSelect(props: {
+  parentState: IShoppingListState;
+  onItemSelect: (key: string, value: ISingleShoppingList) => void;
+  onItemDelete: (key: string) => void;
+}) {
+  const { parentState } = props;
   const { t } = useTranslation();
   const mobile = useMobile();
+  const [newListName, setNewListName] = useState('');
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [deleteKey, setDeleteKey] = useState<string | null>(null);
+
+  const ShoppingListSelect = Select.ofType<{ key: string, value: ISingleShoppingList }>();
+
+  const createNewList = () => {
+    props.onItemSelect(uuidv4(), {
+      items: [],
+      name: newListName
+    });
+    setNewListName('');
+    setPopoverOpen(false);
+  };
+
+  const newListInput = <InputGroup
+    autoFocus={true}
+    large={mobile}
+    value={newListName}
+    onChange={e => setNewListName(e.target.value)}
+    placeholder={t('newShoppingListPlaceholder')}
+    onKeyDown={e => {
+      if (e.key === 'Enter') {
+        createNewList();
+        setPopoverOpen(false);
+      }
+    }}
+  />;
+
+  return <ButtonGroup>
+    <Dialog
+      isOpen={deleteKey !== null}
+      title={t('deleteShoppingList', { name: parentState.lists[deleteKey ?? '']?.name })}
+      isCloseButtonShown={true}
+      onClose={() => setDeleteKey(null)}
+    >
+      <div className={Classes.DIALOG_BODY} />
+      <div className={Classes.DIALOG_FOOTER}>
+        <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+          <Button
+            text={t('cancel')}
+            onClick={() => setDeleteKey(null)}
+          />
+          <Button
+            intent='danger'
+            text={t('delete')}
+            onClick={() => {
+              props.onItemDelete(deleteKey ?? '');
+              setDeleteKey(null);
+            }}
+          />
+        </div>
+      </div>
+    </Dialog>
+    <ShoppingListSelect
+      items={Object.entries(parentState.lists).map(([key, value]) => ({ key, value }))}
+      itemPredicate={(query, item) => item.value.name?.toLowerCase().includes(query.toLowerCase()) ?? false}
+      createNewItemFromQuery={query => {
+        const key = uuidv4();
+        const name = query;
+        return {
+          key,
+          value: {
+            items: [],
+            name
+          }
+        };
+      }}
+      createNewItemRenderer={(query, active, handleClick) =>
+        <MenuItem
+          text={`${t('createNewList')} '${query}'...`}
+          selected={active}
+          onClick={handleClick}
+          shouldDismissPopover={false}
+        />}
+      itemRenderer={(item, { handleClick, modifiers }) => modifiers.matchesPredicate
+        ? <MenuItem
+          selected={modifiers.active}
+          key={item.key}
+          text={item.value.name ?? 'Private'}
+          onClick={handleClick}
+          labelElement={item.key === 'default' ? undefined : <Button
+            icon='cross'
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              setDeleteKey(item.key);
+            }}
+            minimal={true}
+            small={true}
+          />}
+        />
+        : null}
+      itemsEqual='key'
+      activeItem={{key: props.parentState.active, value: props.parentState.lists[props.parentState.active]}}
+      resetOnClose={true}
+      noResults={<MenuItem disabled={true} text="No results." />}
+      onItemSelect={item => props.onItemSelect(item.key, item.value)}
+    >
+      <Button
+        text={t('shoppingListName', {name: parentState.lists[parentState.active].name ?? 'Private'})}
+        rightIcon='double-caret-vertical'
+        large={true}
+      />
+    </ShoppingListSelect>
+    <Popover2
+      disabled={mobile}
+      isOpen={popoverOpen}
+      onInteraction={newState => setPopoverOpen(newState)}
+      popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+      content={<div className='create-shopping-list-popover'>
+        {newListInput}
+        <Button
+          className={Classes2.POPOVER2_DISMISS}
+          text={t('create')}
+          intent='success'
+          onClick={createNewList}
+        />
+      </div>}
+      renderTarget={({ isOpen, ref, ...targetProps }) => (
+        <Button
+          {...targetProps}
+          elementRef={ref as any}
+          intent='primary'
+          icon='add'
+          large={true}
+          onClick={mobile ? () => setPopoverOpen(true) : (targetProps as any).onClick}
+        />
+      )}
+    />
+    <Dialog
+      isOpen={mobile && popoverOpen}
+      onClose={() => setPopoverOpen(false)}
+      title={t('createNewList')}
+    >
+      <div className={Classes.DIALOG_BODY}>
+        {newListInput}
+      </div>
+      <div className={Classes.DIALOG_FOOTER}>
+        <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+          <Button
+            large={true}
+            className={Classes2.POPOVER2_DISMISS}
+            text={t('create')}
+            intent='success'
+            onClick={createNewList}
+          />
+        </div>
+      </div>
+    </Dialog>
+  </ButtonGroup>
+}
+
+export function ShoppingList(props: IDarkThemeProps) {
+
+  const { listKey, listName } = useParams();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const mobile = useMobile();
+  const authenticated = typeof getUserInfo() !== 'undefined';
+
+  document.title = t('shoppingList');
+
   const [online, setOnline] = useState(navigator.onLine);
 
-  const [state, setState] = usePersistentState<IShoppingState>(defaultShoppingState, localStorageShoppingList);
+  const [state, setState] = usePersistentState<IShoppingListState>(defaultState, localStorageShoppingList);
 
-  if (typeof (state as any).checked !== 'undefined') {
-    console.log('updating state', state);
-    window.localStorage.setItem(localStorageShoppingList, JSON.stringify(defaultShoppingState));
-  }
+  const [itemsToBeAddedDialog, setItemsToBeAddedDialog] = useState<IShoppingItem[]>([]);
 
   const [synced, setSynced] = useState<SyncState>('initial-fetch');
 
+  const [shoppingListSelectValue, setShoppingListSelectValue] = useState<string>();
+
   const [updateQueue, setUpdateQueue] = useState<{
+    listKey: string,
     items: IShoppingItem[],
     method: 'DELETE' | 'POST' | 'PUT'
   }[]>([]);
 
-  const updateItems = useCallback(async (items: IShoppingItem[], method: 'DELETE' | 'POST' | 'PUT') => {
+
+  const updateItems = useCallback(async (listKey: string, items: IShoppingItem[], method: 'DELETE' | 'POST' | 'PUT') => {
     if (online) {
       setSynced('uploading');
-      await updateShoppingItem(items, method);
+      await updateShoppingItem(listKey, items, method);
       setSynced('synced');
     } else {
-      setUpdateQueue(updateQueue.concat({ items, method }));
+      setUpdateQueue(updateQueue.concat({ listKey, items, method }));
     }
   }, [online, updateQueue]);
 
   // itemsToBeAdded
   useEffect(() => {
-    if (itemsToBeAdded.length > 0) {
-      const items = itemsToBeAdded.map((text, i) => {
+    // list key is set when not authenticated or when adding a new shopping list
+    if (typeof listKey === 'undefined' && itemsToBeAdded.length > 0) {
+      const items: IShoppingItem[] = itemsToBeAdded.map((text, i) => {
         return {
           text: text,
           checked: false,
           addedTime: dayjs().toJSON(),
           id: uuidv4(),
-          position: i + state.items.filter(v => !v.checked).reduce((p, v) => Math.max(p, v.position), 0) + 1
+          position: i + state.lists[state.active].items.filter(v => !v.checked).reduce((p, v) => Math.max(p, v.position), 0) + 1
         };
       });
       itemsToBeAdded.splice(0, itemsToBeAdded.length);
-      (async () => {
-        await updateItems(items, 'POST');
-        // comes over the sse
-        // setState({ ...state, items: state.items.concat(items) });
-      })();
+      if (Object.keys(state.lists).length === 1) {
+        (async () => {
+          await updateItems(state.active, items, 'POST');
+        })();
+      } else {
+        setItemsToBeAddedDialog(items);
+      }
 
     }
-  }, [state, updateItems]);
+  }, [listKey, state, updateItems]);
 
   // online
   useEffect(() => {
@@ -353,14 +542,8 @@ export function ShoppingList(props: IDarkThemeProps) {
       setOnline(navigator.onLine);
       if (!navigator.onLine) {
         setSynced('offline');
-      } else if (updateQueue.length > 0) {
+      } else {
         setSynced('uploading');
-        let element = updateQueue.shift();
-        while (typeof element !== 'undefined') {
-          await updateShoppingItem(element.items, element.method);
-          element = updateQueue.shift();
-        }
-        setSynced('synced');
       }
     }
 
@@ -370,25 +553,49 @@ export function ShoppingList(props: IDarkThemeProps) {
       window.removeEventListener('online', handle);
       window.removeEventListener('offline', handle);
     }
-  }, [updateQueue]);
+  }, [state.active]);
+
+  useEffect(() => {
+    if (online && updateQueue.length > 0) {
+      (async () => {
+        setSynced('uploading');
+        let element = updateQueue[0];
+        await updateShoppingItem(element.listKey, element.items, element.method);
+        setUpdateQueue(queue => {
+          return queue.slice(1);
+        })
+      })();
+    } else {
+
+      setSynced('synced');
+    }
+  }, [online, updateQueue]);
 
   // sse
   useEffect(() => {
     if (online) {
       setSynced('initial-fetch');
-      let eventSource = new EventSource('/api/shoppingList');
+      let eventSource = new EventSource(getShoppingListUrl(state.active));
 
       const onMessage = (v: MessageEvent) => {
         const result: IShoppingItem[] | null = JSON.parse(v.data);
-        console.log("sse message: ", v);
+        console.log(`sse message for ${state.active}:`, result);
         if (result) {
-          setState(state => ({ ...state, items: result }));
+          setState(state => update(state, {
+            lists: {
+              [state.active]: {
+                items: {
+                  $set: result
+                }
+              }
+            }
+          }));
         }
         setSynced('synced');
       };
       const onError = () => {
         eventSource.close();
-        eventSource = new EventSource('/api/shoppingList');
+        eventSource = new EventSource(getShoppingListUrl(state.active));
         eventSource.onmessage = onMessage;
         eventSource.onerror = onError;
       };
@@ -397,12 +604,61 @@ export function ShoppingList(props: IDarkThemeProps) {
       eventSource.onerror = onError;
       return () => {
         eventSource.close();
-        console.log('[shopping list]', 'closed');
+        console.log(`[shopping list] sse for ${state.active} closed`);
       };
     } else {
       setSynced('offline');
     }
-  }, [online, setState]);
+  }, [online, setState, state.active]);
+
+  useEffect(() => {
+    if (listKey) {
+      if (authenticated) {
+        const newState = update(state, {
+          lists: {
+            $merge: {
+              [listKey]: {
+                items: [],
+                name: listName
+              }
+            }
+          },
+          active: {
+            $set: listKey
+          }
+        });
+        // set state doesn't work when navigating away
+        localStorage.setItem(localStorageShoppingList, JSON.stringify(newState));
+        navigate('/shoppingList');
+      } else if (state.active !== listKey) {
+        setState({
+          active: listKey,
+          lists: {
+            [listKey]: {
+              items: [],
+              name: listName
+            }
+          },
+          showChecked: true
+        });
+      }
+    }
+  }, [authenticated, listKey, listName, navigate, setState, state]);
+
+  // was previosly only a single shoppinglist
+  if (typeof (state as any).lists === 'undefined') {
+    console.log('updating state', state);
+    const newList: ISingleShoppingList = {
+      items: (state as any).items,
+      name: 'Private'
+    };
+    setState({
+      lists: { 'default': newList },
+      active: 'default',
+      showChecked: state.showChecked
+    });
+    return <></>;
+  }
 
   const navigationLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes') },
@@ -410,22 +666,30 @@ export function ShoppingList(props: IDarkThemeProps) {
   ];
 
   const updateElement = (changedItem: IShoppingItem, shouldRefocus: boolean) => {
-    const oldItem = state.items.find(v => v.id === changedItem.id);
+    const oldItem = state.lists[state.active].items.find(v => v.id === changedItem.id);
     if (typeof oldItem === 'undefined') {
       throw new Error('didnt find the item');
     }
     let newPosition = changedItem.position;
     if (oldItem.checked && !changedItem.checked) {
-      newPosition = state.items.filter(v => !v.checked).reduce((p, v) => Math.max(p, v.position), 0) + 1;
+      newPosition = state.lists[state.active].items.filter(v => !v.checked).reduce((p, v) => Math.max(p, v.position), 0) + 1;
     } else if (!oldItem.checked && changedItem.checked) {
-      newPosition = state.items.filter(v => v.checked).reduce((p, v) => Math.max(p, v.position), 0) + 1;
+      newPosition = state.lists[state.active].items.filter(v => v.checked).reduce((p, v) => Math.max(p, v.position), 0) + 1;
     }
     const newItem = update(changedItem, {
       position: { $set: newPosition }
     });
-    setState({ ...state, items: state.items.map(v => v.id === newItem.id ? newItem : v) });
+    setState(update(state, {
+      lists: {
+        [state.active]: {
+          items: {
+            $apply: (items: IShoppingItem[]) => items.map(v => v.id === newItem.id ? newItem : v)
+          }
+        }
+      }
+    }));
     (async () => {
-      await updateItems([newItem], 'PUT');
+      await updateItems(state.active, [newItem], 'PUT');
     })();
     //   notChecked[oldElemIndexNotChecked] = newItem;
     //   if (shouldRefocus && notCheckedRefs[oldElemIndexNotChecked + 1]) {
@@ -441,15 +705,23 @@ export function ShoppingList(props: IDarkThemeProps) {
   };
 
   const deleteElement = (item: IShoppingItem) => {
-    setState({ ...state, items: state.items.filter(v => v.id !== item.id) });
+    setState(update(state, {
+      lists: {
+        [state.active]: {
+          items: {
+            $apply: (items: IShoppingItem[]) => items.filter(v => v.id !== item.id)
+          }
+        }
+      }
+    }));
     (async () => {
-      await updateItems([item], 'DELETE');
+      await updateItems(state.active, [item], 'DELETE');
     })();
   };
 
   const moveCardNotChecked = (dragIndex: number, hoverIndex: number) => {
     setState(state => {
-      const list = state.items.filter(v => !v.checked).sort((v, w) => v.position - w.position);
+      const list = state.lists[state.active].items.filter(v => !v.checked).sort((v, w) => v.position - w.position);
       const dragItem = list[dragIndex];
       const newItems = update(list, {
         $splice: [
@@ -462,13 +734,22 @@ export function ShoppingList(props: IDarkThemeProps) {
           item.position = i;
         }
       });
-      return { ...state, items: state.items.filter(v => v.checked).concat(newItems) }
+
+      return update(state, {
+        lists: {
+          [state.active]: {
+            items: {
+              $apply: (items: IShoppingItem[]) => items.filter(v => v.checked).concat(newItems)
+            }
+          }
+        }
+      });
     });
   };
 
   const moveCardChecked = (dragIndex: number, hoverIndex: number) => {
     setState(state => {
-      const list = state.items.filter(v => v.checked).sort((v, w) => v.position - w.position);
+      const list = state.lists[state.active].items.filter(v => v.checked).sort((v, w) => v.position - w.position);
       const dragItem = list[dragIndex];
       const newItems = update(list, {
         $splice: [
@@ -481,7 +762,15 @@ export function ShoppingList(props: IDarkThemeProps) {
           item.position = i;
         }
       });
-      return { ...state, items: state.items.filter(v => !v.checked).concat(newItems) }
+      return update(state, {
+        lists: {
+          [state.active]: {
+            items: {
+              $apply: (items: IShoppingItem[]) => items.filter(v => !v.checked).concat(newItems)
+            }
+          }
+        }
+      });
     });
   };
 
@@ -521,23 +810,91 @@ export function ShoppingList(props: IDarkThemeProps) {
     </>}
   </div >;
 
+  const removeAllItems = () => {
+    updateItems(state.active, state.lists[state.active].items, 'DELETE');
+    setState(state => update(state, {
+      lists: {
+        [state.active]: {
+          items: {
+            $set: []
+          }
+        }
+      }
+    }));
+  };
+
+  const shareShoppingList = () => {
+    if (state.active !== 'default') {
+      shareLink(`${document.location.origin}/shoppingLists/${state.active}/${state.lists[state.active].name}`);
+    }
+  };
+
 
   const itemRefs: Map<string, HTMLDivElement> = new Map();
   return <>
+    <Dialog
+      isOpen={itemsToBeAddedDialog.length > 0}
+      title={t('selectShoppingList')}
+      onClose={() => setItemsToBeAddedDialog([])}
+    >
+      <div className={Classes.DIALOG_BODY}>
+        <div className='shopping-list-select-list'>
+          <RadioGroup
+            selectedValue={shoppingListSelectValue}
+            onChange={e => setShoppingListSelectValue(e.currentTarget.value)}
+          >
+          {
+            Object.entries(state.lists).map(([key, value]) => (<Radio
+              id={key}
+              value={key}
+              label={value.name}
+              large={true}
+            />))
+          }
+          </RadioGroup>
+        </div>
+      </div>
+      <div className={Classes.DIALOG_FOOTER}>
+        <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+          <Button
+            text={t('cancel')}
+            intent='danger'
+            onClick={() => setItemsToBeAddedDialog([])}
+          />
+          <Button
+            text={t('add')}
+            intent='success'
+            disabled={typeof shoppingListSelectValue === 'undefined'}
+            onClick={() => {
+              const items = itemsToBeAddedDialog.slice();
+              setItemsToBeAddedDialog([]);
+              setState(state => ({ ...state, active: shoppingListSelectValue ?? '' }));
+              (async () => {
+                await updateItems(shoppingListSelectValue ?? '', items, 'POST');
+              })()
+            }}
+          />
+        </div>
+      </div>
+    </Dialog>
     <Header
       darkThemeProps={props}
       navigationLinks={navigationLinks}
     >
       {statusElement}
       <Icon
+        className={classNames(Classes.BUTTON, Classes.MINIMAL, state.active === 'default' && Classes.DISABLED)}
+        icon='share'
+        intent='primary'
+        iconSize={24}
+        onClick={shareShoppingList}
+      />
+      <Icon
         className={classNames(Classes.BUTTON, Classes.MINIMAL)}
         icon='trash'
         intent='warning'
         iconSize={24}
-        onClick={() => {
-          setState({ ...state, items: [] });
-          updateItems(state.items, 'DELETE');
-        }}
+        onClick={removeAllItems}
       />
     </Header>
     <div className='body'>
@@ -551,27 +908,69 @@ export function ShoppingList(props: IDarkThemeProps) {
         <CardNoCard className='shopping-list-wrapper'>
           {!mobile && <div className='edit-container'>
             {statusElement}
-            <Button
-              text={t('deleteAll')}
-              icon='delete'
-              intent='warning'
-              onClick={() => {
-                setState({ ...state, items: [] });
-                updateItems(state.items, 'DELETE');
-              }}
-            />
+            <ButtonGroup vertical={false} alignText='right'>
+              <Tooltip2
+                content={state.active === 'default' ? t('shoppingListNoShare') : t('shoppingListShare')}
+                position='bottom'
+              >
+                <AnchorButton
+                  icon='share'
+                  minimal={mobile}
+                  large={mobile}
+                  text={mobile ? undefined : t('share')}
+                  disabled={state.active === 'default'}
+                  intent='primary'
+                  onClick={shareShoppingList}
+                />
+              </Tooltip2>
+              <Button
+                text={t('deleteAll')}
+                icon='trash'
+                intent='warning'
+                onClick={removeAllItems}
+              />
+            </ButtonGroup>
           </div>}
-          <H1>{t('shoppingList')}</H1>
+          <div className='shopping-list-head'>
+            {authenticated ?
+              <ShoppingListSelect
+                onItemSelect={(key, value) => setState(state => update(state, {
+                  active: {
+                    $set: key
+                  },
+                  lists: {
+                    $merge: {
+                      [key]: value
+                    }
+                  }
+                }))}
+                onItemDelete={key => setState(state => {
+                  const x = update(state, {
+                    active: {
+                      $set: 'default'
+                    },
+                    lists: {
+                      $unset: [key]
+                    }
+                  });
+                  console.log(x);
+                  return x;
+                })}
+                parentState={state}
+              />
+              : <H1>{`${state.lists[state.active].name} Shopping List`}</H1>
+            }
+          </div>
           <div className='shopping-list'>
             <DndProvider backend={mobile ? TouchBackend : HTML5Backend}>
-              {state.items.filter(v => !v.checked).sort((v, w) => v.position - w.position).map((item, index) => {
+              {state.lists[state.active].items.filter(v => !v.checked).sort((v, w) => v.position - w.position).map((item, index) => {
                 return <ShoppingListItem
                   item={item}
                   key={item.id}
                   deleteElement={deleteElement}
                   updateElement={updateElement}
                   moveCard={moveCardNotChecked}
-                  dndFinished={() => updateItems(state.items, 'PUT')}
+                  dndFinished={() => updateItems(state.active, state.lists[state.active].items, 'PUT')}
                   index={index}
                   ref={(v: HTMLDivElement) => {
                     if (v) {
@@ -589,17 +988,25 @@ export function ShoppingList(props: IDarkThemeProps) {
                     checked: false,
                     addedTime: dayjs().toJSON(),
                     id: uuidv4(),
-                    position: i + state.items.filter(v => !v.checked).reduce((p, v) => Math.max(p, v.position), 0) + 1
+                    position: i + state.lists[state.active].items.filter(v => !v.checked).reduce((p, v) => Math.max(p, v.position), 0) + 1
                   };
                 });
-                setState(state => ({ ...state, items: state.items.concat(items) }));
-                updateItems(items, 'POST');
+                setState(state => update(state, {
+                  lists: {
+                    [state.active]: {
+                      items: {
+                        $push: items
+                      }
+                    }
+                  }
+                }));
+                updateItems(state.active, items, 'POST');
               }}
             />
-            {state.items.filter(v => v.checked).length > 0 && !mobile && <Divider />}
-            {state.items.filter(v => v.checked).length > 0 && <Button
+            {state.lists[state.active].items.filter(v => v.checked).length > 0 && !mobile && <Divider />}
+            {state.lists[state.active].items.filter(v => v.checked).length > 0 && <Button
               minimal={true}
-              text={t('checkedItems', { count: state.items.filter(v => v.checked).length })}
+              text={t('checkedItems', { count: state.lists[state.active].items.filter(v => v.checked).length })}
               icon={state.showChecked ? 'caret-down' : 'caret-right'}
               onClick={() => setState(state => ({ ...state, showChecked: !state.showChecked }))}
             />}
@@ -607,14 +1014,14 @@ export function ShoppingList(props: IDarkThemeProps) {
               isOpen={state.showChecked}
             >
               <DndProvider backend={mobile ? TouchBackend : HTML5Backend}>
-                {state.items.filter(v => v.checked).sort((v, w) => v.position - w.position).map((item, index) => {
+                {state.lists[state.active].items.filter(v => v.checked).sort((v, w) => v.position - w.position).map((item, index) => {
                   return <ShoppingListItem
                     item={item}
                     key={item.id}
                     updateElement={updateElement}
                     deleteElement={deleteElement}
                     moveCard={moveCardChecked}
-                    dndFinished={() => updateItems(state.items, 'PUT')}
+                    dndFinished={() => updateItems(state.active, state.lists[state.active].items, 'PUT')}
                     index={index}
                     ref={(v: HTMLDivElement) => {
                       if (v) {

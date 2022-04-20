@@ -8,7 +8,7 @@ import i18n from "../../util/i18n";
 import { getUniqueRecipeLink, IRecipe, emptyRecipe } from "../../util/Network";
 
 
-async function shareLink(link?: string) {
+export async function shareLink(link?: string) {
   const shareLink = link || document.location.href;
   if ('share' in navigator) {
     (navigator as any).share({

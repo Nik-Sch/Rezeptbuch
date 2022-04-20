@@ -22,41 +22,20 @@
 
 .mobile {
   .menu {
-    // using padding for collapse auto height to work
-    padding-top: 20px;
-    padding-bottom: 10px;
-    flex: unset;
-    max-width: unset;
-    margin: unset;
-
-    .settings {
-      margin: 20px;
-      margin-top: 0;
-      display: flex;
-      align-items: center;
-      .spacer {
-        flex-grow: 1;
-      }
-      .logout-button {
-        margin-left: 10px;
-      }
+    display: flex;
+    flex-direction: column;
+    > * {
+      margin: 10px 0;
     }
-
-    .control {
-      margin: 0 20px;
-      display: flex;
-      flex-wrap: wrap;
-      flex-direction: row;
-      justify-content: space-between;
-
-      > * {
-        margin: 7.5px;
-      }
-
-      .filter-categories,
-      .filter-users {
-        flex: 1 1 200px;
-      }
+    div:first-child {
+      margin-top: 0;
+    }
+    div:last-child {
+      margin-bottom: 0;
+    }
+    // weird bug in blueprint?
+    .sort-recipes > div > div {
+      width: 100%;
     }
   }
 }

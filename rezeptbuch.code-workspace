@@ -10,6 +10,7 @@
   "settings": {
     "i18n-ally.localesPaths": [
       "src/static/locales"
-    ]
+    ],
+    "i18n-ally.keystyle": "nested"
   }
 }

@@ -21,6 +21,15 @@ body {
     background-color: $dark-content-background-color;
   }
 }
+.#{$ns}-dark .#{$ns}-button:not([class*="#{$ns}-minimal"]):not([class*="#{$ns}-disabled"]) {
+  box-shadow: 0 0 0 1px rgba($dark-gray1, 0.5);
+}
+.#{$ns}-dark .#{$ns}-button-group.#{$ns}-minimal .#{$ns}-button {
+  box-shadow: none;
+}
+.#{$ns}-dark .#{$ns}-button.#{$ns}-disabled:not([class*="#{$ns}-minimal"]) {
+  box-shadow: 0 0 0 1px rgba($dark-gray1, 0.5);
+}
 
 // toast container was position: absolute and scrolled with the page
 .#{$ns}-toast-container.#{$ns}-toast-container-inline {
