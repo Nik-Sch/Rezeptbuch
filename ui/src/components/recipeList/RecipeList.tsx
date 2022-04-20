@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Network';
 import { Classes, Icon, InputGroup, Button, H3, Card, Dialog } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
@@ -90,7 +90,7 @@ export default function RecipeList(props: IDarkThemeProps) {
   const [userCounts, setUserCounts] = useState<Counts>([]);
   const [searchString, setSearchString] = useSessionState<string>('', sessionStorageSearchString);
   const [searchInIngredients, setSearchInIngredients] = useSessionState<boolean>(true, sessionStorageSearchInIngredients);
-  const defaultSortOrder: { sortValue: ISort, desc: boolean } = useMemo(() => ({ sortValue: { key: 'date', textKey: 'sortDate' }, desc: false }), []);
+  const defaultSortOrder: { sortValue: ISort, desc: boolean } = { sortValue: { key: 'date', textKey: 'sortDate' }, desc: false };
   const [sortingOrder, setSortingOrder] = useSessionState<{ sortValue: ISort, desc: boolean }>(defaultSortOrder, sessionStorageSortingOrder);
   const [recipesToShow, setRecipesToShow] = useState<(IRecipe | undefined)[]>(skeletonRecipes);
   const [filterIsOpen, setFilterIsOpen] = useState(false);
