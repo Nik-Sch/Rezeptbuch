@@ -9,6 +9,7 @@ import dips from '../static/default-images/noRecipeDips.webp';
 import starter from '../static/default-images/noRecipeStarter.webp';
 import exp from '../static/default-images/noRecipeExp.webp';
 import bread from '../static/default-images/noRecipeBread.webp';
+import beilagen from '../static/default-images/noRecipeBeilagen.webp';
 import vegPng from '../static/default-images/noRecipeVeg.png';
 import mainPng from '../static/default-images/noRecipeMain.png';
 import desertPng from '../static/default-images/noRecipeDesert.png';
@@ -20,6 +21,7 @@ import dipsPng from '../static/default-images/noRecipeDips.png';
 import starterPng from '../static/default-images/noRecipeStarter.png';
 import expPng from '../static/default-images/noRecipeExp.png';
 import breadPng from '../static/default-images/noRecipeBread.png';
+import beilagenPng from '../static/default-images/noRecipeBeilagen.png';
 
 const map: { [i: number]: string } = {
   1: exp,
@@ -37,7 +39,8 @@ const map: { [i: number]: string } = {
   24: bread,
   25: cocktail,
   26: main,
-  27: cake
+  27: cake,
+  33: beilagen
 }
 export const mapPng: { [i: number]: string } = {
   1: expPng,
@@ -55,7 +58,8 @@ export const mapPng: { [i: number]: string } = {
   24: breadPng,
   25: cocktailPng,
   26: mainPng,
-  27: cakePng
+  27: cakePng,
+  33: beilagenPng
 }
 
 export default function categoryImageMap() {
