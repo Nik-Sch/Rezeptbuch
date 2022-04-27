@@ -22,6 +22,9 @@
 
     .#{$bp-ns}-editable-text {
       width: 100%;
+      span.#{$bp-ns}-popover2-target {
+        display: inline;
+      }
     }
 
     .#{$bp-ns}-editable-text-content {
