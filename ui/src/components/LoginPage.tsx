@@ -15,7 +15,7 @@ import { Classes as Classes2, Tooltip2 } from "@blueprintjs/popover2";
 import '@blueprintjs/popover2/src/blueprint-popover2.scss';
 import { useEffect } from "react";
 
-export function LoginPage(props: IDarkThemeProps & {setAuthenticated: (success: boolean) => void}) {
+export default function LoginPage(props: IDarkThemeProps & {setAuthenticated: (success: boolean) => void}) {
   const navigate = useNavigate();
   const location = useLocation();
   const mobile = useMobile();

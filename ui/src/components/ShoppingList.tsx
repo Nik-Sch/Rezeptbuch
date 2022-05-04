@@ -474,7 +474,7 @@ function ShoppingListSelect(props: {
   </ButtonGroup>
 }
 
-export function ShoppingList(props: IDarkThemeProps) {
+export default function ShoppingList(props: IDarkThemeProps) {
 
   const { listKey, listName } = useParams();
   const navigate = useNavigate();

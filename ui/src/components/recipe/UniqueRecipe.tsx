@@ -16,7 +16,7 @@ import { Helmet } from 'react-helmet';
 import DescriptionTextArea from './DescriptionTextArea';
 
 
-export function UniqueRecipe(props: IDarkThemeProps) {
+export default function UniqueRecipe(props: IDarkThemeProps) {
   let { id } = useParams();
   const [t] = useTranslation();
 

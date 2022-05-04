@@ -27,7 +27,7 @@ function verifyRecipe(recipe: IRecipe): boolean {
     recipe.category.id !== -1;
 }
 
-export function Recipe(props: IDarkThemeProps) {
+export default function Recipe(props: IDarkThemeProps) {
   let { id } = useParams();
   if (typeof id === 'undefined' || isNaN(parseInt(id))) {
     id = undefined;

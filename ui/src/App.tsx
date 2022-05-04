@@ -1,19 +1,21 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import './App.scss';
-import RecipeList from './components/recipeList/RecipeList';
-import { Recipe } from './components/recipe/Recipe';
 import { Route, BrowserRouter as Router, Routes, Navigate, useLocation } from 'react-router-dom';
 import { Classes, Card, H1, H3 } from '@blueprintjs/core';
 import { fetchUserInfo, getUserInfo } from './util/Network';
-import { LoginPage } from './components/LoginPage';
 import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
 import { localStorageDarkTheme } from './util/StorageKeys';
-import { ShoppingList } from './components/ShoppingList';
 import Header from './components/Header';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { UniqueRecipe } from './components/recipe/UniqueRecipe';
 import { Helmet } from 'react-helmet';
+
+
+const RecipeList = lazy(() => import('./components/recipeList/RecipeList'));
+const Recipe = lazy(() => import('./components/recipe/Recipe'));
+const UniqueRecipe = lazy(() => import('./components/recipe/UniqueRecipe'));
+const ShoppingList = lazy(() => import('./components/ShoppingList'));
+const LoginPage = lazy(() => import('./components/LoginPage'));
 
 function changeThemeClass(darkTheme: boolean) {
   if (darkTheme) {
@@ -46,6 +48,23 @@ function NotFound(props: IDarkThemeProps) {
       </Card>
     </div>
   </>
+}
+
+function Fallback(props: IDarkThemeProps) {
+  return <>
+  <Header
+    darkThemeProps={props}
+    className='login-header'
+  />
+  <div className='card-wrapper'>
+    <Card
+      className='login'
+      elevation={1}
+    >
+      <H3>Loading...</H3>
+    </Card>
+  </div>
+</>
 }
 
 function App() {
@@ -82,38 +101,40 @@ function App() {
         <meta name="color-scheme" content={darkTheme ? 'dark' : 'light'} />
       </Helmet>
       <Router>
-        <Routes>
-          <Route
-            path='/login'
-            element={
-              <LoginPage
-                darkTheme={darkTheme}
-                onDarkThemeChanged={handleThemeChange}
-                setAuthenticated={(success) => setAuthenticated(success)}
-              />
-            }
-          />
-          {routes.map(({ path, Component, priv }) => (
+        <Suspense fallback={<Fallback darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange}/>}>
+          <Routes>
             <Route
-              key={path || 'undefined'}
-              path={path}
-              element={priv ?
-                <RequireAuth authenticated={authenticated}>
-                  <div className='page'>
+              path='/login'
+              element={
+                <LoginPage
+                  darkTheme={darkTheme}
+                  onDarkThemeChanged={handleThemeChange}
+                  setAuthenticated={(success) => setAuthenticated(success)}
+                />
+              }
+            />
+            {routes.map(({ path, Component, priv }) => (
+              <Route
+                key={path || 'undefined'}
+                path={path}
+                element={priv ?
+                  <RequireAuth authenticated={authenticated}>
+                    <div className='page'>
+                      <Component
+                        darkTheme={darkTheme}
+                        onDarkThemeChanged={handleThemeChange}
+                      />
+                    </div>
+                  </RequireAuth>
+                  : <div className='page'>
                     <Component
                       darkTheme={darkTheme}
                       onDarkThemeChanged={handleThemeChange}
                     />
-                  </div>
-                </RequireAuth>
-                : <div className='page'>
-                  <Component
-                    darkTheme={darkTheme}
-                    onDarkThemeChanged={handleThemeChange}
-                  />
-                </div>} />
-          ))}
-        </Routes>
+                  </div>} />
+            ))}
+          </Routes>
+        </Suspense>
       </Router>
     </div>
   );
