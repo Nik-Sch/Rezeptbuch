@@ -69,7 +69,7 @@ function Fallback(props: IDarkThemeProps) {
 
 function App() {
 
-  const [darkTheme, setDarkTheme] = usePersistentState(false, localStorageDarkTheme);
+  const [darkTheme, setDarkTheme] = usePersistentState(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches, localStorageDarkTheme);
   const handleThemeChange = (theme: boolean) => {
     changeThemeClass(theme);
     setDarkTheme(theme);

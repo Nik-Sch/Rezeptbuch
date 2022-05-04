@@ -76,7 +76,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
           </H3>
           <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
             {t('ingredients')}:
-            </H4>
+          </H4>
           {loaded ?
             (recipe.ingredients.length > 0
               ? recipe.ingredients.map((line, index) => (
@@ -120,12 +120,14 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
         <meta name="title" content={recipe.title} />
         <meta name="description" content={recipe.description.split('.')[0]} />
 
+        <meta property="og:url" content={`https://recipev2.niklas-schelten.de/uniqueRecipes/${id}`} />
         <meta property="og:title" content={recipe.title} />
         <meta property="og:description" content={recipe.description.split('.')[0]} />
         {recipe.image && recipe.image.trim().length > 0 && <meta
           property="og:image" content={`/api/images/${recipe.image}`}
         />}
 
+        <meta property="twitter:url" content={`https://recipev2.niklas-schelten.de/uniqueRecipes/${id}`} />
         <meta property="twitter:title" content={recipe.title} />
         <meta property="twitter:description" content={recipe.description.split('.')[0]} />
         {recipe.image && recipe.image.trim().length > 0 && <meta
@@ -154,7 +156,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
                   </H3>
                   <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
                     {t('ingredients')}:
-              </H4>
+                  </H4>
                   <DesktopIngredients
                     ingredients={recipe.ingredients}
                     loaded={loaded}
@@ -172,7 +174,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
               </div>
               <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
                 {t('description')}:
-          </H4>
+              </H4>
               {/* {(recipe.description.trim().length > 0 || !loaded)
                 ? <div className={classNames(loaded ? '' : Classes.SKELETON, 'description')}>
                   {recipe.description}
