@@ -1,8 +1,8 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
 .description-select-popover .#{$bp-ns}-menu {
-  max-height: 300px;
-  max-width: 400px;
+  max-height: 350px;
+  max-width: 90vw;
   overflow: auto;
   .#{$bp-ns}-popover-content {
     padding: 5px;

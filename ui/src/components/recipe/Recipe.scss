@@ -292,6 +292,13 @@
   .user {
     margin-top: 15px;
   }
+
+  .#{$bp-ns}-editable-text {
+    // width: 100%;
+    span.#{$bp-ns}-popover2-target {
+      display: inline;
+    }
+  }
 }
 .edit-container {
   display: flex;
