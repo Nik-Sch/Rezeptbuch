@@ -15,14 +15,17 @@ RUN apk update && apk upgrade && \
   g++
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
-COPY package.json package-lock.json ./
+COPY client/package.json client/package-lock.json ./
 RUN npm ci
-COPY . ./
+COPY client ./
 RUN npm run build
 
 # Stage 2 - the production environment
-FROM nginx:alpine
-COPY --from=build-deps /usr/src/app/build /var/www/html
-COPY nginx.conf /etc/nginx/nginx.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+FROM node:16.14-alpine3.15
+WORKDIR /usr/src/app
+COPY --from=build-deps /usr/src/app/build /usr/src/app/static
+COPY server/package.json server/package-lock.json ./
+RUN npm ci
+COPY server ./
+RUN npm run build
+CMD ["npm", "run", "start"]
