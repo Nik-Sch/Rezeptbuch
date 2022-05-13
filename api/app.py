@@ -45,6 +45,8 @@ checksumRequestParser.add_argument('checksum', type=int, required=False,
 @auth.verify_password
 def verify_password(username: str, password: str):
     hash = db.getPasswordHash(username)
+    if hash == None:
+        return False
     return pbkdf2_sha256.verify(password, hash)
 
 
