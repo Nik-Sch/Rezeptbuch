@@ -1,9 +1,8 @@
 import pymysql
-import base64
-import pysodium
 import os
 from flask_restful import fields, marshal
 from flask import make_response
+from passlib.hash import pbkdf2_sha256
 
 
 class Database:
@@ -291,37 +290,23 @@ class Database:
 
 
 # authentication
-
-    def __encrypt(self, pwd):
-        key = base64.b64decode(os.environ["ENCRYPTION_KEY"])
-        nonce = pysodium.randombytes(pysodium.crypto_secretbox_NONCEBYTES)
-        encrypted = nonce + pysodium.crypto_secretbox(pwd.encode(), nonce, key)
-        return base64.b64encode(encrypted).decode()
-
-    def __decrypt(self, encrypted):
-        key = base64.b64decode(os.environ["ENCRYPTION_KEY"])
-        decoded = base64.b64decode(encrypted)
-        nonce = decoded[:pysodium.crypto_secretbox_NONCEBYTES]
-        ciph = decoded[pysodium.crypto_secretbox_NONCEBYTES:]
-        return pysodium.crypto_secretbox_open(ciph, nonce, key).decode()
-
-    def getPassword(self, username):
+    def getPasswordHash(self, username):
         conn, _, _ = self.connect()
         try:
             cur = conn.cursor()
             cur.execute("SELECT `encrypted` FROM `user` WHERE `user` = %s;", [username])
             for res in cur.fetchall():
-                return self.__decrypt(res['encrypted'])
+                return res['encrypted']
         finally:
             conn.close()
 
     def addUser(self, username, pwd):
         conn, _, _ = self.connect()
         try:
-            encrypted = self.__encrypt(pwd)
+            hash = pbkdf2_sha256.hash(pwd)
             cur = conn.cursor()
             query = "INSERT INTO `user` (`user`, `encrypted`, `readOnly`) VALUES (%s, %s, '0');"
-            if cur.execute(query, [username, encrypted]) == 1:
+            if cur.execute(query, [username, hash]) == 1:
                 return True
         except:
             return False

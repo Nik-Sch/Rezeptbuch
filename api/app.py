@@ -15,6 +15,7 @@ import redis
 import io
 import json
 import threading
+from passlib.hash import pbkdf2_sha256
 
 app = Flask(__name__)
 app.secret_key = bytes(os.environ["FLASK_KEY"],
@@ -38,17 +39,20 @@ redisShoppingListDB = redis.StrictRedis(host='redis', port=6379, db=2)
 
 checksumRequestParser = reqparse.RequestParser()
 checksumRequestParser.add_argument('checksum', type=int, required=False,
-                           help='No checksum provided')
+                           help='No checksum provided', location='args')
 
 
-@auth.get_password
-def get_password(username: str):
-    return db.getPassword(username)
+@auth.verify_password
+def verify_password(username: str, password: str):
+    hash = db.getPasswordHash(username)
+    return pbkdf2_sha256.verify(password, hash)
 
 
 @auth.error_handler
 def unauthorized():
-    return make_response(jsonify({'message': 'Unauthorized access'}), 401)
+    session['userName'] = None
+    session['id'] = None
+    return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
 
 @app.route('/login', methods=['GET'])
@@ -199,7 +203,7 @@ class UserListAPI(Resource):
         if db.addUser(args['username'], args['password']):
             return make_response(jsonify({}), 200)
         else:
-            return make_response(jsonify({}), 400)
+            return make_response(jsonify({"message": "The username already exists, try another one"}), 409)
 
 class CommentListAPI(Resource):
     def __init__(self):
@@ -313,7 +317,7 @@ class RecipeListAPI(Resource):
                                  })
             t.start()
             return result
-        return make_response(jsonify({'error': 'an error occurred'}), 501)
+        return make_response(jsonify({'error': 'The recipe has not been inserted'}), 500)
 
 
 class RecipeAPI(Resource):

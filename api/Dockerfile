@@ -2,7 +2,7 @@ FROM python:3.8
 
 WORKDIR /usr/src/app
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends libsodium-dev mariadb-client \
+  && apt-get install -y --no-install-recommends mariadb-client \
   && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
