@@ -1,4 +1,5 @@
 import os
+from typing import Any, Literal, OrderedDict
 from flask import Flask, request, jsonify, abort, make_response, send_from_directory, send_file, session, Response
 from flask_restful import Api, Resource, reqparse
 from flask_httpauth import HTTPBasicAuth
@@ -41,14 +42,13 @@ checksumRequestParser.add_argument('checksum', type=int, required=False,
 
 
 @auth.get_password
-def get_password(username):
+def get_password(username: str):
     return db.getPassword(username)
 
 
 @auth.error_handler
 def unauthorized():
-    # return 403 instead of 401 to prevent default browser dialog
-    return make_response(jsonify({'message': 'Unauthorized access'}), 403)
+    return make_response(jsonify({'message': 'Unauthorized access'}), 401)
 
 
 @app.route('/login', methods=['GET'])
@@ -64,10 +64,13 @@ def logout():
     session['id'] = None
     return make_response(jsonify({}), 200)
 
+def sessionGet(key: Literal['userName', 'id'], default: Any = None):
+    return session.get(key, default)  # type: ignore
+
 @app.route('/status', methods=['GET'])
 def status():
-    userName = session.get('userName', None)
-    if (userName != None):
+    userName = sessionGet('userName')
+    if userName != None:
         return make_response(jsonify({
             'username': userName,
             'write': db.hasWriteAccess(userName)
@@ -76,7 +79,7 @@ def status():
         return unauthorized()
 
 
-def shoppinglist_stream(list_id):
+def shoppinglist_stream(list_id: str):
     data = redisShoppingListDB.hvals(list_id)
     data = [json.loads(x) for x in data]
     yield 'data: %s\n\n' % json.dumps(data)
@@ -89,6 +92,7 @@ def shoppinglist_stream(list_id):
             yield 'data: %s\n\n' % m['data']
 
 def handleShoppingList(list_id: str):
+    json: Any = request.json
     if request.method == 'GET':
         resp = Response(shoppinglist_stream(list_id),
                                 mimetype="text/event-stream")
@@ -96,10 +100,10 @@ def handleShoppingList(list_id: str):
         resp.headers['Cache-Control'] = 'no-transform' # for npm dev
         return resp
     elif request.method == 'POST' or request.method == 'PUT':
-        for item in request.json:
+        for item in json:
             redisShoppingListDB.hset(list_id, item['id'], json.dumps(item))
     elif request.method == 'DELETE':
-        for item in request.json:
+        for item in json:
             redisShoppingListDB.hdel(list_id, item['id'])
     data = redisShoppingListDB.hvals(list_id)
     data = [json.loads(x) for x in data]
@@ -110,7 +114,7 @@ def handleShoppingList(list_id: str):
 
 @app.route('/shoppingList', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def privateShoppingList():
-    user_name = session.get('userName', None)
+    user_name = sessionGet('userName')
     if (user_name != None):
         return handleShoppingList(user_name)
     else:
@@ -120,13 +124,13 @@ def privateShoppingList():
 def publicShoppingList(list_id: str):
     return handleShoppingList(list_id)
 
-def notifyNewRecipe(recipe, exclude):
+def notifyNewRecipe(recipe: OrderedDict[str, Any], exclude: int):
     print('sending notifications, but not to ', exclude)
     for sub in redisNotificationsDB.scan_iter():
         try:
             if sub.decode() == exclude:
                 continue
-            value = json.loads(redisNotificationsDB.get(sub))
+            value = json.loads(redisNotificationsDB.get(sub))  # type: ignore
             webpush(subscription_info=value['sub'],
                     data=json.dumps(recipe),
                     vapid_private_key=os.environ['PUSH_PRIVATE_KEY'],
@@ -139,12 +143,12 @@ def notifyNewRecipe(recipe, exclude):
 
 @app.route('/subscriptions/', methods=['POST'])
 def addSubscription():
-    userName = session.get('userName', None)
+    userName = sessionGet('userName')
     if (userName == None):
         return unauthorized()
     requestData = request.json
     if ('endpoint' in requestData and 'keys' in requestData):
-        sessionId = session.get('id', -1)
+        sessionId = sessionGet('id', -1)
         try:
             subscription = {}
             subscription['sub'] = requestData
@@ -158,14 +162,14 @@ def addSubscription():
 
 
 @app.route('/uniqueRecipes/<string:uuid>', methods=['GET'])
-def getUniqueRecipe(uuid):
+def getUniqueRecipe(uuid: str):
     if (not redisUniqueRecipeDB.exists(uuid)):
         return make_response('', 404)
-    return make_response(jsonify(json.loads(redisUniqueRecipeDB.get(uuid))), 200)
+    return make_response(jsonify(json.loads(redisUniqueRecipeDB.get(uuid))), 200)  # type: ignore
 
 @app.route('/uniqueRecipes', methods=['POST'])
 def addUniqueRecipe():
-    userName = session.get('userName', None)
+    userName = sessionGet('userName')
     if (userName == None):
         return unauthorized()
     requestData = request.json
@@ -176,7 +180,7 @@ def addUniqueRecipe():
 
 class UserListAPI(Resource):
     def get(self):
-        userName = session.get('userName', None)
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         args = checksumRequestParser.parse_args()
@@ -208,14 +212,14 @@ class CommentListAPI(Resource):
                                    location='json')
 
     def get(self):
-        userName = session.get('userName', None)
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         args = checksumRequestParser.parse_args()
         return db.getComments(userName, args['checksum'])
 
     def post(self):
-        userName = session.get('userName', None)
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
@@ -233,8 +237,8 @@ class CommentAPI(Resource):
                                    help='No text provided',
                                    location='json')
 
-    def get(self, commentId):
-        userName = session.get('userName', None)
+    def get(self, commentId: int):
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         result = db.getComment(userName, commentId)
@@ -243,8 +247,8 @@ class CommentAPI(Resource):
         return make_response(jsonify({'error': 'Not found'}), 404)
         return
     
-    def put(self, commentId):
-        userName = session.get('userName', None)
+    def put(self, commentId: int):
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
@@ -255,8 +259,8 @@ class CommentAPI(Resource):
         else:
             return make_response(jsonify({'error': 'No comment updated'}), 404)
 
-    def delete(self, commentId):
-        userName = session.get('userName', None)
+    def delete(self, commentId: int):
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
@@ -287,14 +291,14 @@ class RecipeListAPI(Resource):
         super(RecipeListAPI, self).__init__()
 
     def get(self):
-        userName = session.get('userName', None)
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         args = checksumRequestParser.parse_args()
         return db.getRecipes(userName, args['checksum'])
 
     def post(self):
-        userName = session.get('userName', None)
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
@@ -305,7 +309,7 @@ class RecipeListAPI(Resource):
         if result is not None:
             t = threading.Thread(target=notifyNewRecipe, kwargs={
                                  'recipe': result,
-                                 'exclude': session.get('id', -1)
+                                 'exclude': sessionGet('id', -1)
                                  })
             t.start()
             return result
@@ -332,8 +336,8 @@ class RecipeAPI(Resource):
 
         super(RecipeAPI, self).__init__()
 
-    def get(self, recipeId):
-        userName = session.get('userName', None)
+    def get(self, recipeId: int):
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         result = db.getRecipe(userName, recipeId)
@@ -341,8 +345,8 @@ class RecipeAPI(Resource):
             return result
         return make_response(jsonify({'error': 'Not found'}), 404)
 
-    def put(self, recipeId):
-        userName = session.get('userName', None)
+    def put(self, recipeId: int):
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
@@ -356,8 +360,8 @@ class RecipeAPI(Resource):
         else:
             return make_response(jsonify({'error': 'No recipe updated'}), 404)
 
-    def delete(self, recipeId):
-        userName = session.get('userName', None)
+    def delete(self, recipeId: int):
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
@@ -377,14 +381,14 @@ class CategoryListAPI(Resource):
         super(CategoryListAPI, self).__init__()
 
     def get(self):
-        userName = session.get('userName', None)
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         args = checksumRequestParser.parse_args()
         return db.getCategories(userName, args['checksum'])
 
     def post(self):
-        userName = session.get('userName', None)
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
@@ -401,14 +405,14 @@ IMAGE_FOLDER = '../images/'
 
 class ImageListAPI(Resource):
     def post(self):
-        userName = session.get('userName', None)
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         if not db.hasWriteAccess(userName):
             return make_response(jsonify({'error': 'no write access'}), 403)
         if 'image' not in request.files:
             return make_response(jsonify({'error': 'No image'}), 400)
-        file = request.files['image']
+        file = request.files['image']  # type: ignore
         if file:
             try:
                 hash = hashlib.sha256()
@@ -434,10 +438,10 @@ class ImageListAPI(Resource):
 
 class ImageAPI(Resource):
 
-    def get(self, name):
+    def get(self, name: str):
         try:
-            w = int(request.args['w'])
-            h = int(request.args['h'])
+            w = int(request.args['w'])  # type: ignore
+            h = int(request.args['h'])  # type: ignore
         except (KeyError, ValueError):
             return send_from_directory(IMAGE_FOLDER, name)
 
@@ -454,8 +458,8 @@ class ImageAPI(Resource):
         except IOError:
             abort(404)
 
-    def delete(self, name):
-        userName = session.get('userName', None)
+    def delete(self, name: str):
+        userName = sessionGet('userName')
         if (userName == None):
             return unauthorized()
         if (os.path.exists(IMAGE_FOLDER + name)):

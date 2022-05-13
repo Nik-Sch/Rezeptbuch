@@ -1,3 +1,4 @@
 #!/bin/sh
+echo "[$(date +"%Y-%m-%d %H:%M:%S %z")] Starting in 6s (waiting for db)"
 sleep 6 # wait for db to come up?
-gunicorn --worker-class=gevent --graceful-timeout 2 -t 9999 -b 0.0.0.0:80 --worker-tmp-dir /dev/shm --access-logfile - --reload app:app
+exec gunicorn app:app
