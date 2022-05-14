@@ -49,12 +49,18 @@ def verify_password(username: str, password: str):
         return False
     return pbkdf2_sha256.verify(password, hash)
 
+# remove the www-authenticate header to avoid browsers opening basic auth dialogs
+@app.after_request
+def remove_header(response):
+    del response.headers['www-authenticate']
+
+    return response
 
 @auth.error_handler
 def unauthorized():
     session['userName'] = None
     session['id'] = None
-    return make_response(jsonify({'message': 'Unauthorized access'}), 403)
+    return make_response(jsonify({'message': 'Unauthorized access'}), 401)
 
 
 @app.route('/login', methods=['GET'])
@@ -98,7 +104,7 @@ def shoppinglist_stream(list_id: str):
             yield 'data: %s\n\n' % m['data']
 
 def handleShoppingList(list_id: str):
-    json: Any = request.json
+    requestJson: Any = request.json
     if request.method == 'GET':
         resp = Response(shoppinglist_stream(list_id),
                                 mimetype="text/event-stream")
@@ -106,10 +112,10 @@ def handleShoppingList(list_id: str):
         resp.headers['Cache-Control'] = 'no-transform' # for npm dev
         return resp
     elif request.method == 'POST' or request.method == 'PUT':
-        for item in json:
+        for item in requestJson:
             redisShoppingListDB.hset(list_id, item['id'], json.dumps(item))
     elif request.method == 'DELETE':
-        for item in json:
+        for item in requestJson:
             redisShoppingListDB.hdel(list_id, item['id'])
     data = redisShoppingListDB.hvals(list_id)
     data = [json.loads(x) for x in data]
@@ -202,10 +208,14 @@ class UserListAPI(Resource):
                             help='No password provided',
                             location='json')
         args = reqParser.parse_args()
+        if len(args['username']) < 3:
+            return make_response(jsonify({"message": "The username is too short (3 chars minimum)."}), 400)
+        if len(args['password']) < 8:
+            return make_response(jsonify({"message": "The password is too short (8 chars minimum)."}), 400)
         if db.addUser(args['username'], args['password']):
             return make_response(jsonify({}), 200)
         else:
-            return make_response(jsonify({"message": "The username already exists, try another one"}), 409)
+            return make_response(jsonify({"message": "The username already exists, try another one."}), 409)
 
 class CommentListAPI(Resource):
     def __init__(self):
@@ -358,7 +368,6 @@ class RecipeAPI(Resource):
         if not db.hasWriteAccess(userName):
             return make_response(jsonify({'error': 'no write access'}), 403)
         args = self.reqparse.parse_args()
-        print(args)
         result = db.updateRecipe(
             recipeId, userName, args['title'], args['categoryId'], args['ingredients'], args['description'], args['image'])
         if result:
