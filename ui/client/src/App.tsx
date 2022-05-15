@@ -2,13 +2,14 @@ import { lazy, Suspense, useEffect } from 'react';
 import './App.scss';
 import { Route, BrowserRouter as Router, Routes, Navigate, useLocation } from 'react-router-dom';
 import { Classes, Card, H1, H3 } from '@blueprintjs/core';
-import { fetchUserInfo, getUserInfo } from './util/Network';
+import recipesHandler, { getUserInfo, ICategory, IRecipe, IUser } from './util/Network';
 import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
 import { localStorageDarkTheme } from './util/StorageKeys';
 import Header from './components/Header';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
+import { AppToasterTop } from './util/toaster';
 
 
 const RecipeList = lazy(() => import('./components/recipeList/RecipeList'));
@@ -52,22 +53,23 @@ function NotFound(props: IDarkThemeProps) {
 
 function Fallback(props: IDarkThemeProps) {
   return <>
-  <Header
-    darkThemeProps={props}
-    className='login-header'
-  />
-  <div className='card-wrapper'>
-    <Card
-      className='login'
-      elevation={1}
-    >
-      <H3>Loading...</H3>
-    </Card>
-  </div>
-</>
+    <Header
+      darkThemeProps={props}
+      className='login-header'
+    />
+    <div className='card-wrapper'>
+      <Card
+        className='login'
+        elevation={1}
+      >
+        <H3>Loading...</H3>
+      </Card>
+    </div>
+  </>
 }
 
 function App() {
+  const [t] = useTranslation();
 
   const [darkTheme, setDarkTheme] = usePersistentState(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches, localStorageDarkTheme);
   const handleThemeChange = (theme: boolean) => {
@@ -80,11 +82,15 @@ function App() {
 
   const [authenticated, setAuthenticated] = useState(typeof getUserInfo() !== 'undefined');
   useEffect(() => {
-    (async () => {
-      const result = await fetchUserInfo(); // just make sure to always check the status
-      setAuthenticated(typeof result !== 'undefined');
-    })();
-  }, []);
+    const handleRecipesChange = (_recipes: IRecipe[], _categories: ICategory[], _users: IUser[], loggedIn: boolean) => {
+      if (authenticated && !loggedIn) {
+        AppToasterTop.show({ message: t('loggedOut'), intent: 'danger' });
+      }
+      setAuthenticated(loggedIn);
+    }
+    return recipesHandler.subscribe(handleRecipesChange);
+
+  }, [authenticated, t]);
   const mobile = useMobile();
 
   const routes = [
@@ -101,7 +107,7 @@ function App() {
         <meta name="color-scheme" content={darkTheme ? 'dark' : 'light'} />
       </Helmet>
       <Router>
-        <Suspense fallback={<Fallback darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange}/>}>
+        <Suspense fallback={<Fallback darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange} />}>
           <Routes>
             <Route
               path='/login'

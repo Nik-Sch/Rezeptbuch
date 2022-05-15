@@ -81,7 +81,7 @@
   "noMatch": "The passwords don't match",
   "accountCreated": "The account was successfully created.",
   "accountError": "There was an error while creating the account. Inform Niklas.",
-  "accountErrorExists": "The username already exists",
+  "accountErrorServer": "The server returned: {{message}}",
   "edit": "Edit",
   "edited": "edited {{date}}",
   "deleteComment": "Delete Comment",
@@ -126,5 +126,6 @@
   "add": "Add",
   "filter": "Filter and Sort",
   "ok": "Ok",
-  "shoppingListName": "{{name}} Shopping List"
+  "shoppingListName": "{{name}} Shopping List",
+  "loggedOut": "You have been logged out"
 }

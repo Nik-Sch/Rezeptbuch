@@ -75,7 +75,7 @@
   "noRecipes": "Es gibt noch keine Rezepte hier. Du solltest eins erstellen.",
   "accountCreated": "Dein Account wurde erfolgreich erstellt.",
   "accountError": "Beim Erstellen des Accounts ist ein Fehler aufgetreten. Informiere Niklas.",
-  "accountErrorExists": "Der Benutzername existiert bereits",
+  "accountErrorServer": "Der Server sagt: {{message}}",
   "alreadyAccount": "Du hast schon einen Account?",
   "createAccount": "Einen Account erstellen",
   "createdCategoryError": "Beim Erstellen der Kategorie ist ein unerwarteter Fehler aufgetreten. Informiere Niklas.",

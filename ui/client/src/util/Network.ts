@@ -175,7 +175,8 @@ export interface IUploadCallbacks {
 type ICallBack = (
   recipes: IRecipe[],
   categories: ICategory[],
-  users: IUser[]
+  users: IUser[],
+  loggedIn: boolean
 ) => void
 class Recipes {
 
@@ -206,7 +207,7 @@ class Recipes {
 
   public subscribe(callback: ICallBack) {
     this.callbacks.push(callback);
-    callback(this.recipeCache, this.categoryCache, this.userCache);
+    callback(this.recipeCache, this.categoryCache, this.userCache, typeof userInfo !== 'undefined');
     this.fetchData();
     return () => { recipesHandler.unsubscribe(callback); };
   }
@@ -337,7 +338,7 @@ class Recipes {
   private notify() {
     // console.debug('notifying', this.callbacks);
     for (const callback of this.callbacks) {
-      callback(this.recipeCache, this.categoryCache, this.userCache);
+      callback(this.recipeCache, this.categoryCache, this.userCache, typeof userInfo !== 'undefined');
     }
   }
 
@@ -447,9 +448,10 @@ class Recipes {
         this.recipeCache = this.recipeCache.map(r => reloadComments(r, this.userCache, this.commentCache));
         await set(RECIPE_CACHE, this.recipeCache);
       }
-      this.notify();
     } catch (e) {
       console.error('failed to fetch, offline', e);
+    } finally {
+      this.notify();
     }
   }
 }
@@ -504,6 +506,8 @@ export async function fetchUserInfo(): Promise<IStatus | undefined> {
   if (result.status === 200) {
     userInfo = await result.json();
     localStorage.setItem(localStorageUserInfo, JSON.stringify(userInfo));
+  } else if (result.status === 401) {
+    await clearLoginData();
   } else {
     localStorage.removeItem(localStorageUserInfo);
     return undefined;
@@ -524,7 +528,7 @@ export async function loginToRecipes(user: string, password: string) {
   }
 }
 
-export async function createAccount(user: string, password: string) {
+export async function createAccount(user: string, password: string): Promise<boolean|string> {
   const headers = getHeaders();
   headers.append('Content-Type', 'application/json');
   const result = await fetch('/api/users', {
@@ -532,18 +536,29 @@ export async function createAccount(user: string, password: string) {
     body: JSON.stringify({ username: user, password }),
     headers,
   });
-  console.log(await result.text());
   localStorage.clear()
-  return result.status === 200;
+
+  if (result.ok) {
+    return true;
+  }
+  try {
+    return (await result.json()).message;
+  } catch {
+    return false;
+  }
+}
+
+async function clearLoginData() {
+  userInfo = undefined;
+  localStorage.clear();
+  await del(RECIPE_CACHE);
+  await del(CATEGORY_CACHE);
 }
 
 export async function logout() {
   const result = await fetch(`/api/logout`);
   if (result.status === 200) {
-    userInfo = undefined;
-    localStorage.clear()
-    await del(RECIPE_CACHE);
-    await del(CATEGORY_CACHE);
+    await clearLoginData();
   }
 }
 

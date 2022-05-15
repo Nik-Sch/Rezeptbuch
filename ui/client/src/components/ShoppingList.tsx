@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import './ShoppingList.scss';
 import classNames from "classnames";
 import { localStorageShoppingList } from "../util/StorageKeys";
-import { getShoppingListUrl, getUserInfo, updateShoppingItem } from "../util/Network";
+import recipesHandler, { getShoppingListUrl, getUserInfo, updateShoppingItem } from "../util/Network";
 import { useDrag, useDrop, DropTargetMonitor, DndProvider, XYCoord } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
@@ -500,6 +500,11 @@ export default function ShoppingList(props: IDarkThemeProps) {
     method: 'DELETE' | 'POST' | 'PUT'
   }[]>([]);
 
+  // fetch recipes to refresh the login information
+  useEffect(() => {
+    recipesHandler.fetchData();
+  }, []);
+
 
   const updateItems = useCallback(async (listKey: string, items: IShoppingItem[], method: 'DELETE' | 'POST' | 'PUT') => {
     if (online) {
@@ -691,17 +696,6 @@ export default function ShoppingList(props: IDarkThemeProps) {
     (async () => {
       await updateItems(state.active, [newItem], 'PUT');
     })();
-    //   notChecked[oldElemIndexNotChecked] = newItem;
-    //   if (shouldRefocus && notCheckedRefs[oldElemIndexNotChecked + 1]) {
-    //     notCheckedRefs[oldElemIndexNotChecked + 1].focus();
-    //   }
-    // }
-    // if (oldElemIndexChecked !== -1) {
-    //   checked[oldElemIndexChecked] = newItem;
-    //   if (shouldRefocus && checkedRefs[oldElemIndexChecked + 1]) {
-    //     checkedRefs[oldElemIndexChecked + 1].focus();
-    //   }
-    // }
   };
 
   const deleteElement = (item: IShoppingItem) => {

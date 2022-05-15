@@ -68,7 +68,7 @@ export default function LoginPage(props: IDarkThemeProps & {setAuthenticated: (s
       }
       setIsSubmitting(true);
       createAccount(details.username, details.password).then(async created => {
-        if (created) {
+        if (created === true) {
           AppToasterTop.show({ message: t('accountCreated'), intent: 'success' });
           const success = await loginToRecipes(details.username, details.password);
           if (success) {
@@ -77,8 +77,10 @@ export default function LoginPage(props: IDarkThemeProps & {setAuthenticated: (s
           } else {
             AppToasterTop.show({ message: t('accountError'), intent: 'danger' })
           }
+        } else if (typeof created === 'string') {
+          AppToasterTop.show({ message: t('accountErrorServer', {message: created}), intent: 'warning' })
         } else {
-          AppToasterTop.show({ message: t('accountErrorExists'), intent: 'warning' })
+          AppToasterTop.show({ message: t('accountError'), intent: 'warning' })
         }
       });
     }
@@ -114,7 +116,7 @@ export default function LoginPage(props: IDarkThemeProps & {setAuthenticated: (s
       <Button
         {...tooltipProps}
         elementRef={ref as any}
-        icon={showPassword ? "unlock" : "lock"}
+        icon={showPassword2 ? "unlock" : "lock"}
         intent={Intent.WARNING}
         minimal={true}
         disabled={isSubmitting}
