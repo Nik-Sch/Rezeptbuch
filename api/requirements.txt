@@ -6,7 +6,7 @@ cffi==1.14.0
 chardet==3.0.4
 charset-normalizer==2.0.12
 click==6.7
-cryptography==3.2
+cryptography==37.0.2
 dnspython==1.16.0
 eventlet==0.31.0
 Flask==1.0.2
@@ -31,9 +31,10 @@ pycparser==2.20
 PyMySQL==0.9.3
 python-dateutil==2.7.3
 pytz==2018.5
-pywebpush==1.11.0
+pywebpush==1.14.0
 redis==3.5.2
-six==1.11.0
+requests==2.27.1
+six==1.16.0
 urllib3==1.26.5
 Werkzeug==0.15.5
 zope.event==4.4
