@@ -103,6 +103,22 @@ def shoppinglist_stream(list_id: str):
             m = json.loads(message['data'])
             yield 'data: %s\n\n' % m['data']
 
+def verifyShoppingListJson(requestJson: Any):
+    if not isinstance(requestJson, list):
+        return make_response(jsonify({'error': 'Expected an array'}), 400)
+    for item in requestJson:
+        if not 'id' in item:
+            return make_response(jsonify({'error': 'Each element requires id'}), 400)
+        if not 'text' in item:
+            return make_response(jsonify({'error': 'Each element requires text'}), 400)
+        if not 'checked' in item:
+            return make_response(jsonify({'error': 'Each element requires checked'}), 400)
+        if not 'position' in item:
+            return make_response(jsonify({'error': 'Each element requires position'}), 400)
+        if not 'addedTime' in item:
+            return make_response(jsonify({'error': 'Each element requires addedTime'}), 400)
+    return True
+
 def handleShoppingList(list_id: str):
     requestJson: Any = request.json
     if request.method == 'GET':
@@ -112,9 +128,15 @@ def handleShoppingList(list_id: str):
         resp.headers['Cache-Control'] = 'no-transform' # for npm dev
         return resp
     elif request.method == 'POST' or request.method == 'PUT':
+        verify = verifyShoppingListJson(requestJson)
+        if verify != True:
+            return verify
         for item in requestJson:
             redisShoppingListDB.hset(list_id, item['id'], json.dumps(item))
     elif request.method == 'DELETE':
+        verify = verifyShoppingListJson(requestJson)
+        if verify != True:
+            return verify
         for item in requestJson:
             redisShoppingListDB.hdel(list_id, item['id'])
     data = redisShoppingListDB.hvals(list_id)
@@ -243,8 +265,8 @@ class CommentListAPI(Resource):
         args = self.reqparse.parse_args()
         try:
             return db.addComment(userName, args['text'], args['recipeId'])
-        except:
-            return make_response(jsonify({'error': 'no write access'}), 405)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
 
 class CommentAPI(Resource):
     def __init__(self):
@@ -447,7 +469,6 @@ class ImageListAPI(Resource):
                 response.autocorrect_location_header = False
                 return response
             except IOError as e:
-                print(e)
                 return make_response(jsonify({'error': 'File isn\'t an image'}), 400)
 
 
@@ -483,10 +504,10 @@ class ImageAPI(Resource):
 
 
 api.add_resource(UserListAPI, '/users', endpoint='users')
-api.add_resource(RecipeAPI, '/recipes/<int:recipeId>', endpoint='recipe')
 api.add_resource(RecipeListAPI, '/recipes', endpoint='recipes')
-api.add_resource(CommentAPI, '/comments/<int:commentId>', endpoint='comment')
+api.add_resource(RecipeAPI, '/recipes/<int:recipeId>', endpoint='recipe')
 api.add_resource(CommentListAPI, '/comments', endpoint='comments')
+api.add_resource(CommentAPI, '/comments/<int:commentId>', endpoint='comment')
 api.add_resource(CategoryListAPI, '/categories', endpoint='categories')
 api.add_resource(ImageListAPI, '/images', endpoint='images')
 api.add_resource(ImageAPI, '/images/<string:name>', endpoint='image')
