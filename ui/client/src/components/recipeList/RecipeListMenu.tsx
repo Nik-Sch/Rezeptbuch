@@ -11,7 +11,7 @@ import { useMobile } from '../helpers/CustomHooks';
 import { UserMultiSelect } from '../helpers/UserMultiSelect';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames';
-import { Tooltip2 } from '@blueprintjs/popover2';
+import { Tooltip2, Classes as Classes2 } from '@blueprintjs/popover2';
 
 export type Counts = { [id: number]: number };
 export interface ISearchProps {
@@ -106,14 +106,18 @@ export default function RecipeListMenu(myProps: ISearchProps) {
   const searchInIngredientsButton = (
     <Tooltip2
       content={props.searchInIngredients ? t('tooltipSearchInIngredients') : t('tooltipNotSearchInIngredients')}
-    >
-      <Button
-        icon='properties'
-        intent={props.searchInIngredients ? 'primary' : 'none'}
-        minimal={true}
-        onClick={() => props.handleSearchInIngredientsChange(!props.searchInIngredients)}
-      />
-    </Tooltip2>
+      position='bottom'
+      popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+      renderTarget={({isOpen, ref, ...tooltipProps}) => (
+        <Button
+          {...tooltipProps}
+          icon='properties'
+          elementRef={ref as any}
+          intent={props.searchInIngredients ? 'primary' : 'none'}
+          minimal={true}
+          onClick={() => props.handleSearchInIngredientsChange(!props.searchInIngredients)}
+        />)}
+    />
   );
   return <Card className='menu'>
     <NavigationLinks

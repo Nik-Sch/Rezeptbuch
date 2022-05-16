@@ -12,7 +12,6 @@ import classNames from "classnames";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { AppToasterTop } from "../util/toaster";
 import { Classes as Classes2, Tooltip2 } from "@blueprintjs/popover2";
-import '@blueprintjs/popover2/src/blueprint-popover2.scss';
 import { useEffect } from "react";
 
 export default function LoginPage(props: IDarkThemeProps & {setAuthenticated: (success: boolean) => void}) {
