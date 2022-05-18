@@ -1,7 +1,9 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
 .recipe-container {
-  margin: 20px 15px;
+  padding: 20px;
+  border-radius: $pt-border-radius * 2;
+  margin-top: 15px;
 
   .recipe {
     width: 100%;
@@ -10,15 +12,6 @@
     align-items: flex-start;
     text-align: justify;
     text-justify: inter-word;
-    // overflow: hidden;
-
-    .edit-container {
-      align-self: flex-end;
-
-      .#{$bp-ns}-button-group {
-        margin: 0 20px;
-      }
-    }
 
     .#{$bp-ns}-editable-text {
       width: 100%;
@@ -51,9 +44,21 @@
     }
     .title-wrapper {
       width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+
       .title {
-        margin-top: 20px;
         font-family: "Montserrat Alternates", sans-serif;
+        // undo callout heading css (_callout.scss:56)
+        line-height: unset;
+        margin-bottom: unset;
+        margin-top: unset;
+      }
+      .edit-container {
+        flex-basis: 1;
+        flex-shrink: 0;
       }
     }
     .user {
@@ -87,7 +92,6 @@
 
     .image {
       cursor: pointer;
-      margin: 0 20px;
       max-width: 35%;
       flex: 1 0 30%;
       align-self: center;
@@ -156,6 +160,11 @@
     color: rgba($gray1, 0.6);
   }
 }
+
+.#{$bp-ns}-dark .recipe-container {
+  background-color: $dark-gray4;
+}
+
 .#{$bp-ns}-dark .no-ingredients {
   color: rgba($gray4, 0.6);
 }

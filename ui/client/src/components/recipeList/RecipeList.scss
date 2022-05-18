@@ -1,69 +1,53 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
-.page {
-  .body {
+.main-content {
+  margin-top: 40px;
+  .recipe-list-action {
+    // position: sticky;
+    // top: 105px;
+    padding: 20px 15px;
+    margin: 35px 0;
+    z-index: 10;
     display: flex;
-    max-width: 1280px;
-    margin: 0 auto;
-    height: 100%;
-    .main-content.unique {
-      max-width: 100%;
-    }
-    .main-content {
-      min-height: 50vh; // fix for weird behaviour in the top margin of the left menu
-      margin-right: 15px;
-      flex: 0 1 75%;
-      max-width: 75%;
-
-      .header {
-        position: sticky;
-        top: 105px;
-        padding: 20px 15px;
-        margin: 0 15px 35px 15px;
-        z-index: 10;
-        display: flex;
-        justify-content: space-between;
-        .sort-button {
-          margin-right: 0;
-        }
-      }
-
-      .notification-asker {
-        margin: 15px;
-        width: auto;
-        .title-wrapper {
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-        }
-      }
-
-      a {
-        text-decoration: none;
-      }
-
-      .error {
-        margin: 20px auto;
-        text-align: center;
-        font-family: "Montserrat Alternates", sans-serif;
-        padding: 0 25px;
-      }
+    justify-content: space-between;
+  }
+  .notification-asker {
+    margin: 15px;
+    width: auto;
+    .title-wrapper {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
     }
   }
 
-  .fab-add {
-    position: fixed;
-    top: calc(100vh - 100px);
-    // bottom: 30px;
-    right: 30px;
-    font-size: 40px !important;
-    // background-color: $green2;
-    // color: #f5f8fa;
-    box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.2), 0 4px 8px rgba(16, 22, 26, 0.4), 0 9px 46px 6px rgba(16, 22, 26, 0.4) !important;
-    border-radius: 100%;
-    border: none;
-    outline: none;
+  a {
+    text-decoration: none;
   }
+
+  .error {
+    margin: 20px auto;
+    text-align: center;
+    font-family: "Montserrat Alternates", sans-serif;
+    padding: 0 25px;
+  }
+}
+.side-menu .sort-recipes .#{$bp-ns}-popover-wrapper .#{$bp-ns}-popover-target {
+  display: unset;
+}
+
+.fab-add {
+  position: fixed;
+  top: calc(100vh - 100px);
+  // bottom: 30px;
+  right: 30px;
+  font-size: 40px !important;
+  // background-color: $green2;
+  // color: #f5f8fa;
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.2), 0 4px 8px rgba(16, 22, 26, 0.4), 0 9px 46px 6px rgba(16, 22, 26, 0.4) !important;
+  border-radius: 100%;
+  border: none;
+  outline: none;
 }
 
 .mobile .page .body .main-content {

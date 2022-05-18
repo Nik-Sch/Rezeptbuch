@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import recipesHandler, { IRecipe, ICategory, emptyRecipe, getUserInfo } from '../../util/Network';
-import { H1, EditableText, Classes, Button, H3, Card, H5, H4, ButtonGroup, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton } from '@blueprintjs/core';
+import { H1, EditableText, Classes, Button, H3, Card, H5, H4, ButtonGroup, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton, Callout } from '@blueprintjs/core';
 
 import { AppToasterTop } from '../../util/toaster';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +17,7 @@ import ShareButton from './ShareButton';
 import { DesktopIngredients, showDot } from './Ingredients';
 import DescriptionTextArea from './DescriptionTextArea';
 import CommentSection from './CommentSection';
-import { INavigationLink, NavigationLinks } from '../recipeList/RecipeListMenu';
+import SideMenu, { INavigationLink } from '../SideMenu';
 import { addShoppingItems } from '../ShoppingList';
 import { usePrompt } from '../helpers/ReactRouterHooks';
 import { Classes as Classes2, Popover2, Tooltip2 } from '@blueprintjs/popover2';
@@ -443,86 +443,85 @@ export default function Recipe(props: IDarkThemeProps) {
         darkThemeProps={props}
       />
       <div className='body'>
-        <Card className='menu'>
-          <NavigationLinks
-            navigationLinks={navigationLinks}
-          />
-        </Card>
+        <SideMenu darkModeProps={props} currentNavigation='recipes'/>
         <div className='main-content'>
-          <div className='recipe-container'>
-            <Card className='recipe' elevation={2}>
-              {state.loaded && <div className='edit-container'>
-                {state.editing ?
-                  <ButtonGroup>
-                    <CancelButton
-                      handleDiscardClick={handleDiscardClick}
-                      popoverTarget={<Button
-                        text={t('cancelEdit')}
-                        onClick={handleCancelClick}
-                      />}
-                    />
-                    <Tooltip2
-                      disabled={online}
-                      content={t('tooltipOffline')}
-                      position='bottom'
-                    >
-                      <AnchorButton
-                        disabled={!online}
-                        icon='floppy-disk'
-                        text={t('saveRecipe')}
-                        intent='primary'
-                        onClick={saveRecipe}
-                      />
-                    </Tooltip2>
-                  </ButtonGroup>
-                  :
-                  <ButtonGroup>
-                    <ShareButton recipe={recipe} />
-                    <Tooltip2
-                      disabled={online && hasWriteAccess}
-                      content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
-                      position='bottom'
-                    >
-                      <AnchorButton
-                        icon='edit'
-                        disabled={!(online && hasWriteAccess)}
-                        intent='primary'
-                        text={t('editRecipe')}
-                        onClick={handleSetEditable}
-                      />
-                    </Tooltip2>
-                    <DeleteButton
-                      handleDeleteClick={handleDeleteClick}
-                      disabled={!(online && hasWriteAccess)}
-                      popoverTarget={
-                        <Tooltip2
-                          disabled={online && hasWriteAccess}
-                          content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
-                          position='bottom'
-                        >
-                          <AnchorButton
-                            text={t('deleteRecipe')}
-                            disabled={!(online && hasWriteAccess)}
-                            intent='warning'
-                            icon='trash'
-                          />
-                        </Tooltip2>
-                      }
-                    />
-                  </ButtonGroup>
-                }
-              </div>}
+          <Callout className='recipe-container'>
+            <div className='recipe'>
+
               {error && <H3>{t('notFound')}</H3>}
-              <H1 className='title-wrapper'>
-                <EditableText
-                  multiline={true}
-                  className={classNames(state.loaded ? '' : Classes.SKELETON, 'title')}
-                  placeholder={t('phTitle')}
-                  disabled={!state.editing}
-                  value={recipe.title}
-                  onChange={handleSetTitle}
-                />
-              </H1>
+              <div className='title-wrapper'>
+                <H1 className='title'>
+                  <EditableText
+                    multiline={true}
+                    className={classNames(state.loaded ? '' : Classes.SKELETON)}
+                    placeholder={t('phTitle')}
+                    disabled={!state.editing}
+                    value={recipe.title}
+                    onChange={handleSetTitle}
+                  />
+                </H1>
+                {state.loaded && <div className='edit-container'>
+                  {state.editing ?
+                    <ButtonGroup>
+                      <CancelButton
+                        handleDiscardClick={handleDiscardClick}
+                        popoverTarget={<Button
+                          text={t('cancelEdit')}
+                          onClick={handleCancelClick}
+                        />}
+                      />
+                      <Tooltip2
+                        disabled={online}
+                        content={t('tooltipOffline')}
+                        position='bottom'
+                      >
+                        <AnchorButton
+                          disabled={!online}
+                          icon='floppy-disk'
+                          text={t('saveRecipe')}
+                          intent='primary'
+                          onClick={saveRecipe}
+                        />
+                      </Tooltip2>
+                    </ButtonGroup>
+                    :
+                    <ButtonGroup>
+                      <ShareButton recipe={recipe} />
+                      <Tooltip2
+                        disabled={online && hasWriteAccess}
+                        content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
+                        position='bottom'
+                      >
+                        <AnchorButton
+                          icon='edit'
+                          disabled={!(online && hasWriteAccess)}
+                          intent='primary'
+                          text={t('editRecipe')}
+                          onClick={handleSetEditable}
+                        />
+                      </Tooltip2>
+                      <DeleteButton
+                        handleDeleteClick={handleDeleteClick}
+                        disabled={!(online && hasWriteAccess)}
+                        popoverTarget={
+                          <Tooltip2
+                            disabled={online && hasWriteAccess}
+                            content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
+                            position='bottom'
+                          >
+                            <AnchorButton
+                              text={t('deleteRecipe')}
+                              disabled={!(online && hasWriteAccess)}
+                              intent='warning'
+                              icon='trash'
+                            />
+                          </Tooltip2>
+                        }
+                      />
+                    </ButtonGroup>
+                  }
+                </div>}
+              </div>
               <div className='text-image-wrapper'>
                 <div className='text-wrapper'>
                   <H3>
@@ -592,8 +591,8 @@ export default function Recipe(props: IDarkThemeProps) {
               <H5 className='user'>
                 {!state.editing && `${t('by')} ${recipe.user.user}.`}
               </H5>
-            </Card>
-          </div>
+            </div>
+          </Callout>
           {recipe.id !== -1 && <CommentSection
             comments={recipe.comments}
             username={status?.username ?? ''}

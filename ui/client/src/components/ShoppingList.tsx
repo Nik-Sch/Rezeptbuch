@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import Header from "./Header";
-import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text, MenuItem, AnchorButton, ButtonGroup, InputGroup, Dialog, Radio, RadioGroup } from "@blueprintjs/core";
+import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text, MenuItem, AnchorButton, ButtonGroup, InputGroup, Dialog, Radio, RadioGroup, Callout } from "@blueprintjs/core";
 import { usePersistentState, useMobile } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
 import { IDarkThemeProps } from "../App";
-import { INavigationLink, NavigationLinks } from "./recipeList/RecipeListMenu";
+import SideMenu, { INavigationLink } from "./SideMenu";
 import dayjs from "dayjs";
 import './ShoppingList.scss';
 import classNames from "classnames";
@@ -892,39 +892,9 @@ export default function ShoppingList(props: IDarkThemeProps) {
       />
     </Header>
     <div className='body'>
-      {!mobile &&
-        <Card className='menu'>
-          <NavigationLinks
-            navigationLinks={navigationLinks}
-          />
-        </Card>}
+      {!mobile && <SideMenu darkModeProps={props} currentNavigation='shopping-list'/>}
       <div className='main-content'>
-        <CardNoCard className='shopping-list-wrapper'>
-          {!mobile && <div className='edit-container'>
-            {statusElement}
-            <ButtonGroup vertical={false} alignText='right'>
-              <Tooltip2
-                content={state.active === 'default' ? t('shoppingListNoShare') : t('shoppingListShare')}
-                position='bottom'
-              >
-                <AnchorButton
-                  icon='share'
-                  minimal={mobile}
-                  large={mobile}
-                  text={mobile ? undefined : t('share')}
-                  disabled={state.active === 'default'}
-                  intent='primary'
-                  onClick={shareShoppingList}
-                />
-              </Tooltip2>
-              <Button
-                text={t('deleteAll')}
-                icon='trash'
-                intent='warning'
-                onClick={removeAllItems}
-              />
-            </ButtonGroup>
-          </div>}
+        <div className='shopping-list-wrapper'>
           <div className='shopping-list-head'>
             {authenticated ?
               <ShoppingListSelect
@@ -954,6 +924,31 @@ export default function ShoppingList(props: IDarkThemeProps) {
               />
               : <H1>{`${state.lists[state.active].name} Shopping List`}</H1>
             }
+            {!mobile && <div className='edit-container'>
+              {statusElement}
+              <ButtonGroup vertical={false} alignText='right'>
+                <Tooltip2
+                  content={state.active === 'default' ? t('shoppingListNoShare') : t('shoppingListShare')}
+                  position='bottom'
+                >
+                  <AnchorButton
+                    icon='share'
+                    minimal={mobile}
+                    large={mobile}
+                    text={mobile ? undefined : t('share')}
+                    disabled={state.active === 'default'}
+                    intent='primary'
+                    onClick={shareShoppingList}
+                  />
+                </Tooltip2>
+                <Button
+                  text={t('deleteAll')}
+                  icon='trash'
+                  intent='warning'
+                  onClick={removeAllItems}
+                />
+              </ButtonGroup>
+            </div>}
           </div>
           <div className='shopping-list'>
             <DndProvider backend={mobile ? TouchBackend : HTML5Backend}>
@@ -1027,7 +1022,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
               </DndProvider>
             </Collapse>
           </div>
-        </CardNoCard>
+        </div>
       </div>
     </div>
   </>

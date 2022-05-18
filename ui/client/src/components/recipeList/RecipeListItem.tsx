@@ -1,5 +1,5 @@
 import { IRecipe } from '../../util/Network';
-import { CardProps, Card, H5, H3, Classes } from '@blueprintjs/core';
+import { CardProps, Card, H5, H3, Classes, Callout, Divider } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { MyImage } from '../helpers/Image';
 import dayjs from 'dayjs';
@@ -10,16 +10,17 @@ import { Link } from 'react-router-dom';
 import './RecipeListItem.scss'
 import { useMobile } from '../helpers/CustomHooks';
 import classNames from 'classnames';
+import { CSSProperties } from 'react';
 
 dayjs.extend(localizedFormat);
 
-interface IRecipeListItemProps extends CardProps {
-  recipe?: IRecipe
+interface IRecipeListItemProps {
+  recipe?: IRecipe;
+  style: CSSProperties;
 }
 
-const RecipeListItem = (myProps: IRecipeListItemProps) => {
+const RecipeListItem = ({recipe, style}: IRecipeListItemProps) => {
   const [, i18n] = useTranslation();
-  const { recipe, style, ...props } = myProps;
 
   const date = dayjs(recipe?.date).locale(i18n.language).format('L');
 
@@ -32,7 +33,7 @@ const RecipeListItem = (myProps: IRecipeListItemProps) => {
       to={recipe ? `/recipes/${recipe.id}` : '/'}
       style={style}
     >
-      <Card {...props}>
+      <Card className={`recipe-list-item`}>
         <H3 className={classNames('recipe-title', recipe ? '' : Classes.SKELETON)}>{recipe?.title}</H3>
         <div className='content-wrapper'>
           <div className={classNames('thumbnail', recipe ? '' : Classes.SKELETON)}>
@@ -59,8 +60,9 @@ const RecipeListItem = (myProps: IRecipeListItemProps) => {
       style={style}
       className='desktop'
     >
-      <Card
-        {...props}
+      <div
+        className={`recipe-list-item`}
+
       >
         <div className={classNames('thumbnail', recipe ? '' : Classes.SKELETON)}>
           {recipe && <MyImage
@@ -80,7 +82,8 @@ const RecipeListItem = (myProps: IRecipeListItemProps) => {
             <div className={classNames('recipe-date', recipe ? '' : Classes.SKELETON)}>{date}</div>
           </div>
         </div>
-      </Card>
+      </div>
+      <Divider/>
     </Link>
   }
 };

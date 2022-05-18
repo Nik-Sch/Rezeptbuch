@@ -3,9 +3,16 @@
 
 .recipe-list-item {
   display: flex;
-  margin: 0px 15px 20px 15px;
-  
+  margin: 0 15px 20px 0;
+  padding: 20px;
   height: 150px;
+
+  // background-color: $white;
+  // border-radius: $pt-border-radius;
+  // box-shadow: $pt-elevation-shadow-0;
+  // &:hover {
+  //   box-shadow: $pt-elevation-shadow-2;
+  // }
 
   .thumbnail {
     width: 110px;
@@ -74,6 +81,15 @@
   }
 }
 
+// .#{$bp-ns}-dark .recipe-list-item {
+//   background-color: $dark-gray4;
+//   border-radius: $pt-border-radius;
+//   box-shadow: unset;
+//   &:hover {
+//     box-shadow: $pt-dark-elevation-shadow-1;
+//   }
+// }
+
 .ellipsis {
   overflow: hidden;
   position: relative;
@@ -87,10 +103,10 @@
   right: 0;
   width: 70%;
   height: 1.2em;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7) 50%);
+  background: linear-gradient(to right, rgba($light-gray5, 0), rgba($light-gray5, 0.7) 50%);
 }
 .#{$bp-ns}-dark .ellipsis::after {
-  background: linear-gradient(to right, rgba($background-dark-card, 0), rgba($background-dark-card, 0.7) 50%);
+  background: linear-gradient(to right, rgba($dark-content-background-color, 0), rgba($dark-content-background-color, 0.7) 50%);
 }
 
 .mobile {

@@ -10,25 +10,32 @@ body,
 }
 body {
   width: 100%;
-}
-.page {
-  min-height: 100vh;
-  background-color: $content-background-color;
+  .page {
+    min-height: 100vh;
+    background-color: $content-background-color;
+    .body {
+      display: flex;
+      max-width: 1280px;
+      margin: 0 auto;
+      // padding-top: 10px;
+      height: 100%;
+      .main-content.unique {
+        max-width: 100%;
+      }
+      .main-content {
+        min-height: 50vh; // fix for weird behaviour in the top margin of the left menu
+        flex: 0 1 75%;
+        max-width: 75%;
+        padding: 0 20px;
+      }
+    }
+  }
 }
 
 .#{$ns}-dark {
   .page {
     background-color: $dark-content-background-color;
   }
-}
-.#{$ns}-dark .#{$ns}-button:not([class*="#{$ns}-minimal"]):not([class*="#{$ns}-disabled"]) {
-  box-shadow: 0 0 0 1px rgba($dark-gray1, 0.5);
-}
-.#{$ns}-dark .#{$ns}-button-group.#{$ns}-minimal .#{$ns}-button {
-  box-shadow: none;
-}
-.#{$ns}-dark .#{$ns}-button.#{$ns}-disabled:not([class*="#{$ns}-minimal"]) {
-  box-shadow: 0 0 0 1px rgba($dark-gray1, 0.5);
 }
 
 // toast container was position: absolute and scrolled with the page

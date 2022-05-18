@@ -14,6 +14,7 @@ export function DarkModeSwitch(props: IProps & IDarkThemeProps) {
     checked={props.darkTheme}
     label={t('labelDarkTheme')}
     onChange={() => props.onDarkThemeChanged(!props.darkTheme)}
+
     className={props.className}
   ></Switch>;
 }

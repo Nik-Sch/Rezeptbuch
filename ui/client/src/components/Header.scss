@@ -2,7 +2,7 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
 .page {
-  padding-top: 85px;
+  // padding-top: 85px;
   @media only screen and (max-width: $mobile-width), (max-height: $mobile-width) {
     padding-top: $pt-navbar-height;
   }
@@ -10,7 +10,6 @@
 }
 .header-wrapper {
   height: 85px;
-  box-shadow: none;
 
   .desktop-header {
     max-width: 1280px;
@@ -42,9 +41,13 @@
     }
   }
 }
+.#{$bp-ns}-dark {
+  .header-wrapper, .mobile-header-content {
+    box-shadow: unset;
+  }
+}
 
 .mobile-header-wrapper {
-
   .mobile-header-content {
     display: flex;
     flex-direction: row;
@@ -107,7 +110,6 @@
     .navigation {
       padding-bottom: 10px;
       margin: 0 20px;
-
     }
   }
 }

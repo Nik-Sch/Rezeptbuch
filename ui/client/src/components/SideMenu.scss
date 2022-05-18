@@ -1,0 +1,74 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+.side-menu-wrapper {
+  flex-basis: 240px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  position: relative;
+  .side-menu {
+    background-color: $light-gray4;
+    position: fixed;
+    // top: 85px;
+    // margin: 0 15px;
+    padding: 20px;
+    margin-left: -1000px;
+    padding-left: 1000px;
+    overflow-y: auto;
+    flex: 0 1 25%;
+    // max-width: 280px;
+    height: 100vh;
+    width: 1240px;
+
+    .App-logo {
+      max-width: 200px;
+      margin-bottom: 30px;
+    }
+    .settings {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: flex-start;
+      height: 75px;
+      padding: 5px;
+    }
+
+    .menu-item {
+      margin: 20px 0;
+    }
+    .navigation-link {
+      margin: 5px 0;
+    }
+    .menu-item:first-child,
+    .navigation-link:first-child {
+      margin-top: 0;
+    }
+    .menu-item:last-child,
+    .navigation-link:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.#{$bp-ns}-dark .side-menu {
+  background-color: $dark-gray3;
+}
+
+.mobile {
+  .menu {
+    display: flex;
+    flex-direction: column;
+    > * {
+      margin: 10px 0;
+    }
+    div:first-child {
+      margin-top: 0;
+    }
+    div:last-child {
+      margin-bottom: 0;
+    }
+    // weird bug in blueprint?
+    // .sort-recipes > div > div {
+    //   width: 100%;
+    // }
+  }
+}

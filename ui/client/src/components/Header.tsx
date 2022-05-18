@@ -13,7 +13,7 @@ import { IDarkThemeProps } from '../App';
 import LogoutButton from './helpers/LogoutButton';
 import { NavigationIcon } from './recipeList/RecipeList';
 import { getUserInfo } from '../util/Network';
-import { INavigationLink, NavigationLinks } from './recipeList/RecipeListMenu';
+import { INavigationLink, NavigationLinks } from './SideMenu';
 
 export interface IHeaderProps {
   children?: React.ReactNode;
@@ -74,22 +74,23 @@ export default function Header(props: IHeaderProps) {
       />}
     </>
   } else {
-    return <header className={classNames('header-wrapper', Classes.FIXED_TOP, Classes.NAVBAR)}>
-      <div className={classNames(props.className, 'desktop-header')}>
-        <Link to='/'>
-          <img
-            src={props.darkThemeProps.darkTheme ? logoDark : logo}
-            className="App-logo"
-            alt="logo" />
-        </Link>
-        <div className='settings'>
-          <DarkModeSwitch {...props.darkThemeProps} />
-          <ButtonGroup>
-            <LanguageSelect className='language-select' />
-            <LogoutButton />
-          </ButtonGroup>
-        </div>
-      </div>
-    </header>
+    return <></>;
+    // return <Navbar fixedToTop={true} className={classNames('header-wrapper')}>
+    //   <div className={classNames(props.className, 'desktop-header')}>
+    //     <Link to='/'>
+    //       <img
+    //         src={props.darkThemeProps.darkTheme ? logoDark : logo}
+    //         className="App-logo"
+    //         alt="logo" />
+    //     </Link>
+    //     <div className='settings'>
+    //       <DarkModeSwitch {...props.darkThemeProps} />
+    //       <ButtonGroup>
+    //         <LanguageSelect className='language-select' />
+    //         <LogoutButton />
+    //       </ButtonGroup>
+    //     </div>
+    //   </div>
+    // </Navbar>
   }
 }

@@ -4,7 +4,7 @@ import { IUser } from '../../util/Network';
 import React from 'react';
 import { Button, MenuItem } from '@blueprintjs/core';
 import { useMobile } from './CustomHooks';
-import { Counts } from '../recipeList/RecipeListMenu';
+import { Counts } from '../SideMenu';
 
 
 interface IProps {

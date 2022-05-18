@@ -127,5 +127,6 @@
   "filter": "Filter and Sort",
   "ok": "Ok",
   "shoppingListName": "{{name}} Shopping List",
-  "loggedOut": "You have been logged out"
+  "loggedOut": "You have been logged out",
+  "loadingRecipes": "Loading Recipes..."
 }

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Network';
-import { Classes, Icon, InputGroup, Button, H3, Card, Dialog } from '@blueprintjs/core';
+import { Classes, Icon, InputGroup, Button, H3, Card, Dialog, Divider } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { ISort, SortSelect } from '../helpers/SortSelect';
 import { useMobile, useSessionState, useOnline } from '../helpers/CustomHooks';
 import RecipeListItem from './RecipeListItem';
-import RecipeListMenu, { INavigationLink, Counts } from './RecipeListMenu';
+import SideMenu, { INavigationLink, Counts } from '../SideMenu';
 import Header from '../Header';
 
 import './RecipeList.scss'
@@ -19,9 +19,9 @@ import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionSt
 import { AppToasterBottom } from '../../util/toaster';
 import i18n from '../../util/i18n';
 import { WindowScroller, List } from 'react-virtualized';
-import { Tooltip2 } from '@blueprintjs/popover2';
-
-const skeletonRecipes = [undefined, undefined, undefined, undefined];
+import { Tooltip2, Classes as Classes2 } from '@blueprintjs/popover2';
+import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
+import { UserMultiSelect } from '../helpers/UserMultiSelect';
 
 export function NavigationIcon(props: { isOpen: boolean, onClick?: () => void }) {
   return <div className='nav-icon2-wrapper'>
@@ -92,7 +92,7 @@ export default function RecipeList(props: IDarkThemeProps) {
   const [searchInIngredients, setSearchInIngredients] = useSessionState<boolean>(true, sessionStorageSearchInIngredients);
   const defaultSortOrder: { sortValue: ISort, desc: boolean } = { sortValue: { key: 'date', textKey: 'sortDate' }, desc: false };
   const [sortingOrder, setSortingOrder] = useSessionState<{ sortValue: ISort, desc: boolean }>(defaultSortOrder, sessionStorageSortingOrder);
-  const [recipesToShow, setRecipesToShow] = useState<(IRecipe | undefined)[]>(skeletonRecipes);
+  const [recipesToShow, setRecipesToShow] = useState<IRecipe[] | undefined>(undefined);
   const [filterIsOpen, setFilterIsOpen] = useState(false);
   const timeout = useRef<number>();
   const mobile = useMobile();
@@ -213,25 +213,81 @@ export default function RecipeList(props: IDarkThemeProps) {
     { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
     { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
   ];
-  const recipeListMenu = <RecipeListMenu
-    darkModeProps={props}
-    searchString={searchString}
-    handleSearchChange={handleSearchChange}
-    handleSearchInIngredientsChange={v => setSearchInIngredients(v)}
-    searchInIngredients={searchInIngredients}
-    onCategorySelected={setFilteredCategories}
-    selectedCategories={filteredCategories}
-    allCategories={categories}
-    categoryCounts={categoryCounts}
-    userCounts={userCounts}
-    sortOptions={sortOptions}
-    onUserSelected={setFilteredUsers}
-    selectedUsers={filteredUsers}
-    allUsers={users}
-    onSortSelected={onSortSelected}
-    selectedSortDesc={sortingOrder.desc}
-    selectedSortValue={sortingOrder.sortValue}
-  />;
+
+  const searchInIngredientsButton = (
+    <Tooltip2
+      content={searchInIngredients ? t('tooltipSearchInIngredients') : t('tooltipNotSearchInIngredients')}
+      position='bottom'
+      popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+      renderTarget={({ isOpen, ref, ...tooltipProps }) => (
+        <Button
+          {...tooltipProps}
+          icon='properties'
+          elementRef={ref as any}
+          intent={searchInIngredients ? 'primary' : 'none'}
+          minimal={true}
+          onClick={() => setSearchInIngredients(!searchInIngredients)}
+        />)}
+    />
+  );
+  const sideMenu = <SideMenu darkModeProps={props} currentNavigation='recipes' >
+    <InputGroup
+      leftIcon='search'
+      rightElement={searchInIngredientsButton}
+      placeholder={t('searchRecipe')}
+      value={searchString}
+      className='search-recipe menu-item'
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
+    />
+    <UserMultiSelect
+      placeholder={t('filterForUsers')}
+      noResultText={t('noUsersFound')}
+      onUserSelected={setFilteredUsers}
+      userCounts={userCounts}
+      selectedUsers={filteredUsers}
+      allUsers={users}
+      className='filter-users menu-item'
+    />
+    <CategoryMultiSelect
+      placeholder={t('filterForCategories')}
+      noResultText={t('noCategoryFound')}
+      onCategorySelected={setFilteredCategories}
+      selectedCategories={filteredCategories}
+      categoryCounts={categoryCounts}
+      allCategories={categories}
+      className='filter-categories menu-item'
+    />
+
+    <Divider className='menu-item' />
+    <SortSelect
+      className='menu-item sort-recipes'
+      fill={true}
+      items={sortOptions}
+      onSelected={onSortSelected}
+      selectedDesc={sortingOrder.desc}
+      selectedValue={sortingOrder.sortValue}
+    />
+    <Tooltip2
+      disabled={online && hasWriteAccess}
+      content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWrite')}
+      position='bottom'
+      renderTarget={({ isOpen, ref, ...tooltipProps }) => (
+        <Link
+          {...tooltipProps}
+          ref={ref}
+          to={(online && hasWriteAccess) ? '/recipes/new' : ''}
+          className={classNames('add-recipe', Classes.BUTTON, Classes.INTENT_PRIMARY, (online && hasWriteAccess) ? '' : Classes.DISABLED, Classes.FILL, Classes.ALIGN_LEFT)}
+          role='button'
+        >
+          <Icon icon='add' />
+          <span className={Classes.BUTTON_TEXT}>
+            {t('newRecipe')}
+          </span>
+        </Link>
+      )}
+    />
+
+  </SideMenu>;
 
 
   return <>
@@ -270,7 +326,7 @@ export default function RecipeList(props: IDarkThemeProps) {
         title={t('filter')}
       >
         <div className={classNames(Classes.DIALOG_BODY, 'mobile')}>
-          {recipeListMenu}
+          {sideMenu}
         </div>
         <div className={Classes.DIALOG_FOOTER}>
           <div className={Classes.DIALOG_FOOTER_ACTIONS}>
@@ -285,53 +341,27 @@ export default function RecipeList(props: IDarkThemeProps) {
       </Dialog>
     }
     <div className='body'>
-      {!mobile && recipeListMenu}
+      {!mobile && sideMenu}
       <div className='main-content'>
-        {!mobile && <Card className='header' elevation={2}>
-          <Tooltip2
-            disabled={online && hasWriteAccess}
-            content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWrite')}
-            position='bottom'
-            renderTarget={({ isOpen, ref, ...tooltipProps }) => (
-              <Link
-                {...tooltipProps}
-                ref={ref}
-                to={(online && hasWriteAccess) ? '/recipes/new' : ''}
-                className={classNames('add-recipe', Classes.BUTTON, Classes.INTENT_PRIMARY, (online && hasWriteAccess) ? '' : Classes.DISABLED)}
-                role='button'
-              >
-                <Icon icon='add' />
-                <span className={Classes.BUTTON_TEXT}>
-                  {t('newRecipe')}
-                </span>
-              </Link>
-            )}
-          />
-
-          <SortSelect
-            className='sort-recipes'
-            items={sortOptions}
-            onSelected={onSortSelected}
-            selectedDesc={sortingOrder.desc}
-            selectedValue={sortingOrder.sortValue}
-          />
-        </Card>}
         {isNotificationAvailable() && <AskForNotifications />}
-        {recipes.length === 0 && recipesToShow.length === 0 &&
+        {recipes.length === 0 && recipesToShow?.length === 0 &&
           <H3 className='error'>
             {t('noRecipes')}
           </H3>}
-        {recipes.length > 0 && recipesToShow.length === 0 &&
+        {recipes.length > 0 && recipesToShow?.length === 0 &&
           <H3 className='error'>
             {t('noRecipesMatching')}
           </H3>}
+        {typeof recipesToShow === 'undefined' &&
+          <H3 className='error'>
+            {t('loadingRecipes')}
+          </H3>}
 
-        {recipesToShow.length > 0 &&
+        {typeof recipesToShow !== 'undefined' && recipesToShow.length > 0 &&
           <WindowScroller>
             {({ height, isScrolling, onChildScroll, scrollTop, width }) => {
 
-              const listWidth = mobile ? width :
-                Math.min(width, 1280) * 0.75 - 5;
+              const listWidth = mobile ? width : Math.min(width, 935);
               return <List
                 autoHeight={true}
                 height={height}
@@ -342,13 +372,11 @@ export default function RecipeList(props: IDarkThemeProps) {
                 scrollTop={scrollTop}
                 width={listWidth}
                 rowRenderer={({ index, style, isScrolling }) => <RecipeListItem
-                  interactive={true}
-                  elevation={1}
-                  className={`recipe-list-item`}
                   recipe={recipesToShow[index]}
                   style={style}
-                  key={recipesToShow[index]?.id ?? '-1'}
-                />}
+                  key={recipesToShow[index].id}
+                />
+                }
               />
             }}
           </WindowScroller>}

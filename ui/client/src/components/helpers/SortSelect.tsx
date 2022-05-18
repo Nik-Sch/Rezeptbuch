@@ -53,9 +53,10 @@ export function SortSelect(props: IProps) {
   return (<>
     <ButtonGroup
       fill={props.fill}
+      className={props.className}
     >
       <SortSelect
-        className={classNames(props.className, Classes.FILL)}
+        className={Classes.FILL}
         activeItem={props.selectedValue}
         items={props.items}
         itemsEqual='key'
@@ -72,6 +73,8 @@ export function SortSelect(props: IProps) {
           className='sort-button'
           large={mobile}
           fill={true}
+          alignText={props.fill ? 'left' : 'center'}
+          icon='sort'
           text={t(props.selectedValue.textKey)}
           rightIcon='caret-down'
         />
