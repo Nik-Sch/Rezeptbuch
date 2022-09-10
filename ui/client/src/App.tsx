@@ -112,11 +112,13 @@ function App() {
             <Route
               path='/login'
               element={
-                <LoginPage
-                  darkTheme={darkTheme}
-                  onDarkThemeChanged={handleThemeChange}
-                  setAuthenticated={(success) => setAuthenticated(success)}
-                />
+                <div className='page'>
+                  <LoginPage
+                    darkTheme={darkTheme}
+                    onDarkThemeChanged={handleThemeChange}
+                    setAuthenticated={(success) => setAuthenticated(success)}
+                  />
+                </div>
               }
             />
             {routes.map(({ path, Component, priv }) => (
