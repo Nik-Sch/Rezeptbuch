@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Network';
-import { Classes, Icon, InputGroup, Button, H3, Card, Dialog, Divider } from '@blueprintjs/core';
+import { Classes, Icon, InputGroup, Button, H3, Dialog, Divider } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { ISort, SortSelect } from '../helpers/SortSelect';

@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import logoDark from '../static/logo-dark.svg';
-import logo from '../static/logo.svg';
 import logoNoText from '../static/logo-no-text.svg';
 import { Link } from 'react-router-dom';
-import { Navbar, ButtonGroup, Collapse, Classes, Divider } from '@blueprintjs/core';
+import { Navbar, Collapse, Classes, Divider } from '@blueprintjs/core';
 import { LanguageSelect } from './helpers/LanguageSelect';
 import './Header.scss';
 import classNames from 'classnames';

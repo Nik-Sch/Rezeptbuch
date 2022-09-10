@@ -1,5 +1,5 @@
 import { IRecipe } from '../../util/Network';
-import { CardProps, Card, H5, H3, Classes, Callout, Divider } from '@blueprintjs/core';
+import { Card, H5, H3, Classes, Divider } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { MyImage } from '../helpers/Image';
 import dayjs from 'dayjs';

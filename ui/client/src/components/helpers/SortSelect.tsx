@@ -1,8 +1,7 @@
-import { Select, IItemRendererProps } from '@blueprintjs/select';
+import { Select2, ItemRendererProps } from '@blueprintjs/select';
 
 import { Button, MenuItem, ButtonGroup, Classes } from '@blueprintjs/core';
 import { IRecipe } from '../../util/Network';
-import classNames from 'classnames';
 import { useMobile } from './CustomHooks';
 import { useTranslation } from 'react-i18next';
 
@@ -21,11 +20,11 @@ interface IProps {
 }
 
 export function SortSelect(props: IProps) {
-  const SortSelect = Select.ofType<ISort>();
+  const SortSelect = Select2.ofType<ISort>();
 
   const { t } = useTranslation();
 
-  const itemRenderer = (item: ISort, { handleClick, modifiers }: IItemRendererProps) => {
+  const itemRenderer = (item: ISort, { handleClick, modifiers }: ItemRendererProps) => {
     if (!modifiers.matchesPredicate) {
       return null;
     }

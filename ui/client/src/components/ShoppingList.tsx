@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import Header from "./Header";
-import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text, MenuItem, AnchorButton, ButtonGroup, InputGroup, Dialog, Radio, RadioGroup, Callout } from "@blueprintjs/core";
+import { Collapse, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text, MenuItem, AnchorButton, ButtonGroup, InputGroup, Dialog, Radio, RadioGroup } from "@blueprintjs/core";
 import { usePersistentState, useMobile } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
 import { IDarkThemeProps } from "../App";
@@ -15,7 +15,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import update from 'immutability-helper';
 import { v4 as uuidv4 } from 'uuid';
-import { Select } from "@blueprintjs/select";
+import { Select2 } from "@blueprintjs/select";
 import { useNavigate, useParams } from "react-router-dom";
 import { Popover2, Tooltip2, Classes as Classes2 } from "@blueprintjs/popover2";
 import { shareLink } from "./recipe/ShareButton";
@@ -296,18 +296,6 @@ const defaultState: IShoppingListState = {
   active: 'default'
 }
 
-function CardNoCard(props: { children?: React.ReactNode; className?: string }) {
-  const mobile = useMobile();
-  const className = classNames(props.className, mobile ? 'mobile' : '');
-  return mobile
-    ? <div className={className}>
-      {props.children}
-    </div>
-    : <Card className={className}>
-      {props.children}
-    </Card>
-}
-
 const itemsToBeAdded: string[] = [];
 export function addShoppingItems(items: string[]) {
   itemsToBeAdded.push(...items);
@@ -325,7 +313,7 @@ function ShoppingListSelect(props: {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [deleteKey, setDeleteKey] = useState<string | null>(null);
 
-  const ShoppingListSelect = Select.ofType<{ key: string, value: ISingleShoppingList }>();
+  const ShoppingListSelect = Select2.ofType<{ key: string, value: ISingleShoppingList }>();
 
   const createNewList = () => {
     props.onItemSelect(uuidv4(), {
@@ -377,25 +365,7 @@ function ShoppingListSelect(props: {
     </Dialog>
     <ShoppingListSelect
       items={Object.entries(parentState.lists).map(([key, value]) => ({ key, value }))}
-      itemPredicate={(query, item) => item.value.name?.toLowerCase().includes(query.toLowerCase()) ?? false}
-      createNewItemFromQuery={query => {
-        const key = uuidv4();
-        const name = query;
-        return {
-          key,
-          value: {
-            items: [],
-            name
-          }
-        };
-      }}
-      createNewItemRenderer={(query, active, handleClick) =>
-        <MenuItem
-          text={`${t('createNewList')} '${query}'...`}
-          selected={active}
-          onClick={handleClick}
-          shouldDismissPopover={false}
-        />}
+      filterable={false}
       itemRenderer={(item, { handleClick, modifiers }) => modifiers.matchesPredicate
         ? <MenuItem
           selected={modifiers.active}
@@ -417,7 +387,6 @@ function ShoppingListSelect(props: {
       itemsEqual='key'
       activeItem={{key: props.parentState.active, value: props.parentState.lists[props.parentState.active]}}
       resetOnClose={true}
-      noResults={<MenuItem disabled={true} text="No results." />}
       onItemSelect={item => props.onItemSelect(item.key, item.value)}
     >
       <Button
@@ -650,7 +619,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
     }
   }, [authenticated, listKey, listName, navigate, setState, state]);
 
-  // was previosly only a single shoppinglist
+  // was previously only a single shoppinglist
   if (typeof (state as any).lists === 'undefined') {
     console.log('updating state', state);
     const newList: ISingleShoppingList = {

@@ -12,7 +12,6 @@ import classNames from 'classnames';
 import { DarkModeSwitch } from './helpers/DarkModeSwitch';
 import { LanguageSelect } from './helpers/LanguageSelect';
 import LogoutButton from './helpers/LogoutButton';
-import i18n from '../util/i18n';
 
 
 
