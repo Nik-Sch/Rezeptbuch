@@ -17,17 +17,17 @@
 .shopping-list-wrapper {
   margin: 20px 15px;
 
-  .edit-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-right: 20px;
-    margin-bottom: 10px;
-  }
 
   .shopping-list-head {
     display: flex;
     justify-content: space-between;
-    margin: 20px 20px 20px 26px;
+    align-items: center;
+    margin: 20px 0;
+
+    .edit-container {
+      display: flex;
+      justify-content: flex-end;
+    }
   }
 
   .shopping-list {
@@ -38,8 +38,11 @@
       height: 0.66666px;
     }
 
+    .#{$bp-ns}-divider {
+      margin: 5px 0;
+    }
+
     .shopping-item {
-      padding-right: 20px;
       display: flex;
       justify-items: flex-start;
       align-items: center;
@@ -54,9 +57,6 @@
         margin-right: 10px;
         cursor: move;
       }
-      // .drag-handle.active {
-      //   cursor: grab;
-      // }
 
       .my-editable-text {
         flex-grow: 1;

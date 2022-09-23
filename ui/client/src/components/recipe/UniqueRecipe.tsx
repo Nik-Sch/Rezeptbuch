@@ -1,30 +1,36 @@
-import { useState, useEffect } from 'react';
+import { Classes, EditableText, H1, H2, H3, H4, H5, Icon } from '@blueprintjs/core';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { IRecipe, emptyRecipe, fetchUniqueRecipe } from '../../util/Network';
-import { H1, Classes, H3, Card, H4, Icon, H2 } from '@blueprintjs/core';
+import { emptyRecipe, fetchUniqueRecipe, IRecipe } from '../../util/Network';
 
-import { useTranslation } from 'react-i18next';
-import Header from '../Header';
-import ImagePart from './ImagePart';
-import './Recipe.scss';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 import { IDarkThemeProps } from '../../App';
+import { CategorySelect } from '../helpers/CategorySelect';
+import { CategorySuggest } from '../helpers/CategorySuggest';
 import { useMobile } from '../helpers/CustomHooks';
-import ShareButton from './ShareButton';
-import { DesktopIngredients, showDot } from './Ingredients';
-import { Helmet } from 'react-helmet';
+import MobileHeader from '../MobileHeader';
+import SideMenu, { INavigationLink } from '../SideMenu';
+import CommentSection from './CommentSection';
 import DescriptionTextArea from './DescriptionTextArea';
+import ImagePart from './ImagePart';
+import { DesktopIngredients, showDot } from './Ingredients';
+import './Recipe.scss';
+import ShareButton from './ShareButton';
 
 
 export default function UniqueRecipe(props: IDarkThemeProps) {
   let { id } = useParams();
+  if (typeof id === 'undefined' || isNaN(parseInt(id))) {
+    id = undefined;
+  }
   const [t] = useTranslation();
 
-  const [recipe, setRecipe] = useState<IRecipe>(emptyRecipe);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-
+  const [recipe, setRecipe] = useState<IRecipe>(emptyRecipe);
   const mobile = useMobile();
+
   // load recipes
   useEffect(() => {
     if (typeof id === 'undefined') {
@@ -43,20 +49,39 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
     })
   }, [id]);
 
-  if (error) {
-    return <H3>{t('notFound')}</H3>
-  }
+  const navigationLinks: INavigationLink[] = [
+    { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
+    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
+  ];
 
+  if (error) {
+    return <>
+      {mobile && <MobileHeader
+        darkThemeProps={props}
+        navigationLinks={navigationLinks}
+      />}
+      <div className='body'>
+        {mobile || <SideMenu
+          darkModeProps={props}
+          currentNavigation='recipes'
+        />}
+        <div className='main-content'>
+          <H2>{t('notFound')}</H2>
+        </div>
+      </div>
+    </>
+
+  }
   if (mobile) {
     return <>
-      <Header
+      <MobileHeader
         darkThemeProps={props}
-        className='login-header'
+        navigationLinks={navigationLinks}
       >
         {loaded && <div className='edit-container'>
-          <ShareButton onlyLink={true} />
+          <ShareButton recipe={recipe} />
         </div>}
-      </Header>
+      </MobileHeader>
       <div className='recipe-container-mobile'>
         <ImagePart
           recipe={recipe}
@@ -70,16 +95,32 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
             </span>
           </H2>
           <H3>
-            <span className={classNames('category-select', Classes.TEXT_MUTED, loaded ? '' : Classes.SKELETON)}>
-              {recipe.category.name}
-            </span>
+            <CategorySelect
+              canAddCategory={true}
+              noResultText={t('noCategoryFound')}
+              className={classNames('category-select', Classes.TEXT_MUTED, loaded ? '' : Classes.SKELETON)}
+              disabled={true}
+              placeholder={t('phCategoryMobile')}
+              category={recipe.category}
+              onCategorySelected={() => { }}
+            />
           </H3>
-          <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
-            {t('ingredients')}:
-          </H4>
-          {loaded ?
-            (recipe.ingredients.length > 0
-              ? recipe.ingredients.map((line, index) => (
+
+          <div className='ingredients-title-wrapper'>
+            <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
+              {t('ingredients')}:
+            </H4>
+            {/* {recipe.ingredients.length > 0 && !state.editing && <Button
+              text={t('addToShopping')}
+              minimal={true}
+              intent='success'
+              icon='add'
+              onClick={addIngredientsToShoppingList}
+            />} */}
+          </div>
+          {loaded
+            ? (recipe.ingredients.length > 0 ?
+              recipe.ingredients.map((line, index) => (
                 <div key={index} className='ingredients-line'>
                   {showDot(line) && <Icon icon='dot' />}
                   <span className='ingredients-line-text'>
@@ -87,10 +128,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
                   </span>
                 </div>
               ))
-              : <div
-                className={classNames(Classes.TEXT_MUTED, 'ingredients-line')}>
-                {t('noIngredients')}
-              </div>
+              : <div className={classNames(Classes.TEXT_MUTED, 'ingredients-line')}>{t('noIngredients')}</div>
             )
             : [1, 2, 3].map((_, index) => (
               <div key={-index} className='ingredients-line'>
@@ -102,61 +140,73 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
           <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
             {t('description')}:
           </H4>
-          {(recipe.description.trim().length > 0 || !loaded)
-            ? <div className={classNames(loaded ? '' : Classes.SKELETON, 'description')}>
-              {recipe.description}
-            </div>
-            : <div className={classNames(Classes.TEXT_MUTED, 'description')}>
-              {t('noDescription')}
-            </div>
-          }
+
+          <DescriptionTextArea
+            value={recipe.description}
+            editable={false}
+            placeholder={t('noDescription')}
+            className={classNames(loaded ? '' : Classes.SKELETON, 'description')}
+          />
+          <H5 className='user'>
+            {`${t('by')} ${recipe.user.user}.`}
+          </H5>
         </div>
       </div>
+      {recipe.id !== -1 && <CommentSection
+        comments={recipe.comments}
+        username={''}
+        recipeId={recipe.id}
+        writeAccess={false}
+      />}
+      <div className='bottom-padding' />
     </>
   } else {
     return <>
-      <Helmet>
-        <title>{recipe.title} | Unsere Rezepte</title>
-        <meta name="title" content={recipe.title} />
-        <meta name="description" content={recipe.description.split('.')[0]} />
-
-        <meta property="og:url" content={`https://recipev2.niklas-schelten.de/uniqueRecipes/${id}`} />
-        <meta property="og:title" content={recipe.title} />
-        <meta property="og:description" content={recipe.description.split('.')[0]} />
-        {recipe.image && recipe.image.trim().length > 0 && <meta
-          property="og:image" content={`/api/images/${recipe.image}`}
-        />}
-
-        <meta property="twitter:url" content={`https://recipev2.niklas-schelten.de/uniqueRecipes/${id}`} />
-        <meta property="twitter:title" content={recipe.title} />
-        <meta property="twitter:description" content={recipe.description.split('.')[0]} />
-        {recipe.image && recipe.image.trim().length > 0 && <meta
-          property="twitter:image" content={`/api/images/${recipe.image}`}
-        />}
-      </Helmet>
-      <Header
-        darkThemeProps={props}
-      />
       <div className='body'>
-        <div className='main-content unique'>
+        <SideMenu darkModeProps={props} currentNavigation='recipes' />
+        <div className='main-content'>
           <div className='recipe-container'>
-            <Card className='recipe' elevation={2}>
-              {loaded && <div className='edit-container'>
-                <ShareButton onlyLink={true} />
-              </div>}
-              <H1 className='title-wrapper'>
-                {recipe.title}
-              </H1>
+            <div className='recipe'>
+              <div className='title-wrapper'>
+                <H1 className='title'>
+                  <EditableText
+                    multiline={true}
+                    className={classNames(loaded ? '' : Classes.SKELETON)}
+                    placeholder={t('phTitle')}
+                    disabled={true}
+                    value={recipe.title}
+                    onChange={() => { }}
+                  />
+                </H1>
+                {loaded && <div className='edit-container'>
+                  <ShareButton recipe={recipe} />
+                </div>}
+              </div>
               <div className='text-image-wrapper'>
                 <div className='text-wrapper'>
                   <H3>
-                    <span className={classNames('category-select', loaded ? '' : Classes.SKELETON)}>
-                      {recipe.category.name}
-                    </span>
+                    <CategorySuggest
+                      canAddCategory={true}
+                      noResultText={t('noCategoryFound')}
+                      className={classNames('category-select', loaded ? '' : Classes.SKELETON)}
+                      disabled={true}
+                      placeholder={t('phCategory')}
+                      initialCategory={recipe.category}
+                      onCategorySelected={() => { }}
+                    />
                   </H3>
-                  <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
-                    {t('ingredients')}:
-                  </H4>
+                  <div className='ingredients-title-wrapper'>
+                    <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
+                      {t('ingredients')}:
+                    </H4>
+                    {/* {recipe.ingredients.length > 0 && !state.editing && <Button
+                      text={t('addToShopping')}
+                      minimal={true}
+                      intent='success'
+                      icon='add'
+                      onClick={addIngredientsToShoppingList}
+                    />} */}
+                  </div>
                   <DesktopIngredients
                     ingredients={recipe.ingredients}
                     loaded={loaded}
@@ -175,25 +225,26 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
               <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
                 {t('description')}:
               </H4>
-              {/* {(recipe.description.trim().length > 0 || !loaded)
-                ? <div className={classNames(loaded ? '' : Classes.SKELETON, 'description')}>
-                  {recipe.description}
-                </div>
-                : <div className={classNames(Classes.TEXT_MUTED, 'description')}>
-                  {t('noDescription')}
-                </div>
-              } */}
-
               <DescriptionTextArea
                 value={recipe.description}
-                editable={false}
                 placeholder={t('noDescription')}
+                editable={false}
                 className={classNames(loaded ? '' : Classes.SKELETON, 'description')}
               />
-            </Card>
+              <H5 className='user'>
+                {`${t('by')} ${recipe.user.user}.`}
+              </H5>
+            </div>
           </div>
+          {recipe.id !== -1 && <CommentSection
+            comments={recipe.comments}
+            username={''}
+            recipeId={recipe.id}
+            writeAccess={false}
+          />}
         </div>
       </div>
+      <div className='bottom-padding' />
     </>
   }
 }

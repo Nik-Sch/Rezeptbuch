@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from "react";
-import Header from "./Header";
-import { Collapse, Card, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text, MenuItem, AnchorButton, ButtonGroup, InputGroup, Dialog, Radio, RadioGroup } from "@blueprintjs/core";
+import MobileHeader from "./MobileHeader";
+import { Collapse, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text, MenuItem, AnchorButton, ButtonGroup, InputGroup, Dialog, Radio, RadioGroup } from "@blueprintjs/core";
 import { usePersistentState, useMobile } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
 import { IDarkThemeProps } from "../App";
-import { INavigationLink, NavigationLinks } from "./recipeList/RecipeListMenu";
+import SideMenu, { INavigationLink } from "./SideMenu";
 import dayjs from "dayjs";
 import './ShoppingList.scss';
 import classNames from "classnames";
@@ -15,7 +15,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import update from 'immutability-helper';
 import { v4 as uuidv4 } from 'uuid';
-import { Select } from "@blueprintjs/select";
+import { Select2 } from "@blueprintjs/select";
 import { useNavigate, useParams } from "react-router-dom";
 import { Popover2, Tooltip2, Classes as Classes2 } from "@blueprintjs/popover2";
 import { shareLink } from "./recipe/ShareButton";
@@ -123,7 +123,7 @@ function NewShoppingListItem(props: {
         minimal={true}
       />
     </div>
-    {hover || mobile ? <Divider /> : <div className='fake-divider' />}
+    {hover ? <Divider /> : <div className='fake-divider' />}
   </div>
 
 }
@@ -265,7 +265,7 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
           onClick={() => props.deleteElement && props.deleteElement(props.item)}
         />
       </div>
-      {hover || mobile ? <Divider /> : <div className='fake-divider' />}
+      {hover ? <Divider /> : <div className='fake-divider' />}
     </div>
   </div>
 });
@@ -296,18 +296,6 @@ const defaultState: IShoppingListState = {
   active: 'default'
 }
 
-function CardNoCard(props: { children?: React.ReactNode; className?: string }) {
-  const mobile = useMobile();
-  const className = classNames(props.className, mobile ? 'mobile' : '');
-  return mobile
-    ? <div className={className}>
-      {props.children}
-    </div>
-    : <Card className={className}>
-      {props.children}
-    </Card>
-}
-
 const itemsToBeAdded: string[] = [];
 export function addShoppingItems(items: string[]) {
   itemsToBeAdded.push(...items);
@@ -325,7 +313,7 @@ function ShoppingListSelect(props: {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [deleteKey, setDeleteKey] = useState<string | null>(null);
 
-  const ShoppingListSelect = Select.ofType<{ key: string, value: ISingleShoppingList }>();
+  const ShoppingListSelect = Select2.ofType<{ key: string, value: ISingleShoppingList }>();
 
   const createNewList = () => {
     props.onItemSelect(uuidv4(), {
@@ -377,25 +365,7 @@ function ShoppingListSelect(props: {
     </Dialog>
     <ShoppingListSelect
       items={Object.entries(parentState.lists).map(([key, value]) => ({ key, value }))}
-      itemPredicate={(query, item) => item.value.name?.toLowerCase().includes(query.toLowerCase()) ?? false}
-      createNewItemFromQuery={query => {
-        const key = uuidv4();
-        const name = query;
-        return {
-          key,
-          value: {
-            items: [],
-            name
-          }
-        };
-      }}
-      createNewItemRenderer={(query, active, handleClick) =>
-        <MenuItem
-          text={`${t('createNewList')} '${query}'...`}
-          selected={active}
-          onClick={handleClick}
-          shouldDismissPopover={false}
-        />}
+      filterable={false}
       itemRenderer={(item, { handleClick, modifiers }) => modifiers.matchesPredicate
         ? <MenuItem
           selected={modifiers.active}
@@ -415,13 +385,12 @@ function ShoppingListSelect(props: {
         />
         : null}
       itemsEqual='key'
-      activeItem={{key: props.parentState.active, value: props.parentState.lists[props.parentState.active]}}
+      activeItem={{ key: props.parentState.active, value: props.parentState.lists[props.parentState.active] }}
       resetOnClose={true}
-      noResults={<MenuItem disabled={true} text="No results." />}
       onItemSelect={item => props.onItemSelect(item.key, item.value)}
     >
       <Button
-        text={t('shoppingListName', {name: parentState.lists[parentState.active].name ?? 'Private'})}
+        text={t('shoppingListName', { name: parentState.lists[parentState.active].name ?? 'Private' })}
         rightIcon='double-caret-vertical'
         large={true}
       />
@@ -650,7 +619,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
     }
   }, [authenticated, listKey, listName, navigate, setState, state]);
 
-  // was previosly only a single shoppinglist
+  // was previously only a single shoppinglist
   if (typeof (state as any).lists === 'undefined') {
     console.log('updating state', state);
     const newList: ISingleShoppingList = {
@@ -837,14 +806,14 @@ export default function ShoppingList(props: IDarkThemeProps) {
             selectedValue={shoppingListSelectValue}
             onChange={e => setShoppingListSelectValue(e.currentTarget.value)}
           >
-          {
-            Object.entries(state.lists).map(([key, value]) => (<Radio
-              id={key}
-              value={key}
-              label={value.name}
-              large={true}
-            />))
-          }
+            {
+              Object.entries(state.lists).map(([key, value]) => (<Radio
+                id={key}
+                value={key}
+                label={value.name}
+                large={true}
+              />))
+            }
           </RadioGroup>
         </div>
       </div>
@@ -871,7 +840,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
         </div>
       </div>
     </Dialog>
-    <Header
+    {mobile && <MobileHeader
       darkThemeProps={props}
       navigationLinks={navigationLinks}
     >
@@ -890,41 +859,11 @@ export default function ShoppingList(props: IDarkThemeProps) {
         iconSize={24}
         onClick={removeAllItems}
       />
-    </Header>
+    </MobileHeader>}
     <div className='body'>
-      {!mobile &&
-        <Card className='menu'>
-          <NavigationLinks
-            navigationLinks={navigationLinks}
-          />
-        </Card>}
+      {!mobile && <SideMenu darkModeProps={props} currentNavigation='shopping-list' />}
       <div className='main-content'>
-        <CardNoCard className='shopping-list-wrapper'>
-          {!mobile && <div className='edit-container'>
-            {statusElement}
-            <ButtonGroup vertical={false} alignText='right'>
-              <Tooltip2
-                content={state.active === 'default' ? t('shoppingListNoShare') : t('shoppingListShare')}
-                position='bottom'
-              >
-                <AnchorButton
-                  icon='share'
-                  minimal={mobile}
-                  large={mobile}
-                  text={mobile ? undefined : t('share')}
-                  disabled={state.active === 'default'}
-                  intent='primary'
-                  onClick={shareShoppingList}
-                />
-              </Tooltip2>
-              <Button
-                text={t('deleteAll')}
-                icon='trash'
-                intent='warning'
-                onClick={removeAllItems}
-              />
-            </ButtonGroup>
-          </div>}
+        <div className='shopping-list-wrapper'>
           <div className='shopping-list-head'>
             {authenticated ?
               <ShoppingListSelect
@@ -954,6 +893,31 @@ export default function ShoppingList(props: IDarkThemeProps) {
               />
               : <H1>{`${state.lists[state.active].name} Shopping List`}</H1>
             }
+            {!mobile && <div className='edit-container'>
+              {statusElement}
+              <ButtonGroup vertical={false} alignText='right'>
+                <Tooltip2
+                  content={state.active === 'default' ? t('shoppingListNoShare') : t('shoppingListShare')}
+                  position='bottom'
+                >
+                  <AnchorButton
+                    icon='share'
+                    minimal={mobile}
+                    large={mobile}
+                    text={mobile ? undefined : t('share')}
+                    disabled={state.active === 'default'}
+                    intent='primary'
+                    onClick={shareShoppingList}
+                  />
+                </Tooltip2>
+                <Button
+                  text={t('deleteAll')}
+                  icon='trash'
+                  intent='warning'
+                  onClick={removeAllItems}
+                />
+              </ButtonGroup>
+            </div>}
           </div>
           <div className='shopping-list'>
             <DndProvider backend={mobile ? TouchBackend : HTML5Backend}>
@@ -1027,7 +991,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
               </DndProvider>
             </Collapse>
           </div>
-        </CardNoCard>
+        </div>
       </div>
     </div>
   </>

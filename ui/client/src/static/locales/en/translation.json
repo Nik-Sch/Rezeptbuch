@@ -91,9 +91,9 @@
   "save": "Save",
   "commentSaved": "The comment was successfully saved.",
   "commentNotModified": "The comment has not been modified.",
-  "comments": "One Comment",
   "comments_0": "Be the first to comment:",
-  "comments_plural": "{{count}} Comments",
+  "comments_1": "One comment",
+  "comments_plural": "{{count}} comments",
   "editComment": "Edit the comment...",
   "addComment": "Add a comment to the recipe...",
   "comment": "Comment",
@@ -127,5 +127,6 @@
   "filter": "Filter and Sort",
   "ok": "Ok",
   "shoppingListName": "{{name}} Shopping List",
-  "loggedOut": "You have been logged out"
+  "loggedOut": "You have been logged out",
+  "loadingRecipes": "Loading Recipes..."
 }
