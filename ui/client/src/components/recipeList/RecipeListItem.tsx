@@ -1,5 +1,5 @@
 import { IRecipe } from '../../util/Network';
-import { Card, H5, H3, Classes, Divider } from '@blueprintjs/core';
+import { H5, H3, Classes, Divider } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { MyImage } from '../helpers/Image';
 import dayjs from 'dayjs';
@@ -19,51 +19,47 @@ interface IRecipeListItemProps {
   style: CSSProperties;
 }
 
-const RecipeListItem = ({recipe, style}: IRecipeListItemProps) => {
+const RecipeListItemDesktop = ({ recipe, style }: IRecipeListItemProps) => {
   const [, i18n] = useTranslation();
-
   const date = dayjs(recipe?.date).locale(i18n.language).format('L');
 
-  const mobile = useMobile();
-
-
-
-  if (mobile) {
-    return <Link
-      to={recipe ? `/recipes/${recipe.id}` : '/'}
-      style={style}
-    >
-      <Card className={`recipe-list-item`}>
-        <H3 className={classNames('recipe-title', recipe ? '' : Classes.SKELETON)}>{recipe?.title}</H3>
-        <div className='content-wrapper'>
-          <div className={classNames('thumbnail', recipe ? '' : Classes.SKELETON)}>
-            {recipe && <MyImage
-              size={150}
-              className='recipe-image'
-              fallback={true}
-              recipe={recipe}
-            />}
-          </div>
-          <div className='recipe-text-wrapper'>
-            <div className='info-wrapper'>
-              <div className={classNames('recipe-description', 'ellipsis', Classes.TEXT_MUTED, recipe ? '' : Classes.SKELETON)}>{recipe?.description}</div>
-            </div>
-            <H5 className={classNames('recipe-category', Classes.INTENT_PRIMARY, Classes.ICON, recipe ? '' : Classes.SKELETON)}>{recipe?.category.name}</H5>
-          </div>
+  return <Link
+    to={recipe ? `/recipes/${recipe.id}` : ''}
+    style={style}
+  >
+    <div className={`recipe-list-item`}>
+      <div className={classNames('thumbnail', recipe ? '' : Classes.SKELETON)}>
+        {recipe && <MyImage
+          size={150}
+          className='recipe-image'
+          fallback={true}
+          recipe={recipe}
+        />}
+      </div>
+      <div className='recipe-text-wrapper'>
+        <div className='title-category-wrapper'>
+          <H3 className={classNames('recipe-title', recipe ? '' : Classes.SKELETON)}>{recipe?.title}</H3>
+          <H5 className={classNames('recipe-category', recipe ? '' : Classes.SKELETON)}>{recipe?.category.name}</H5>
         </div>
-      </Card>
-    </Link>
-  } else {
+        <div className='info-wrapper'>
+          <div className={classNames('recipe-description', 'ellipsis', Classes.TEXT_MUTED, recipe ? '' : Classes.SKELETON)}>{recipe?.description}</div>
+          <div className={classNames('recipe-date', recipe ? '' : Classes.SKELETON)}>{date}</div>
+        </div>
+      </div>
+    </div>
+    <Divider />
+  </Link>
+}
 
-    return <Link
-      to={recipe ? `/recipes/${recipe.id}` : ''}
-      style={style}
-      className='desktop'
-    >
-      <div
-        className={`recipe-list-item`}
+const RecipeListItemMobile = ({ recipe, style }: IRecipeListItemProps) => {
 
-      >
+  return <Link
+    to={recipe ? `/recipes/${recipe.id}` : ''}
+    style={style}
+  >
+    <div className={`recipe-list-item`}>
+      <H3 className={classNames('recipe-title', recipe ? '' : Classes.SKELETON)}>{recipe?.title}</H3>
+      <div className='recipe-content-wrapper'>
         <div className={classNames('thumbnail', recipe ? '' : Classes.SKELETON)}>
           {recipe && <MyImage
             size={150}
@@ -73,18 +69,20 @@ const RecipeListItem = ({recipe, style}: IRecipeListItemProps) => {
           />}
         </div>
         <div className='recipe-text-wrapper'>
-          <div className='title-category-wrapper'>
-            <H3 className={classNames('recipe-title', recipe ? '' : Classes.SKELETON)}>{recipe?.title}</H3>
-            <H5 className={classNames('recipe-category', recipe ? '' : Classes.SKELETON)}>{recipe?.category.name}</H5>
-          </div>
-          <div className='info-wrapper'>
-            <div className={classNames('recipe-description', 'ellipsis', Classes.TEXT_MUTED, recipe ? '' : Classes.SKELETON)}>{recipe?.description}</div>
-            <div className={classNames('recipe-date', recipe ? '' : Classes.SKELETON)}>{date}</div>
-          </div>
+          <div className={classNames('recipe-description', 'ellipsis', Classes.TEXT_MUTED, recipe ? '' : Classes.SKELETON)}>{recipe?.description}</div>
+          <H5 className={classNames('recipe-category', recipe ? '' : Classes.SKELETON)}>{recipe?.category.name}</H5>
         </div>
       </div>
-      <Divider/>
-    </Link>
+    </div>
+    <Divider className='recipe-list-divider'/>
+  </Link>
+}
+
+const RecipeListItem = (props: IRecipeListItemProps) => {
+  if (useMobile()) {
+    return <RecipeListItemMobile {...props} />
+  } else {
+    return <RecipeListItemDesktop {...props} />
   }
 };
 
