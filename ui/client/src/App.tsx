@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import './App.scss';
 import { Route, BrowserRouter as Router, Routes, Navigate, useLocation } from 'react-router-dom';
-import { Classes, Card, H1, H3 } from '@blueprintjs/core';
+import { Classes, H1, H3 } from '@blueprintjs/core';
 import recipesHandler, { getUserInfo, ICategory, IRecipe, IUser } from './util/Network';
 import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
 import { localStorageDarkTheme } from './util/StorageKeys';

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { IDarkThemeProps } from "../App";
 import MobileHeader from "./MobileHeader";
 import { useMobile } from "./helpers/CustomHooks";
-import { Classes, Card, H1, FormGroup, InputGroup, Button, Intent, Callout, H4 } from "@blueprintjs/core";
+import { Classes, H1, FormGroup, InputGroup, Button, Intent, Callout, H4 } from "@blueprintjs/core";
 import { useTranslation } from "react-i18next";
 
 import './LoginPage.scss';

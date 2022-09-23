@@ -5,11 +5,11 @@
   flex-grow: 0;
   flex-shrink: 0;
   position: relative;
+  margin-left: 15px;
+
   .side-menu {
     background-color: $light-gray4;
     position: fixed;
-    // top: 85px;
-    // margin: 0 15px;
     padding: 20px;
     margin-left: -1000px;
     padding-left: 1000px;

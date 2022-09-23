@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import recipesHandler, { IRecipe, ICategory, emptyRecipe, getUserInfo } from '../../util/Network';
-import { H1, EditableText, Classes, Button, H3, H5, H4, ButtonGroup, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton, Callout } from '@blueprintjs/core';
+import { H1, EditableText, Classes, Button, H3, H5, H4, ButtonGroup, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton } from '@blueprintjs/core';
 
 import { AppToasterTop } from '../../util/toaster';
 import { useTranslation } from 'react-i18next';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import logoNoText from '../static/logo-no-text.svg';
 import { Link } from 'react-router-dom';
-import { Navbar, Collapse, Classes, Divider } from '@blueprintjs/core';
+import { Collapse, Classes, Divider } from '@blueprintjs/core';
 import { LanguageSelect } from './helpers/LanguageSelect';
 import './MobileHeader.scss';
 import classNames from 'classnames';
