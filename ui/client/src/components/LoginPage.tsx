@@ -128,10 +128,10 @@ export default function LoginPage(props: IDarkThemeProps & { setAuthenticated: (
   );
 
   return <>
-    <MobileHeader
+    {mobile && <MobileHeader
       darkThemeProps={props}
       className='login-header'
-    />
+    />}
     <div className='body'>
       {!mobile && <SideMenu darkModeProps={props} currentNavigation='recipes' />}
       <div className='main-content'>

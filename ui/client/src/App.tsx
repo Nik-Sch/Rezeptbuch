@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { AppToasterTop } from './util/toaster';
+import SideMenu, { INavigationLink } from './components/SideMenu';
 
 
 const RecipeList = lazy(() => import('./components/recipeList/RecipeList'));
@@ -33,39 +34,53 @@ export interface IDarkThemeProps {
 
 function NotFound(props: IDarkThemeProps) {
   const { t } = useTranslation();
+  const mobile = useMobile();
+  const navigationLinks: INavigationLink[] = [
+    { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
+    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
+  ];
 
   return <>
-    <MobileHeader
+    {mobile && <MobileHeader
       darkThemeProps={props}
-      className='login-header'
-    />
-    <div className='card-wrapper'>
-      <Card
-        className='login'
-        elevation={1}
-      >
+      navigationLinks={navigationLinks}
+    />}
+    <div className='body'>
+      {mobile || <SideMenu
+        darkModeProps={props}
+        currentNavigation='recipes'
+      />}
+      <div className='main-content'>
         <H1>{t('404Header')}</H1>
         <H3>{t('404Text')}</H3>
-      </Card>
+      </div>
     </div>
-  </>
+  </>;
 }
 
 function Fallback(props: IDarkThemeProps) {
+  const mobile = useMobile();
+  const { t } = useTranslation();
+  const navigationLinks: INavigationLink[] = [
+    { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
+    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
+  ];
+
   return <>
-    <MobileHeader
+    {mobile && <MobileHeader
       darkThemeProps={props}
-      className='login-header'
-    />
-    <div className='card-wrapper'>
-      <Card
-        className='login'
-        elevation={1}
-      >
+      navigationLinks={navigationLinks}
+    />}
+    <div className='body'>
+      {mobile || <SideMenu
+        darkModeProps={props}
+        currentNavigation='recipes'
+      />}
+      <div className='main-content'>
         <H3>Loading...</H3>
-      </Card>
+      </div>
     </div>
-  </>
+  </>;
 }
 
 function App() {
