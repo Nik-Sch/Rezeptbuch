@@ -7,7 +7,7 @@ import { ISort, SortSelect } from '../helpers/SortSelect';
 import { useMobile, useSessionState, useOnline } from '../helpers/CustomHooks';
 import RecipeListItem from './RecipeListItem';
 import SideMenu, { INavigationLink, Counts } from '../SideMenu';
-import Header from '../Header';
+import MobileHeader from '../MobileHeader';
 
 import './RecipeList.scss'
 import classNames from 'classnames';
@@ -230,15 +230,8 @@ export default function RecipeList(props: IDarkThemeProps) {
         />)}
     />
   );
-  const sideMenu = <SideMenu darkModeProps={props} currentNavigation='recipes' >
-    <InputGroup
-      leftIcon='search'
-      rightElement={searchInIngredientsButton}
-      placeholder={t('searchRecipe')}
-      value={searchString}
-      className='search-recipe menu-item'
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
-    />
+
+  const sortAndFilter = <>
     <UserMultiSelect
       placeholder={t('filterForUsers')}
       noResultText={t('noUsersFound')}
@@ -267,6 +260,20 @@ export default function RecipeList(props: IDarkThemeProps) {
       selectedDesc={sortingOrder.desc}
       selectedValue={sortingOrder.sortValue}
     />
+  </>;
+
+  const sideMenu = <SideMenu darkModeProps={props} currentNavigation='recipes' >
+    <InputGroup
+      leftIcon='search'
+      rightElement={searchInIngredientsButton}
+      placeholder={t('searchRecipe')}
+      value={searchString}
+      className='search-recipe menu-item'
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
+    />
+
+    {sortAndFilter}
+
     <Tooltip2
       disabled={online && hasWriteAccess}
       content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWrite')}
@@ -286,60 +293,64 @@ export default function RecipeList(props: IDarkThemeProps) {
         </Link>
       )}
     />
-
   </SideMenu>;
 
+  const filterActive = filteredCategories.length > 0 || filteredUsers.length > 0;
+
+  const mobileHeader = <MobileHeader
+    darkThemeProps={props}
+    navigationLinks={navigationLinks}
+  >
+    <>
+      <Icon
+        className={classNames(Classes.BUTTON, Classes.MINIMAL)}
+        icon={filterActive ? 'filter-keep' : 'filter'}
+        intent={filterActive ? 'primary' : 'none'}
+        iconSize={24}
+        onClick={() => {
+          setFilterIsOpen(!filterIsOpen);
+          if (!filterIsOpen) { // going to open filter
+            window.scrollTo(0, 0);
+          }
+        }}
+      />
+      <InputGroup
+        leftIcon='search'
+        large={true}
+        rightElement={searchClearButton}
+        placeholder={t('searchRecipe')}
+        value={searchString}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
+        className='recipe-search'
+      />
+    </>
+  </MobileHeader>
+
+  const mobileFilterDialog = <Dialog
+    isOpen={filterIsOpen}
+    onClose={() => setFilterIsOpen(false)}
+    title={t('filter')}
+  >
+    <div className={classNames(Classes.DIALOG_BODY, 'mobile')}>
+      <div className='sort-filter'>
+        {sortAndFilter}
+      </div>
+    </div>
+    <div className={Classes.DIALOG_FOOTER}>
+      <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+        <Button
+          text={t('ok')}
+          intent='success'
+          large={true}
+          onClick={() => setFilterIsOpen(false)}
+        />
+      </div>
+    </div>
+  </Dialog>;
 
   return <>
-    <Header
-      darkThemeProps={props}
-      navigationLinks={navigationLinks}
-    >
-      {mobile && <>
-        <Icon
-          className={classNames(Classes.BUTTON, Classes.MINIMAL)}
-          icon={filteredCategories.length > 0 || filteredUsers.length > 0 ? 'filter-keep' : 'filter'}
-          intent={filterIsOpen ? 'primary' : 'none'}
-          iconSize={24}
-          onClick={() => {
-            setFilterIsOpen(!filterIsOpen);
-            if (!filterIsOpen) { // going to open filter
-              window.scrollTo(0, 0);
-            }
-          }}
-        />
-        <InputGroup
-          leftIcon='search'
-          large={true}
-          rightElement={searchClearButton}
-          placeholder={t('searchRecipe')}
-          value={searchString}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
-          className='recipe-search'
-        />
-      </>}
-    </Header>
-    {mobile &&
-      <Dialog
-        isOpen={filterIsOpen}
-        onClose={() => setFilterIsOpen(false)}
-        title={t('filter')}
-      >
-        <div className={classNames(Classes.DIALOG_BODY, 'mobile')}>
-          {sideMenu}
-        </div>
-        <div className={Classes.DIALOG_FOOTER}>
-          <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-            <Button
-              text={t('ok')}
-              intent='success'
-              large={true}
-              onClick={() => setFilterIsOpen(false)}
-            />
-          </div>
-        </div>
-      </Dialog>
-    }
+    {mobile && mobileHeader}
+    {mobile && mobileFilterDialog}
     <div className='body'>
       {!mobile && sideMenu}
       <div className='main-content'>

@@ -50,12 +50,20 @@
   outline: none;
 }
 
-.mobile .page .body .main-content {
-  margin-top: 10px;
-  flex: unset;
-  max-width: unset;
-  width: 100%;
-  padding-top: unset;
+.mobile {
+  .page .body .main-content {
+    margin-top: 10px;
+    flex: unset;
+    max-width: unset;
+    width: 100%;
+    padding-top: unset;
+  }
+  .sort-filter {
+    .menu-item {
+      margin: 20px auto;
+      max-width: 80%;
+    }
+  }
 }
 
 .recipe-search {

@@ -4,7 +4,7 @@ import { IRecipe, emptyRecipe, fetchUniqueRecipe } from '../../util/Network';
 import { H1, Classes, H3, Card, H4, Icon, H2 } from '@blueprintjs/core';
 
 import { useTranslation } from 'react-i18next';
-import Header from '../Header';
+import MobileHeader from '../MobileHeader';
 import ImagePart from './ImagePart';
 import './Recipe.scss';
 import classNames from 'classnames';
@@ -49,14 +49,14 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
 
   if (mobile) {
     return <>
-      <Header
+      <MobileHeader
         darkThemeProps={props}
         className='login-header'
       >
         {loaded && <div className='edit-container'>
           <ShareButton onlyLink={true} />
         </div>}
-      </Header>
+      </MobileHeader>
       <div className='recipe-container-mobile'>
         <ImagePart
           recipe={recipe}
@@ -134,7 +134,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
           property="twitter:image" content={`/api/images/${recipe.image}`}
         />}
       </Helmet>
-      <Header
+      <MobileHeader
         darkThemeProps={props}
       />
       <div className='body'>

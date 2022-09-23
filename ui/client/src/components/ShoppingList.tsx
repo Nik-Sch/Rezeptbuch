@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from "react";
-import Header from "./Header";
+import MobileHeader from "./MobileHeader";
 import { Collapse, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text, MenuItem, AnchorButton, ButtonGroup, InputGroup, Dialog, Radio, RadioGroup } from "@blueprintjs/core";
 import { usePersistentState, useMobile } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
@@ -123,7 +123,7 @@ function NewShoppingListItem(props: {
         minimal={true}
       />
     </div>
-    {hover || mobile ? <Divider /> : <div className='fake-divider' />}
+    {hover ? <Divider /> : <div className='fake-divider' />}
   </div>
 
 }
@@ -265,7 +265,7 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
           onClick={() => props.deleteElement && props.deleteElement(props.item)}
         />
       </div>
-      {hover || mobile ? <Divider /> : <div className='fake-divider' />}
+      {hover ? <Divider /> : <div className='fake-divider' />}
     </div>
   </div>
 });
@@ -385,12 +385,12 @@ function ShoppingListSelect(props: {
         />
         : null}
       itemsEqual='key'
-      activeItem={{key: props.parentState.active, value: props.parentState.lists[props.parentState.active]}}
+      activeItem={{ key: props.parentState.active, value: props.parentState.lists[props.parentState.active] }}
       resetOnClose={true}
       onItemSelect={item => props.onItemSelect(item.key, item.value)}
     >
       <Button
-        text={t('shoppingListName', {name: parentState.lists[parentState.active].name ?? 'Private'})}
+        text={t('shoppingListName', { name: parentState.lists[parentState.active].name ?? 'Private' })}
         rightIcon='double-caret-vertical'
         large={true}
       />
@@ -806,14 +806,14 @@ export default function ShoppingList(props: IDarkThemeProps) {
             selectedValue={shoppingListSelectValue}
             onChange={e => setShoppingListSelectValue(e.currentTarget.value)}
           >
-          {
-            Object.entries(state.lists).map(([key, value]) => (<Radio
-              id={key}
-              value={key}
-              label={value.name}
-              large={true}
-            />))
-          }
+            {
+              Object.entries(state.lists).map(([key, value]) => (<Radio
+                id={key}
+                value={key}
+                label={value.name}
+                large={true}
+              />))
+            }
           </RadioGroup>
         </div>
       </div>
@@ -840,7 +840,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
         </div>
       </div>
     </Dialog>
-    <Header
+    {mobile && <MobileHeader
       darkThemeProps={props}
       navigationLinks={navigationLinks}
     >
@@ -859,9 +859,9 @@ export default function ShoppingList(props: IDarkThemeProps) {
         iconSize={24}
         onClick={removeAllItems}
       />
-    </Header>
+    </MobileHeader>}
     <div className='body'>
-      {!mobile && <SideMenu darkModeProps={props} currentNavigation='shopping-list'/>}
+      {!mobile && <SideMenu darkModeProps={props} currentNavigation='shopping-list' />}
       <div className='main-content'>
         <div className='shopping-list-wrapper'>
           <div className='shopping-list-head'>

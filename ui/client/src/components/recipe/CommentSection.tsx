@@ -224,7 +224,7 @@ function Comment(props: ICommentProps) {
         <div className={classNames(Classes.TEXT_MUTED, 'date')}>
           {dayjs(props.comment.date).locale(i18n.language).fromNow()}
         </div>
-        {props.comment.editedDate && <div className={classNames(Classes.TEXT_MUTED, 'date')}>
+        {props.comment.editedDate && !mobile && <div className={classNames(Classes.TEXT_MUTED, 'date')}>
           {t('edited', { date: dayjs(props.comment.editedDate).locale(i18n.language).fromNow() })}
         </div>}
         {mobile && props.username === props.comment.user.user &&
@@ -399,9 +399,9 @@ export default function CommentSection(props: IProps) {
     <div className='comment-section'>
       {mobile && <Divider />}
       <H3 className='comment-count'>
-        {(props.comments.length === 0 && props.writeAccess && !mobile)
+        {(props.comments.length === 0 && props.writeAccess)
           ? t('comments_0')
-          : t('comments', { count: props.comments.length })}
+          : (props.comments.length === 1) ? t('comments_1') : t('comments_plural', { count: props.comments.length })}
       </H3>
       {props.writeAccess && <NewComment
         username={props.username}

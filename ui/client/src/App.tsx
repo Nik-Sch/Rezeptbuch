@@ -5,7 +5,7 @@ import { Classes, Card, H1, H3 } from '@blueprintjs/core';
 import recipesHandler, { getUserInfo, ICategory, IRecipe, IUser } from './util/Network';
 import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
 import { localStorageDarkTheme } from './util/StorageKeys';
-import Header from './components/Header';
+import MobileHeader from './components/MobileHeader';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
@@ -35,7 +35,7 @@ function NotFound(props: IDarkThemeProps) {
   const { t } = useTranslation();
 
   return <>
-    <Header
+    <MobileHeader
       darkThemeProps={props}
       className='login-header'
     />
@@ -53,7 +53,7 @@ function NotFound(props: IDarkThemeProps) {
 
 function Fallback(props: IDarkThemeProps) {
   return <>
-    <Header
+    <MobileHeader
       darkThemeProps={props}
       className='login-header'
     />

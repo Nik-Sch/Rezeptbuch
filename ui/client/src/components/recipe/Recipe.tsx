@@ -6,7 +6,7 @@ import { H1, EditableText, Classes, Button, H3, H5, H4, ButtonGroup, Icon, TextA
 import { AppToasterTop } from '../../util/toaster';
 import { useTranslation } from 'react-i18next';
 import { CategorySuggest } from '../helpers/CategorySuggest';
-import Header from '../Header';
+import MobileHeader from '../MobileHeader';
 import ImagePart from './ImagePart';
 import './Recipe.scss';
 import classNames from 'classnames';
@@ -232,7 +232,7 @@ export default function Recipe(props: IDarkThemeProps) {
 
   if (mobile) {
     return <>
-      <Header
+      <MobileHeader
         darkThemeProps={props}
         navigationLinks={navigationLinks}
       >
@@ -289,6 +289,7 @@ export default function Recipe(props: IDarkThemeProps) {
             <>
               <Button
                 text={t('cancel')}
+                intent='warning'
                 onClick={handleCancelClick}
                 minimal={true}
                 large={true}
@@ -335,7 +336,7 @@ export default function Recipe(props: IDarkThemeProps) {
             </>
           }
         </div>}
-      </Header>
+      </MobileHeader>
       <div className='recipe-container-mobile'>
         <ImagePart
           recipe={recipe}
@@ -439,13 +440,10 @@ export default function Recipe(props: IDarkThemeProps) {
     </>
   } else {
     return <>
-      <Header
-        darkThemeProps={props}
-      />
       <div className='body'>
         <SideMenu darkModeProps={props} currentNavigation='recipes'/>
         <div className='main-content'>
-          <Callout className='recipe-container'>
+          <div className='recipe-container'>
             <div className='recipe'>
 
               {error && <H3>{t('notFound')}</H3>}
@@ -467,6 +465,7 @@ export default function Recipe(props: IDarkThemeProps) {
                         handleDiscardClick={handleDiscardClick}
                         popoverTarget={<Button
                           text={t('cancelEdit')}
+                          intent='warning'
                           onClick={handleCancelClick}
                         />}
                       />
@@ -592,7 +591,7 @@ export default function Recipe(props: IDarkThemeProps) {
                 {!state.editing && `${t('by')} ${recipe.user.user}.`}
               </H5>
             </div>
-          </Callout>
+          </div>
           {recipe.id !== -1 && <CommentSection
             comments={recipe.comments}
             username={status?.username ?? ''}
