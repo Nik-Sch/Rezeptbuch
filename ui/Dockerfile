@@ -4,11 +4,9 @@ FROM node:16.14-alpine3.15 as build-deps
 WORKDIR /usr/src/app
 # Installs latest Chromium (63) package.
 RUN apk update && apk upgrade && \
-  echo @edge http://nl.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
-  echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
   apk add --no-cache \
-  chromium@edge=~108.0.5359.125 \
-  nss@edge \
+  chromium \
+  nss \
   git \
   python3 \
   make \

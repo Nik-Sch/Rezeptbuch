@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-const applicationServerPublicKey = process.env.REACT_APP_WEBPUSH_PUBLIC_KEY || '';
-
 let isSubscribed = false;
 let swRegistration: ServiceWorkerRegistration | null = null;
 
@@ -133,7 +131,15 @@ export function registerSW(config: IConfig) {
 }
 
 export async function subscribeUser() {
-  const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
+  // fetch the public key from the server:
+  const response = await fetch('/api/webpush_public_key');
+  if (response.ok !== true) {
+    console.error('Failed to retrieve the public key for push from the api.', await response.text());
+    return false;
+  }
+  const result = await response.json();
+  const publicKey = result.public_key;
+  const applicationServerKey = urlB64ToUint8Array(publicKey);
   if (swRegistration === null) {
     console.error('swRegistration is null');
     return false;

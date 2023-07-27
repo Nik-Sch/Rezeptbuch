@@ -158,6 +158,11 @@ def privateShoppingList():
 def publicShoppingList(list_id: str):
     return handleShoppingList(list_id)
 
+@app.route('/webpush_public_key', methods=['GET'])
+def get_push_public_key():
+    return make_response(jsonify({'public_key': os.environ['PUSH_PUBLIC_KEY']}), 200)
+
+
 def notifyNewRecipe(recipe: OrderedDict[str, Any], exclude: int):
     print('sending notifications, but not to ', exclude)
     for sub in redisNotificationsDB.scan_iter():
@@ -168,7 +173,7 @@ def notifyNewRecipe(recipe: OrderedDict[str, Any], exclude: int):
             webpush(subscription_info=value['sub'],
                     data=json.dumps(recipe),
                     vapid_private_key=os.environ['PUSH_PRIVATE_KEY'],
-                    vapid_claims={"sub": "mailto:me@niklas-schelten.de"})
+                    vapid_claims={"sub": "mailto:mail@niklas-schelten.de"})
             print('sent to: ', sub)
         except Exception as e:
             print('removing sub because of error:', e, sub)
