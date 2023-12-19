@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+
+  db:
+    image: mariadb
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    env_file:
+      - db.env
+
+  redis:
+    image: redis
+    command: --appendonly yes
+    restart: always
+
+  api:
+    build: ./api
+    restart: always
+    environment:
+      - MYSQL_HOST=db
+      - IMAGE_DIRECTORY=/usr/src/images
+    env_file:
+      - db.env
+      - api/.env
+    depends_on:
+      - db
+      - redis
+
+  ui:
+    build: ./ui
+    restart: always
+    depends_on:
+      - api
+    env_file:
+      - ui/.env
+
+  rezeptbuch:
+    build: ./proxy
+    container_name: rezeptbuch
+    restart: always
+    ports:
+      - "3040:80"
+    depends_on:
+      - ui
