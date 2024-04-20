@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "homepage": "/",
-  "proxy": "http://localhost/",
+  "proxy": "http://localhost:3040/",
   "dependencies": {
     "@blueprintjs/core": "^4.9.4",
     "@blueprintjs/popover2": "^1.6.4",

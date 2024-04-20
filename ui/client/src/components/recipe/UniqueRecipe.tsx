@@ -21,9 +21,6 @@ import ShareButton from './ShareButton';
 
 export default function UniqueRecipe(props: IDarkThemeProps) {
   let { id } = useParams();
-  if (typeof id === 'undefined' || isNaN(parseInt(id))) {
-    id = undefined;
-  }
   const [t] = useTranslation();
 
   const [loaded, setLoaded] = useState(false);

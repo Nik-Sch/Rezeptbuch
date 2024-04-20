@@ -1,0 +1,686 @@
+openapi: '3.0.2'
+info:
+  title: RecipeV2
+  version: '1.0'
+servers:
+  - url: http://localhost/api/
+security:
+  - cookieAuth: []
+
+paths:
+  /users:
+    get:
+      summary: Get all known users
+      parameters:
+        - in: query
+          name: checksum
+          schema:
+            type: integer
+          required: false
+          description: The checksum of the last retrieval of all users, if the checksum did not changed, returns 204
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checksum:
+                    type: integer
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/user'
+
+        '204':
+          description: OK
+        '401':
+          $ref: '#/components/responses/error'
+    post:
+      summary: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: Account successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/error'
+        '409':
+          $ref: '#/components/responses/error'
+
+
+  /recipes:
+    get:
+      summary: Get all recipes
+      parameters:
+        - in: query
+          name: checksum
+          schema:
+            type: integer
+          required: false
+          description: The checksum of the last retrieval of all recipes, if the checksum did not changed, returns 204
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checksum:
+                    type: integer
+                  recipes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/recipe'
+
+        '204':
+          description: OK
+        '401':
+          $ref: '#/components/responses/error'
+    post:
+      summary: Add a new recipe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/recipe'
+      responses:
+        '401':
+          $ref: '#/components/responses/error'
+        '403':
+          $ref: '#/components/responses/error'
+        '400':
+          $ref: '#/components/responses/error'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/recipe'
+
+  /recipes/{recipeId}:
+    parameters:
+      - in: path
+        name: recipeId
+        description: The id of the recipe
+        required: true
+        schema:
+          type: integer
+          minimum: 0
+    get:
+      responses:
+        '200':
+          description: The recipe.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recipe:
+                    $ref: '#/components/schemas/recipe'
+                required:
+                  - recipe
+        '401':
+          $ref: '#/components/responses/error'
+        '404':
+          $ref: '#/components/responses/error'
+    put:
+      description: Modify a recipe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/recipe'
+      responses:
+        '200':
+          description: Recipe modified
+        '401':
+          $ref: '#/components/responses/error'
+        '403':
+          $ref: '#/components/responses/error'
+        '404':
+          $ref: '#/components/responses/error'
+    delete:
+      description: Delete a recipe
+      responses:
+        '204':
+          description: Recipe deleted
+        '401':
+          $ref: '#/components/responses/error'
+        '403':
+          $ref: '#/components/responses/error'
+        '404':
+          $ref: '#/components/responses/error'
+
+  /comments:
+    get:
+      summary: Get all comments
+      parameters:
+        - in: query
+          name: checksum
+          schema:
+            type: integer
+          required: false
+          description: The checksum of the last retrieval of all comments, if the checksum did not changed, returns 204
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checksum:
+                    type: integer
+                  comments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/comment'
+
+        '204':
+          description: OK
+        '401':
+          $ref: '#/components/responses/error'
+    post:
+      summary: Add a new comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/comment'
+      responses:
+        '401':
+          $ref: '#/components/responses/error'
+        '403':
+          $ref: '#/components/responses/error'
+        '400':
+          $ref: '#/components/responses/error'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/comment'
+
+  /comments/{commentId}:
+    parameters:
+      - in: path
+        name: commentId
+        description: The id of the comment
+        required: true
+        schema:
+          type: integer
+          minimum: 0
+    get:
+      responses:
+        '200':
+          description: The comment.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    $ref: '#/components/schemas/comment'
+                required:
+                  - comment
+        '401':
+          $ref: '#/components/responses/error'
+        '404':
+          $ref: '#/components/responses/error'
+    put:
+      description: Modify a comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/comment'
+      responses:
+        '200':
+          description: Comment modified
+        '401':
+          $ref: '#/components/responses/error'
+        '403':
+          $ref: '#/components/responses/error'
+        '404':
+          $ref: '#/components/responses/error'
+    delete:
+      description: Delete a comment
+      responses:
+        '204':
+          description: Comment deleted
+        '401':
+          $ref: '#/components/responses/error'
+        '403':
+          $ref: '#/components/responses/error'
+        '404':
+          $ref: '#/components/responses/error'
+
+
+  /categories:
+    get:
+      summary: Get all categories
+      parameters:
+        - in: query
+          name: checksum
+          schema:
+            type: integer
+          required: false
+          description: The checksum of the last retrieval of all categories, if the checksum did not changed, returns 204
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checksum:
+                    type: integer
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/category'
+
+        '204':
+          description: OK
+        '401':
+          $ref: '#/components/responses/error'
+    post:
+      summary: Add a new category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/category'
+      responses:
+        '401':
+          $ref: '#/components/responses/error'
+        '403':
+          $ref: '#/components/responses/error'
+        '400':
+          $ref: '#/components/responses/error'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/comment'
+
+  /images:
+    post:
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      description: Upload a new image
+      responses:
+        '401':
+          $ref: '#/components/responses/error'
+        '403':
+          $ref: '#/components/responses/error'
+        '400':
+          $ref: '#/components/responses/error'
+        '201':
+          description: Image was uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+
+  /images/{name}:
+    parameters:
+      - in: path
+        name: name
+        description: The image name
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: w
+        description: Optional width of a preview image
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: h
+        description: Optional height of a preview image
+        required: false
+        schema:
+          type: integer
+    get:
+      responses:
+        '200':
+          description: The image.
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/error'
+    delete:
+      description: Delete the image
+      responses:
+        '200':
+          description: Image deleted
+        '401':
+          $ref: '#/components/responses/error'
+        '403':
+          $ref: '#/components/responses/error'
+
+  /login:
+    get:
+      summary: Log in the user
+      security:
+        - basicAuth: []
+
+      responses:
+        '200':
+          description: Successfully authenticated.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/error'
+
+  /logout:
+    get:
+      summary: Log out the user
+      responses:
+        '200':
+          description: Successfully logged out.
+
+
+  /status:
+    get:
+      summary: Get the authentication status
+      responses:
+        '200':
+          description: User is authenticated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  write:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/error'
+
+  /shoppingList:
+    get:
+      responses:
+        '200':
+          description: An event stream with updates for the shopping list
+          content:
+            text/event-stream:
+              schema:
+                type: array
+                format: event-stream
+                items:
+                  $ref: '#/components/schemas/shoppingListItem'
+    post:
+      description: Add new shopping list items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/shoppingListItem'
+      responses:
+        '401':
+          $ref: '#/components/responses/error'
+        '400':
+          $ref: '#/components/responses/error'
+        '200':
+          description: Successfully added
+    put:
+      description: Modify shopping list items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/shoppingListItem'
+      responses:
+        '401':
+          $ref: '#/components/responses/error'
+        '400':
+          $ref: '#/components/responses/error'
+        '200':
+          description: Successfully modified
+    delete:
+      description: Delete shopping list items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/shoppingListItem'
+      responses:
+        '401':
+          $ref: '#/components/responses/error'
+        '400':
+          $ref: '#/components/responses/error'
+        '200':
+          description: Successfully deleted
+
+  /shoppingLists/{listId}:
+    parameters:
+      - in: path
+        name: listId
+        description: The shopping list identifier
+        required: true
+        schema:
+          type: string
+    get:
+      responses:
+        '200':
+          description: An event stream with updates for the shopping list
+          content:
+            text/event-stream:
+              schema:
+                type: array
+                format: event-stream
+                items:
+                  $ref: '#/components/schemas/shoppingListItem'
+    post:
+      description: Add new shopping list items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/shoppingListItem'
+      responses:
+        '401':
+          $ref: '#/components/responses/error'
+        '400':
+          $ref: '#/components/responses/error'
+        '200':
+          description: Successfully added
+    put:
+      description: Modify shopping list items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/shoppingListItem'
+      responses:
+        '401':
+          $ref: '#/components/responses/error'
+        '400':
+          $ref: '#/components/responses/error'
+        '200':
+          description: Successfully modified
+    delete:
+      description: Delete shopping list items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/shoppingListItem'
+      responses:
+        '401':
+          $ref: '#/components/responses/error'
+        '400':
+          $ref: '#/components/responses/error'
+        '200':
+          description: Successfully deleted
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    user:
+      type: object
+      properties:
+        id:
+          type: integer
+        user:
+          type: string
+        readOnly:
+          type: boolean
+      required:
+        - user
+        - readOnly
+    recipe:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        categoryId:
+          type: integer
+        ingredients:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        date:
+          type: string
+          format: date-time
+        userId:
+          type: integer
+      required:
+        - title
+        - categoryId
+        - ingredients
+    comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
+        userId:
+          type: integer
+        recipeId:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        editedDate:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - text
+        - userId
+        - recipeId
+    category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        userId:
+          type: integer
+      required:
+        - name
+        - userId
+    shoppingListItem:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        checked:
+          type: boolean
+        position:
+          type: integer
+          minimum: 0
+        addedTime:
+          type: string
+          format: date-time
+      required:
+        - id
+        - text
+        - checked
+        - position
+        - addedTime
+  responses:
+    error:
+      description: An error occured
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              error:
+                type: string
