@@ -159,11 +159,11 @@ export default function RecipeList(props: IDarkThemeProps) {
 
 
   const [scrollPosition, setScrollPosition] = useSessionState(0, sessionStorageScrollPosition);
-  const handleScroll = () => {
-    const position = window.scrollY;
-    setScrollPosition(position);
-  };
   useEffect(() => {
+    const handleScroll = () => {
+      const position = window.scrollY;
+      setScrollPosition(position);
+    };
     window.scrollTo(0, scrollPosition);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
