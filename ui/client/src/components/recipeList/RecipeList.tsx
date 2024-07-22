@@ -15,10 +15,10 @@ import { Link } from 'react-router-dom';
 import { IDarkThemeProps } from '../../App';
 import AskForNotifications from '../AskForNotifications';
 import { isNotificationAvailable, registerSW } from '../../serviceWorkerRegistration';
-import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionStorageSearchInIngredients, sessionStorageSortingOrder, sessionStorageFilteredUsers } from '../../util/StorageKeys';
+import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionStorageSearchInIngredients, sessionStorageSortingOrder, sessionStorageFilteredUsers, localStorageCategoryChecksum, sessionStorageScrollPosition } from '../../util/StorageKeys';
 import { AppToasterBottom } from '../../util/toaster';
-import i18n from '../../util/i18n';
 import { WindowScroller, List } from 'react-virtualized';
+import i18n from '../../util/i18n';
 import { Tooltip2, Classes as Classes2 } from '@blueprintjs/popover2';
 import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { UserMultiSelect } from '../helpers/UserMultiSelect';
@@ -92,7 +92,7 @@ export default function RecipeList(props: IDarkThemeProps) {
   const [searchInIngredients, setSearchInIngredients] = useSessionState<boolean>(true, sessionStorageSearchInIngredients);
   const defaultSortOrder: { sortValue: ISort, desc: boolean } = { sortValue: { key: 'date', textKey: 'sortDate' }, desc: false };
   const [sortingOrder, setSortingOrder] = useSessionState<{ sortValue: ISort, desc: boolean }>(defaultSortOrder, sessionStorageSortingOrder);
-  const [recipesToShow, setRecipesToShow] = useState<IRecipe[] | undefined>(undefined);
+  const [recipesToShow, setRecipesToShow] = useState<IRecipe[]>([]);
   const [filterIsOpen, setFilterIsOpen] = useState(false);
   const timeout = useRef<number>();
   const mobile = useMobile();
@@ -157,6 +157,18 @@ export default function RecipeList(props: IDarkThemeProps) {
     window.scrollTo(0, 0)
   }, [filterRecipeByCategory, filterRecipeBySearch, filterRecipeByUser])
 
+
+  const [scrollPosition, setScrollPosition] = useSessionState(0, sessionStorageScrollPosition);
+  const handleScroll = () => {
+    const position = window.scrollY;
+    setScrollPosition(position);
+  };
+  useEffect(() => {
+    window.scrollTo(0, scrollPosition);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [recipesToShow]);
+
   // search and sort
   useEffect(() => {
     const sortRecipes = (r1?: IRecipe, r2?: IRecipe): number => {
@@ -187,15 +199,10 @@ export default function RecipeList(props: IDarkThemeProps) {
     timeout.current = window.setTimeout(() => {
       if (recipes) {
         setRecipesToShow(recipes.sort(sortRecipes).filter(filterRecipe));
-
       }
     }, mobile ? 100 : 0);
   }, [filterRecipeByCategory, filterRecipeBySearch, filterRecipeByUser, mobile, recipes, sortingOrder]);
 
-  if (typeof sortingOrder.sortValue === 'undefined') {
-    setSortingOrder(defaultSortOrder);
-    return <></>;
-  }
 
   const handleSearchChange = (value: string) => {
     setSearchString(value);
@@ -348,6 +355,11 @@ export default function RecipeList(props: IDarkThemeProps) {
     </div>
   </Dialog>;
 
+  if (typeof sortingOrder.sortValue === 'undefined') {
+    setSortingOrder(defaultSortOrder);
+    return <></>;
+  }
+
   return <>
     {mobile && mobileHeader}
     {mobile && mobileFilterDialog}
@@ -355,42 +367,35 @@ export default function RecipeList(props: IDarkThemeProps) {
       {!mobile && sideMenu}
       <div className='main-content'>
         {isNotificationAvailable() && <AskForNotifications />}
-        {recipes.length === 0 && recipesToShow?.length === 0 &&
+        {recipes.length === 0 && recipesToShow.length === 0 &&
           <H3 className='error'>
             {t('noRecipes')}
           </H3>}
-        {recipes.length > 0 && recipesToShow?.length === 0 &&
+        {recipes.length > 0 && recipesToShow.length === 0 &&
           <H3 className='error'>
             {t('noRecipesMatching')}
           </H3>}
-        {typeof recipesToShow === 'undefined' &&
-          <H3 className='error'>
-            {t('loadingRecipes')}
-          </H3>}
-
-        {typeof recipesToShow !== 'undefined' && recipesToShow.length > 0 &&
-          <WindowScroller>
-            {({ height, isScrolling, onChildScroll, scrollTop, width }) => {
-
-              const listWidth = mobile ? width : (Math.min(width, 1200) - 280); // comensate for sidebar in desktop
-              return <List
-                autoHeight={true}
-                height={height}
-                isScrolling={isScrolling}
-                onScroll={onChildScroll}
-                rowCount={recipesToShow.length}
-                rowHeight={(mobile ? 175 : 150) + 20}
-                scrollTop={scrollTop}
-                width={listWidth}
-                rowRenderer={({ index, style, isScrolling }) => <RecipeListItem
-                  recipe={recipesToShow[index]}
-                  style={style}
-                  key={recipesToShow[index].id}
-                />
-                }
+        <WindowScroller>
+          {({ height, isScrolling, onChildScroll, scrollTop, width }) => {
+            const listWidth = mobile ? width : (Math.min(width, 1200) - 280); // compensate for sidebar in desktop
+            return <List
+              autoHeight={true}
+              height={height}
+              isScrolling={isScrolling}
+              onScroll={onChildScroll}
+              rowCount={recipesToShow.length}
+              rowHeight={(mobile ? 175 : 150) + 20}
+              scrollTop={scrollTop}
+              width={listWidth}
+              rowRenderer={({ index, style, isScrolling }) => <RecipeListItem
+                recipe={recipesToShow[index]}
+                style={style}
+                key={recipesToShow[index].id}
               />
-            }}
-          </WindowScroller>}
+              }
+            />
+          }}
+        </WindowScroller>
       </div>
     </div>
     {mobile && online && hasWriteAccess && <Link
