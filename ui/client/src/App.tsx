@@ -1,6 +1,6 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, useEffect } from 'react';
 import './App.scss';
-import { Route, BrowserRouter as Router, Routes, Navigate, useLocation } from 'react-router-dom';
+import { Route, createBrowserRouter, Navigate, useLocation, createRoutesFromElements, RouterProvider } from 'react-router-dom';
 import { Classes, H1, H3 } from '@blueprintjs/core';
 import recipesHandler, { getUserInfo, ICategory, IRecipe, IUser } from './util/Network';
 import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
@@ -117,49 +117,52 @@ function App() {
     { path: '*', Component: NotFound, priv: false },
   ]
 
+  const router = createBrowserRouter(createRoutesFromElements(<>
+    <Route
+      path='/login'
+      element={
+        <div className='page'>
+          <LoginPage
+            darkTheme={darkTheme}
+            onDarkThemeChanged={handleThemeChange}
+            setAuthenticated={(success) => setAuthenticated(success)}
+          />
+        </div>
+      }
+    />
+    {routes.map(({ path, Component, priv }) => (
+      <Route
+        key={path || 'undefined'}
+        path={path}
+        element={priv ?
+          <RequireAuth authenticated={authenticated}>
+            <div className='page'>
+              <Component
+                darkTheme={darkTheme}
+                onDarkThemeChanged={handleThemeChange}
+              />
+            </div>
+          </RequireAuth>
+          : <div className='page'>
+            <Component
+              darkTheme={darkTheme}
+              onDarkThemeChanged={handleThemeChange}
+            />
+          </div>} />
+    ))}
+  </>))
+
+  const fallback = <Fallback darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange} />
+
   return (
     <div className={mobile ? 'mobile' : ''}>
       <Helmet>
         <meta name="color-scheme" content={darkTheme ? 'dark' : 'light'} />
       </Helmet>
-      <Router>
-        <Suspense fallback={<Fallback darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange} />}>
-          <Routes>
-            <Route
-              path='/login'
-              element={
-                <div className='page'>
-                  <LoginPage
-                    darkTheme={darkTheme}
-                    onDarkThemeChanged={handleThemeChange}
-                    setAuthenticated={(success) => setAuthenticated(success)}
-                  />
-                </div>
-              }
-            />
-            {routes.map(({ path, Component, priv }) => (
-              <Route
-                key={path || 'undefined'}
-                path={path}
-                element={priv ?
-                  <RequireAuth authenticated={authenticated}>
-                    <div className='page'>
-                      <Component
-                        darkTheme={darkTheme}
-                        onDarkThemeChanged={handleThemeChange}
-                      />
-                    </div>
-                  </RequireAuth>
-                  : <div className='page'>
-                    <Component
-                      darkTheme={darkTheme}
-                      onDarkThemeChanged={handleThemeChange}
-                    />
-                  </div>} />
-            ))}
-          </Routes>
-        </Suspense>
-      </Router>
+        <RouterProvider
+          router={router}
+          fallbackElement={fallback}
+        />
     </div>
   );
 }

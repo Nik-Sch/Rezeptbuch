@@ -5,10 +5,9 @@ import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import '@blueprintjs/popover2/src/blueprint-popover2.scss';
 import App from './App';
 import logo from './static/logo-no-text.svg';
-import { hydrate, render } from "react-dom";
+import { hydrateRoot, createRoot } from 'react-dom/client';
 
-
-const rootElement = document.getElementById("root");
+const container = document.getElementById("root");
 const fallback = <div style={{
     maxWidth: '90vw',
     maxHeight: '90vh',
@@ -25,8 +24,9 @@ const node = <React.StrictMode>
   </Suspense>
 </React.StrictMode>;
 
-if (rootElement && rootElement.hasChildNodes()) {
-  hydrate(node, rootElement);
+if (container && container.hasChildNodes()) {
+  hydrateRoot(container, node);
 } else {
-  render(node, rootElement);
+  const root = createRoot(container!);
+  root.render(node);
 }

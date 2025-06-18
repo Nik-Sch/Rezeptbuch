@@ -15,7 +15,7 @@ import { Link } from 'react-router-dom';
 import { IDarkThemeProps } from '../../App';
 import AskForNotifications from '../AskForNotifications';
 import { isNotificationAvailable, registerSW } from '../../serviceWorkerRegistration';
-import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionStorageSearchInIngredients, sessionStorageSortingOrder, sessionStorageFilteredUsers, localStorageCategoryChecksum, sessionStorageScrollPosition } from '../../util/StorageKeys';
+import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionStorageSearchInIngredients, sessionStorageSortingOrder, sessionStorageFilteredUsers, sessionStorageScrollPosition } from '../../util/StorageKeys';
 import { AppToasterBottom } from '../../util/toaster';
 import { WindowScroller, List } from 'react-virtualized';
 import i18n from '../../util/i18n';

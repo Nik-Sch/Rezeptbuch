@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import recipesHandler, { IRecipe, ICategory, emptyRecipe, getUserInfo } from '../../util/Network';
-import { H1, EditableText, Classes, Button, H3, H5, H4, ButtonGroup, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton } from '@blueprintjs/core';
+import { H1, EditableText, Classes, Button, H3, H5, H4, ButtonGroup, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton, Alert } from '@blueprintjs/core';
 
 import { AppToasterTop } from '../../util/toaster';
 import { useTranslation } from 'react-i18next';
@@ -19,8 +19,8 @@ import DescriptionTextArea from './DescriptionTextArea';
 import CommentSection from './CommentSection';
 import SideMenu, { INavigationLink } from '../SideMenu';
 import { addShoppingItems } from '../ShoppingList';
-import { usePrompt } from '../helpers/ReactRouterHooks';
 import { Classes as Classes2, Popover2, Tooltip2 } from '@blueprintjs/popover2';
+import ReactRouterPrompt from 'react-router-prompt';
 
 function verifyRecipe(recipe: IRecipe): boolean {
   return recipe.title.trim() !== '' &&
@@ -228,10 +228,26 @@ export default function Recipe(props: IDarkThemeProps) {
   }
 
 
-  usePrompt(t('leavingWarning'), state.dirty);
+  const prompt = <ReactRouterPrompt when={state.dirty}>
+    {({ isActive, onConfirm, onCancel }) => (
+      <Alert
+        isOpen={isActive}
+        cancelButtonText={t('cancel')}
+        canEscapeKeyCancel={true}
+        onCancel={onCancel}
+        confirmButtonText={t('discardChanges')}
+        intent='danger'
+        onConfirm={onConfirm}
+
+      >
+        <p>{t('confirmCancel')}</p>
+      </Alert>
+    )}
+  </ReactRouterPrompt>
 
   if (mobile) {
     return <>
+      {prompt}
       <MobileHeader
         darkThemeProps={props}
         navigationLinks={navigationLinks}
@@ -440,8 +456,9 @@ export default function Recipe(props: IDarkThemeProps) {
     </>
   } else {
     return <>
+      {prompt}
       <div className='body'>
-        <SideMenu darkModeProps={props} currentNavigation='recipes'/>
+        <SideMenu darkModeProps={props} currentNavigation='recipes' />
         <div className='main-content'>
           <div className='recipe-container'>
             <div className='recipe'>
