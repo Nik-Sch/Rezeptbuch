@@ -1,17 +1,17 @@
-@import "~@blueprintjs/core/lib/scss/variables";
+@use "@blueprintjs/core/lib/scss/variables" as bp;
 
-.#{$bp-ns}-dialog.image-dialog {
+.#{bp.$bp-ns}-dialog.image-dialog {
   width: unset;
   padding: 5px 5px;
   margin: 0;
-  .#{$bp-ns}-dialog-body {
+  .#{bp.$bp-ns}-dialog-body {
     max-width: calc(100vw - 85px);
     max-height: calc(100vh - 85px);
     border-radius: 6px;
   }
 }
 
-.#{$bp-ns}-dialog.image-dialog .mobile-image{
+.#{bp.$bp-ns}-dialog.image-dialog .mobile-image{
   max-width: calc(100vw - 20px);
   max-height: calc(100vh - 20px);
   border-radius: 6px;
@@ -40,7 +40,7 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    background: rgba($dark-gray5, 0.6);
+    background: rgba(bp.$dark-gray5, 0.6);
 
     .mobile-edit-card {
       position: absolute;

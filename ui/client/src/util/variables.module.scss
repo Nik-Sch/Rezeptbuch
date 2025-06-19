@@ -1,0 +1,9 @@
+@use "@blueprintjs/core/lib/scss/variables" as bp;
+
+$mobile-width: 700px;
+$content-background-color: bp.$light-gray5;
+$dark-content-background-color: bp.$dark-gray4;
+
+:export {
+  mobileWidth: $mobile-width;
+}

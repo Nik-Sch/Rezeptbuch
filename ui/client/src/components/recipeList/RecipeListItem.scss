@@ -1,5 +1,5 @@
-@import "../../util/variables";
-@import "~@blueprintjs/core/lib/scss/variables";
+@use "../../util/variables.module";
+@use "@blueprintjs/core/lib/scss/variables" as bp;
 
 .recipe-list-item {
   display: flex;
@@ -7,11 +7,11 @@
   padding: 20px;
   height: 150px;
 
-  // background-color: $white;
-  // border-radius: $pt-border-radius;
-  // box-shadow: $pt-elevation-shadow-0;
+  // background-color: bp.$white;
+  // border-radius: bp.$pt-border-radius;
+  // box-shadow: bp.$pt-elevation-shadow-0;
   // &:hover {
-  //   box-shadow: $pt-elevation-shadow-2;
+  //   box-shadow: bp.$pt-elevation-shadow-2;
   // }
 
   .thumbnail {
@@ -68,15 +68,15 @@
     }
   }
 
-  .recipe-title.#{$bp-ns}-skeleton {
+  .recipe-title.#{bp.$bp-ns}-skeleton {
     height: 25px;
     width: 300px;
   }
-  .recipe-category.#{$bp-ns}-skeleton {
+  .recipe-category.#{bp.$bp-ns}-skeleton {
     height: 20px;
     width: 250px;
   }
-  .recipe-description.#{$bp-ns}-skeleton {
+  .recipe-description.#{bp.$bp-ns}-skeleton {
     height: 3.6em;
     width: 450px;
   }
@@ -95,13 +95,13 @@
   right: 0;
   width: 70%;
   height: 1.2em;
-  background: linear-gradient(to right, rgba($light-gray5, 0), rgba($light-gray5, 0.7) 50%);
+  background: linear-gradient(to right, rgba(bp.$light-gray5, 0), rgba(bp.$light-gray5, 0.7) 50%);
 }
-.#{$bp-ns}-dark .ellipsis::after {
+.#{bp.$bp-ns}-dark .ellipsis::after {
   background: linear-gradient(
     to right,
-    rgba($dark-content-background-color, 0),
-    rgba($dark-content-background-color, 0.7) 50%
+    rgba(variables.$dark-content-background-color, 0),
+    rgba(variables.$dark-content-background-color, 0.7) 50%
   );
 }
 
@@ -135,9 +135,9 @@
         font-style: italic;
         text-align: end;
         margin: unset;
-        color: $pt-link-color;
-        .#{$bp-ns}-dark & {
-          color: $pt-dark-link-color;
+        color: bp.$pt-link-color;
+        .#{bp.$bp-ns}-dark & {
+          color: bp.$pt-dark-link-color;
         }
       }
     }

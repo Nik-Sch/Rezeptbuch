@@ -1,8 +1,8 @@
-@import "~@blueprintjs/core/lib/scss/variables";
+@use "@blueprintjs/core/lib/scss/variables" as bp;
 
 .recipe-container {
   padding: 20px;
-  border-radius: $pt-border-radius * 2;
+  border-radius: bp.$pt-border-radius * 2;
   margin-top: 15px;
 
   .recipe {
@@ -13,14 +13,14 @@
     text-align: justify;
     text-justify: inter-word;
 
-    .#{$bp-ns}-editable-text {
+    .#{bp.$bp-ns}-editable-text {
       width: 100%;
-      span.#{$bp-ns}-popover2-target {
+      span.#{bp.$bp-ns}-popover2-target {
         display: inline;
       }
     }
 
-    .#{$bp-ns}-editable-text-content {
+    .#{bp.$bp-ns}-editable-text-content {
       // chrome is strange
       overflow: hidden !important;
     }
@@ -100,10 +100,10 @@
         max-height: 50vh;
         object-fit: cover;
         border-radius: 6px;
-        box-shadow: $pt-dark-elevation-shadow-2;
+        box-shadow: bp.$pt-dark-elevation-shadow-2;
       }
       img:hover {
-        box-shadow: $pt-dark-elevation-shadow-3;
+        box-shadow: bp.$pt-dark-elevation-shadow-3;
       }
     }
     .image-button {
@@ -111,7 +111,7 @@
       align-self: center;
     }
     .category-select,
-    .category-select .#{$bp-ns}-input {
+    .category-select .#{bp.$bp-ns}-input {
       font-family: "Montserrat Alternates", sans-serif;
       font-style: italic;
     }
@@ -121,23 +121,23 @@
       align-items: flex-start;
       margin-top: 3px;
       margin-bottom: 3px;
-      .#{$bp-ns}-icon {
+      .#{bp.$bp-ns}-icon {
         margin-right: 5px;
         padding: 1px 0;
       }
       .ingredients-line-cross:hover {
         cursor: pointer;
-        box-shadow: $pt-dark-elevation-shadow-3;
+        box-shadow: bp.$pt-dark-elevation-shadow-3;
       }
     }
   }
 
-  .title.#{$bp-ns}-skeleton {
+  .title.#{bp.$bp-ns}-skeleton {
     height: 35px;
     width: 300px;
   }
 
-  .category-select.#{$bp-ns}-skeleton {
+  .category-select.#{bp.$bp-ns}-skeleton {
     display: inline-block;
     height: 20px;
     width: 250px;
@@ -146,27 +146,27 @@
     white-space: break-spaces;
   }
 
-  .ingredients-line .#{$bp-ns}-skeleton {
+  .ingredients-line .#{bp.$bp-ns}-skeleton {
     display: inline-block;
     width: 250px;
     height: 1em;
   }
-  .description.#{$bp-ns}-skeleton {
+  .description.#{bp.$bp-ns}-skeleton {
     width: 800px;
     height: 4.8em;
   }
 
   .no-ingredients {
-    color: rgba($gray1, 0.6);
+    color: rgba(bp.$gray1, 0.6);
   }
 }
 
-.#{$bp-ns}-dark .recipe-container {
-  background-color: $dark-gray4;
+.#{bp.$bp-ns}-dark .recipe-container {
+  background-color: bp.$dark-gray4;
 }
 
-.#{$bp-ns}-dark .no-ingredients {
-  color: rgba($gray4, 0.6);
+.#{bp.$bp-ns}-dark .no-ingredients {
+  color: rgba(bp.$gray4, 0.6);
 }
 .popover-button-container {
   display: flex;
@@ -175,15 +175,15 @@
   }
 }
 
-.description.#{$bp-ns}-editable-text {
+.description.#{bp.$bp-ns}-editable-text {
   width: 100%;
-  .#{$bp-ns}-popover-wrapper,
-  .#{$bp-ns}-popover-target {
+  .#{bp.$bp-ns}-popover-wrapper,
+  .#{bp.$bp-ns}-popover-target {
     display: block;
     width: 100%;
   }
 }
-.description .#{$bp-ns}-editable-text-content {
+.description .#{bp.$bp-ns}-editable-text-content {
   overflow: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -206,7 +206,7 @@
     font-family: "Montserrat Alternates", sans-serif;
     text-align: center;
     width: 100%;
-    .#{$bp-ns}-input {
+    .#{bp.$bp-ns}-input {
       font-family: "Montserrat Alternates", sans-serif;
     }
   }
@@ -217,7 +217,7 @@
     margin: 0 auto;
     display: flex;
     justify-content: center;
-    .#{$bp-ns}-button {
+    .#{bp.$bp-ns}-button {
       font-family: "Montserrat Alternates", sans-serif;
       font-style: italic;
     }
@@ -277,25 +277,25 @@
     margin-top: 15px;
   }
 
-  .title.#{$bp-ns}-skeleton {
+  .title.#{bp.$bp-ns}-skeleton {
     height: 30px;
     width: 90vw;
     margin: 0 auto;
     margin-bottom: 15px;
   }
 
-  .category-select.#{$bp-ns}-skeleton {
+  .category-select.#{bp.$bp-ns}-skeleton {
     height: 20px;
     width: 60vw;
     margin: 0 auto;
   }
 
-  .ingredients-line-text.#{$bp-ns}-skeleton {
+  .ingredients-line-text.#{bp.$bp-ns}-skeleton {
     display: inline-block;
     width: 40vw;
     height: 1em;
   }
-  .description.#{$bp-ns}-skeleton {
+  .description.#{bp.$bp-ns}-skeleton {
     width: 90vw;
     height: 4.8em;
   }
@@ -303,9 +303,9 @@
     margin-top: 15px;
   }
 
-  .#{$bp-ns}-editable-text {
+  .#{bp.$bp-ns}-editable-text {
     // width: 100%;
-    span.#{$bp-ns}-popover2-target {
+    span.#{bp.$bp-ns}-popover2-target {
       display: inline;
     }
   }

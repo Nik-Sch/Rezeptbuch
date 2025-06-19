@@ -1,10 +1,10 @@
-@import "~@blueprintjs/core/lib/scss/variables";
+@use "@blueprintjs/core/lib/scss/variables" as bp;
 
 .create-shopping-list-popover {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  .#{$bp-ns}-button {
+  .#{bp.$bp-ns}-button {
     margin-top: 10px;
   }
 }
@@ -38,7 +38,7 @@
       height: 0.66666px;
     }
 
-    .#{$bp-ns}-divider {
+    .#{bp.$bp-ns}-divider {
       margin: 5px 0;
     }
 
@@ -63,7 +63,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .my-editable-text.#{$bp-ns}-editable-text-editing {
+      .my-editable-text.#{bp.$bp-ns}-editable-text-editing {
         overflow: visible;
       }
       .new-icon {
@@ -111,7 +111,7 @@
   }
 }
 
-.#{$bp-ns}-dark .shopping-list-status-element .my-spinner:after {
+.#{bp.$bp-ns}-dark .shopping-list-status-element .my-spinner:after {
   border: 2.3px solid #fff;
   border-color: #fff transparent #fff transparent;
 

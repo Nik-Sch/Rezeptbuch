@@ -1,17 +1,17 @@
-@import "../util/variables.scss";
-@import "~@blueprintjs/core/lib/scss/variables";
+@use "../util/variables.module";
+@use "@blueprintjs/core/lib/scss/variables" as bp;
 
 .page {
   // padding-top: 85px;
-  @media only screen and (max-width: $mobile-width), (max-height: $mobile-width) {
-    padding-top: $pt-navbar-height;
+  @media only screen and (max-width: variables.$mobile-width), (max-height: variables.$mobile-width) {
+    padding-top: bp.$pt-navbar-height;
   }
   position: relative;
 }
 
 .mobile-header-wrapper {
   .mobile-header-content {
-    height: $pt-navbar-height;
+    height: bp.$pt-navbar-height;
     padding: 0 15px;
     position: fixed;
     top: 0;
@@ -22,9 +22,9 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    background-color: $white;
-    .#{$bp-ns}-dark & {
-      background-color: $dark-gray5;
+    background-color: bp.$white;
+    .#{bp.$bp-ns}-dark & {
+      background-color: bp.$dark-gray5;
     }
 
     .left-align {
@@ -47,11 +47,11 @@
     .recipe-search {
       margin-left: 5px;
 
-      .#{$bp-ns}-input {
+      .#{bp.$bp-ns}-input {
         transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
         width: 40vw;
       }
-      .#{$bp-ns}-input:focus {
+      .#{bp.$bp-ns}-input:focus {
         width: 45vw;
       }
     }
@@ -67,8 +67,8 @@
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     z-index: 10;
-    .#{$bp-ns}-dark & {
-      background-color: $dark-gray5;
+    .#{bp.$bp-ns}-dark & {
+      background-color: bp.$dark-gray5;
       box-shadow: 0 0 0 1px rgba(17,20,24,.2),0 0 0 rgba(17,20,24,0),0 1px 1px rgba(17,20,24,.4);
     }
     .settings {
@@ -77,7 +77,7 @@
       display: flex;
       align-items: center;
 
-      .#{$bp-ns}-switch {
+      .#{bp.$bp-ns}-switch {
         margin-bottom: 0;
       }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
-import variables from '../../util/variables.scss';
+import variables from '../../util/variables.module.scss';
 
 function getWindowDimensions() {
   const { innerWidth: width, innerHeight: height } = window;
