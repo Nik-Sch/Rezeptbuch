@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { IDarkThemeProps } from "../App";
 import MobileHeader from "./MobileHeader";
 import { useMobile } from "./helpers/CustomHooks";
-import { Classes, H1, FormGroup, InputGroup, Button, Intent, Callout, H4 } from "@blueprintjs/core";
+import { Classes, H1, FormGroup, InputGroup, Button, Intent, Callout, H4, Tooltip } from "@blueprintjs/core";
 import { useTranslation } from "react-i18next";
 
 import './LoginPage.scss';
@@ -11,7 +11,6 @@ import { loginToRecipes, createAccount, getUserInfo } from "../util/Network";
 import classNames from "classnames";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { AppToasterTop } from "../util/toaster";
-import { Classes as Classes2, Tooltip2 } from "@blueprintjs/popover2";
 import { useEffect } from "react";
 import SideMenu from "./SideMenu";
 
@@ -88,18 +87,18 @@ export default function LoginPage(props: IDarkThemeProps & { setAuthenticated: (
   }
 
   const lockButton = (
-    <Tooltip2
+    <Tooltip
       content={`${showPassword ? "Hide" : "Show"} Password`}
       disabled={isSubmitting}
       position='right'
-      popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+      popoverClassName={Classes.POPOVER_CONTENT_SIZING}
       renderTarget={({ isOpen, ref, ...tooltipProps }) => (
         <Button
           {...tooltipProps}
-          elementRef={ref as any}
+          ref={ref as any}
           icon={showPassword ? "unlock" : "lock"}
           intent={Intent.WARNING}
-          minimal={true}
+          variant='minimal'
           disabled={isSubmitting}
           onClick={() => setShowPassword(!showPassword)}
           tabIndex={-1}
@@ -107,18 +106,18 @@ export default function LoginPage(props: IDarkThemeProps & { setAuthenticated: (
     />
   );
   const lockButton2 = (
-    <Tooltip2
+    <Tooltip
       content={`${showPassword2 ? "Hide" : "Show"} Password`}
-      popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+      popoverClassName={Classes.POPOVER_CONTENT_SIZING}
       disabled={isSubmitting}
       position='right'
       renderTarget={({ isOpen, ref, ...tooltipProps }) => (
         <Button
           {...tooltipProps}
-          elementRef={ref as any}
+          ref={ref as any}
           icon={showPassword2 ? "unlock" : "lock"}
           intent={Intent.WARNING}
-          minimal={true}
+          variant='minimal'
           disabled={isSubmitting}
           onClick={() => setShowPassword2(!showPassword2)}
           tabIndex={-1}
@@ -144,8 +143,8 @@ export default function LoginPage(props: IDarkThemeProps & { setAuthenticated: (
                 {t('wrongCredentials')}
                 <Button
                   icon='cross'
-                  minimal={true}
-                  large={true}
+                  variant='minimal'
+                  size='large'
                   intent='danger'
                   onClick={() => setWrongCredentials(false)}
                 />

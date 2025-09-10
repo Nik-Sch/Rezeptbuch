@@ -4,9 +4,8 @@
   "private": true,
   "homepage": "/",
   "dependencies": {
-    "@blueprintjs/core": "^4.9.4",
-    "@blueprintjs/popover2": "^1.6.4",
-    "@blueprintjs/select": "^4.6.4",
+    "@blueprintjs/core": "^5.19.1",
+    "@blueprintjs/select": "^5.3.21",
     "@types/jest": "^27.5.2",
     "@types/node": "^22.15.32",
     "@types/react": "^18.3.23",
@@ -60,12 +59,6 @@
     "start": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [

@@ -101,7 +101,7 @@ export function CategorySelect(props: IProps) {
       filterable={false}
       popoverProps={{ minimal: true }}
     >
-      <Button text={buttonText} rightIcon="double-caret-vertical" large={true} />
+      <Button text={buttonText} rightIcon="double-caret-vertical" size='large' />
     </CatSelect>
   );
 }

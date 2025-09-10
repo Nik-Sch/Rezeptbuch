@@ -2,7 +2,6 @@ import React, { Suspense } from 'react';
 import './index.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
-import '@blueprintjs/popover2/src/blueprint-popover2.scss';
 import App from './App';
 import logo from './static/logo-no-text.svg';
 import { hydrateRoot, createRoot } from 'react-dom/client';

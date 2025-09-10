@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import MobileHeader from "./MobileHeader";
-import { Collapse, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text, MenuItem, AnchorButton, ButtonGroup, InputGroup, Dialog, Radio, RadioGroup } from "@blueprintjs/core";
+import { Collapse, H1, Checkbox, Icon, Button, Divider, Classes, Keys, Text, MenuItem, AnchorButton, ButtonGroup, InputGroup, Dialog, Radio, RadioGroup, Popover, Tooltip } from "@blueprintjs/core";
 import { usePersistentState, useMobile } from "./helpers/CustomHooks";
 import { useTranslation } from "react-i18next";
 import { IDarkThemeProps } from "../App";
@@ -15,9 +15,8 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import update from 'immutability-helper';
 import { v4 as uuidv4 } from 'uuid';
-import { Select2 } from "@blueprintjs/select";
+import { Select } from "@blueprintjs/select";
 import { useNavigate, useParams } from "react-router-dom";
-import { Popover2, Tooltip2, Classes as Classes2 } from "@blueprintjs/popover2";
 import { shareLink } from "./recipe/ShareButton";
 
 export interface IShoppingItem {
@@ -120,7 +119,7 @@ function NewShoppingListItem(props: {
       <Button
         icon='blank'
         small={!mobile}
-        minimal={true}
+        variant='minimal'
       />
     </div>
     {hover ? <Divider /> : <div className='fake-divider' />}
@@ -261,7 +260,7 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
         <Button
           icon='cross'
           small={!mobile}
-          minimal={true}
+          variant='minimal'
           onClick={() => props.deleteElement && props.deleteElement(props.item)}
         />
       </div>
@@ -313,7 +312,7 @@ function ShoppingListSelect(props: {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [deleteKey, setDeleteKey] = useState<string | null>(null);
 
-  const ShoppingListSelect = Select2.ofType<{ key: string, value: ISingleShoppingList }>();
+  const ShoppingListSelect = Select.ofType<{ key: string, value: ISingleShoppingList }>();
 
   const createNewList = () => {
     props.onItemSelect(uuidv4(), {
@@ -379,7 +378,7 @@ function ShoppingListSelect(props: {
               e.stopPropagation();
               setDeleteKey(item.key);
             }}
-            minimal={true}
+            variant='minimal'
             small={true}
           />}
         />
@@ -392,18 +391,18 @@ function ShoppingListSelect(props: {
       <Button
         text={t('shoppingListName', { name: parentState.lists[parentState.active].name ?? 'Private' })}
         rightIcon='double-caret-vertical'
-        large={true}
+        size='large'
       />
     </ShoppingListSelect>
-    <Popover2
+    <Popover
       disabled={mobile}
       isOpen={popoverOpen}
       onInteraction={newState => setPopoverOpen(newState)}
-      popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+      popoverClassName={Classes.POPOVER_CONTENT_SIZING}
       content={<div className='create-shopping-list-popover'>
         {newListInput}
         <Button
-          className={Classes2.POPOVER2_DISMISS}
+          className={Classes.POPOVER_DISMISS}
           text={t('create')}
           intent='success'
           onClick={createNewList}
@@ -412,10 +411,10 @@ function ShoppingListSelect(props: {
       renderTarget={({ isOpen, ref, ...targetProps }) => (
         <Button
           {...targetProps}
-          elementRef={ref as any}
+          ref={ref as any}
           intent='primary'
           icon='add'
-          large={true}
+          size='large'
           onClick={mobile ? () => setPopoverOpen(true) : (targetProps as any).onClick}
         />
       )}
@@ -431,8 +430,8 @@ function ShoppingListSelect(props: {
       <div className={Classes.DIALOG_FOOTER}>
         <div className={Classes.DIALOG_FOOTER_ACTIONS}>
           <Button
-            large={true}
-            className={Classes2.POPOVER2_DISMISS}
+            size='large'
+            className={Classes.POPOVER_DISMISS}
             text={t('create')}
             intent='success'
             onClick={createNewList}
@@ -811,7 +810,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
                 id={key}
                 value={key}
                 label={value.name}
-                large={true}
+                size='large'
               />))
             }
           </RadioGroup>
@@ -896,20 +895,20 @@ export default function ShoppingList(props: IDarkThemeProps) {
             {!mobile && <div className='edit-container'>
               {statusElement}
               <ButtonGroup vertical={false} alignText='right'>
-                <Tooltip2
+                <Tooltip
                   content={state.active === 'default' ? t('shoppingListNoShare') : t('shoppingListShare')}
                   position='bottom'
                 >
                   <AnchorButton
                     icon='share'
-                    minimal={mobile}
-                    large={mobile}
+                    variant={mobile ? 'minimal' : 'solid'}
+                    size={mobile ? 'large' : 'medium'}
                     text={mobile ? undefined : t('share')}
                     disabled={state.active === 'default'}
                     intent='primary'
                     onClick={shareShoppingList}
                   />
-                </Tooltip2>
+                </Tooltip>
                 <Button
                   text={t('deleteAll')}
                   icon='trash'
@@ -963,7 +962,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
             />
             {state.lists[state.active].items.filter(v => v.checked).length > 0 && !mobile && <Divider />}
             {state.lists[state.active].items.filter(v => v.checked).length > 0 && <Button
-              minimal={true}
+              variant='minimal'
               text={t('checkedItems', { count: state.lists[state.active].items.filter(v => v.checked).length })}
               icon={state.showChecked ? 'caret-down' : 'caret-right'}
               onClick={() => setState(state => ({ ...state, showChecked: !state.showChecked }))}

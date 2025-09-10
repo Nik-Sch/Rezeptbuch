@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Network';
-import { Classes, Icon, InputGroup, Button, H3, Dialog, Divider } from '@blueprintjs/core';
+import { Classes, Icon, InputGroup, Button, H3, Dialog, Divider, Tooltip } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { ISort, SortSelect } from '../helpers/SortSelect';
@@ -19,7 +19,6 @@ import { sessionStorageFilteredCategories, sessionStorageSearchString, sessionSt
 import { AppToasterBottom } from '../../util/toaster';
 import { WindowScroller, List } from 'react-virtualized';
 import i18n from '../../util/i18n';
-import { Tooltip2, Classes as Classes2 } from '@blueprintjs/popover2';
 import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { UserMultiSelect } from '../helpers/UserMultiSelect';
 
@@ -214,7 +213,7 @@ export default function RecipeList(props: IDarkThemeProps) {
 
   const searchClearButton = searchString.length === 0
     ? undefined
-    : <Button icon='cross' minimal={true} onClick={() => handleSearchChange('')} />;
+    : <Button icon='cross' variant='minimal' onClick={() => handleSearchChange('')} />;
 
   const navigationLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
@@ -222,17 +221,17 @@ export default function RecipeList(props: IDarkThemeProps) {
   ];
 
   const searchInIngredientsButton = (
-    <Tooltip2
+    <Tooltip
       content={searchInIngredients ? t('tooltipSearchInIngredients') : t('tooltipNotSearchInIngredients')}
       position='bottom'
-      popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+      popoverClassName={Classes.POPOVER_CONTENT_SIZING}
       renderTarget={({ isOpen, ref, ...tooltipProps }) => (
         <Button
           {...tooltipProps}
           icon='properties'
-          elementRef={ref as any}
+          ref={ref}
           intent={searchInIngredients ? 'primary' : 'none'}
-          minimal={true}
+          variant='minimal'
           onClick={() => setSearchInIngredients(!searchInIngredients)}
         />)}
     />
@@ -281,7 +280,7 @@ export default function RecipeList(props: IDarkThemeProps) {
 
     {sortAndFilter}
 
-    <Tooltip2
+    <Tooltip
       disabled={online && hasWriteAccess}
       content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWrite')}
       position='bottom'
@@ -323,7 +322,7 @@ export default function RecipeList(props: IDarkThemeProps) {
       />
       <InputGroup
         leftIcon='search'
-        large={true}
+        size='large'
         rightElement={searchClearButton}
         placeholder={t('searchRecipe')}
         value={searchString}
@@ -348,7 +347,7 @@ export default function RecipeList(props: IDarkThemeProps) {
         <Button
           text={t('ok')}
           intent='success'
-          large={true}
+          size='large'
           onClick={() => setFilterIsOpen(false)}
         />
       </div>

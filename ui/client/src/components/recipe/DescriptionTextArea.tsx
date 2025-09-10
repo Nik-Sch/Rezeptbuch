@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef, KeyboardEventHandler, useCallback } from "react";
 import recipesHandler, { IRecipe } from "../../util/Network";
-import { IQueryListRendererProps, IItemRendererProps, QueryList, ItemPredicate } from "@blueprintjs/select";
-import { TextAreaProps, Classes, MenuItem, Position } from "@blueprintjs/core";
+import { QueryListRendererProps, ItemRendererProps, QueryList, ItemPredicate } from "@blueprintjs/select";
+import { TextAreaProps, Classes, MenuItem, Position, Tooltip, Popover } from "@blueprintjs/core";
 import classNames from "classnames";
 
 import './DescriptionTextArea.scss';
 import { useMobile } from "../helpers/CustomHooks";
 import { Link } from "react-router-dom";
-import { Popover2, Tooltip2 } from "@blueprintjs/popover2";
 
 interface IDescriptionTextAreaProps extends TextAreaProps {
   changeValue?: (v: string | undefined) => void;
@@ -166,7 +165,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
     }
   }
 
-  const itemRenderer = (recipe: IRecipe, props: IItemRendererProps) => {
+  const itemRenderer = (recipe: IRecipe, props: ItemRendererProps) => {
     if (!props.modifiers.matchesPredicate) {
       return null;
     }
@@ -204,9 +203,9 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
           <em>{matchedRecipe.category.name}</em>
         </>;
         tokens.push(
-          <Tooltip2 key={lastIndex} content={tooltipContent} position='top'>
+          <Tooltip key={lastIndex} content={tooltipContent} position='top'>
             <Link to={`/recipes/${match[1]}`}>{match[0]}</Link>
-          </Tooltip2>
+          </Tooltip>
         );
       } else {
         tokens.push(match[0]);
@@ -220,8 +219,8 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
   }
 
 
-  const renderer = (listProps: IQueryListRendererProps<IRecipe>) => {
-    return <Popover2
+  const renderer = (listProps: QueryListRendererProps<IRecipe>) => {
+    return <Popover
       autoFocus={false}
       enforceFocus={false}
       isOpen={isOpen}
@@ -253,7 +252,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
           style={{ height: textAreaHeight }}
         />
       </div>
-    </Popover2>
+    </Popover>
   }
 
   const updateHeight = useCallback(() => {

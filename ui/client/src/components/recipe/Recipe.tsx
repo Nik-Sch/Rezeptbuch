@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import recipesHandler, { IRecipe, ICategory, emptyRecipe, getUserInfo } from '../../util/Network';
-import { H1, EditableText, Classes, Button, H3, H5, H4, ButtonGroup, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton, Alert } from '@blueprintjs/core';
+import { H1, EditableText, Classes, Button, H3, H5, H4, ButtonGroup, Icon, TextArea, H2, InputGroup, Dialog, AnchorButton, Alert, Tooltip, Popover } from '@blueprintjs/core';
 
 import { AppToasterTop } from '../../util/toaster';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +19,6 @@ import DescriptionTextArea from './DescriptionTextArea';
 import CommentSection from './CommentSection';
 import SideMenu, { INavigationLink } from '../SideMenu';
 import { addShoppingItems } from '../ShoppingList';
-import { Classes as Classes2, Popover2, Tooltip2 } from '@blueprintjs/popover2';
 import ReactRouterPrompt from 'react-router-prompt';
 
 function verifyRecipe(recipe: IRecipe): boolean {
@@ -262,12 +261,12 @@ export default function Recipe(props: IDarkThemeProps) {
             <div className={Classes.DIALOG_FOOTER_ACTIONS}>
               <Button
                 text={t('cancel')}
-                large={true}
+                size='large'
                 className={'popover-left'}
                 onClick={() => setMobileCancelIsOpen(false)}
               />
               <Button
-                large={true}
+                size='large'
                 text={t('discardChanges')}
                 intent='danger'
                 className={Classes.POPOVER_DISMISS}
@@ -286,12 +285,12 @@ export default function Recipe(props: IDarkThemeProps) {
             <div className={Classes.DIALOG_FOOTER_ACTIONS}>
               <Button
                 text={t('cancel')}
-                large={true}
+                size='large'
                 className={'popover-left'}
                 onClick={() => setMobileDeleteIsOpen(false)}
               />
               <Button
-                large={true}
+                size='large'
                 text={t('deleteRecipe')}
                 intent='danger'
                 className={Classes.POPOVER_DISMISS}
@@ -307,10 +306,10 @@ export default function Recipe(props: IDarkThemeProps) {
                 text={t('cancel')}
                 intent='warning'
                 onClick={handleCancelClick}
-                minimal={true}
-                large={true}
+                variant='minimal'
+                size='large'
               />
-              <Tooltip2
+              <Tooltip
                 disabled={online}
                 content={t('tooltipOffline')}
                 position='bottom'
@@ -318,16 +317,16 @@ export default function Recipe(props: IDarkThemeProps) {
                 <Icon
                   className={classNames(Classes.BUTTON, Classes.MINIMAL, online ? '' : Classes.DISABLED)}
                   icon='floppy-disk'
-                  iconSize={24}
+                  size={24}
                   intent='primary'
                   onClick={online ? saveRecipe : undefined}
                 />
-              </Tooltip2>
+              </Tooltip>
             </>
             :
             <>
               <ShareButton recipe={recipe} />
-              <Tooltip2
+              <Tooltip
                 disabled={online && hasWriteAccess}
                 content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
                 position='bottom'
@@ -348,7 +347,7 @@ export default function Recipe(props: IDarkThemeProps) {
                     intent='danger'
                   />
                 </>
-              </Tooltip2>
+              </Tooltip>
             </>
           }
         </div>}
@@ -366,7 +365,7 @@ export default function Recipe(props: IDarkThemeProps) {
             {state.editing ?
               <InputGroup
                 value={recipe.title}
-                large={true}
+                size='large'
                 placeholder={t('phTitle')}
                 onChange={(event: any) => handleSetTitle(event.target.value)}
               />
@@ -394,7 +393,7 @@ export default function Recipe(props: IDarkThemeProps) {
             </H4>
             {recipe.ingredients.length > 0 && !state.editing && <Button
               text={t('addToShopping')}
-              minimal={true}
+              variant='minimal'
               intent='success'
               icon='add'
               onClick={addIngredientsToShoppingList}
@@ -486,7 +485,7 @@ export default function Recipe(props: IDarkThemeProps) {
                           onClick={handleCancelClick}
                         />}
                       />
-                      <Tooltip2
+                      <Tooltip
                         disabled={online}
                         content={t('tooltipOffline')}
                         position='bottom'
@@ -498,12 +497,12 @@ export default function Recipe(props: IDarkThemeProps) {
                           intent='primary'
                           onClick={saveRecipe}
                         />
-                      </Tooltip2>
+                      </Tooltip>
                     </ButtonGroup>
                     :
                     <ButtonGroup>
                       <ShareButton recipe={recipe} />
-                      <Tooltip2
+                      <Tooltip
                         disabled={online && hasWriteAccess}
                         content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
                         position='bottom'
@@ -515,12 +514,12 @@ export default function Recipe(props: IDarkThemeProps) {
                           text={t('editRecipe')}
                           onClick={handleSetEditable}
                         />
-                      </Tooltip2>
+                      </Tooltip>
                       <DeleteButton
                         handleDeleteClick={handleDeleteClick}
                         disabled={!(online && hasWriteAccess)}
                         popoverTarget={
-                          <Tooltip2
+                          <Tooltip
                             disabled={online && hasWriteAccess}
                             content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWriteRecipe')}
                             position='bottom'
@@ -531,7 +530,7 @@ export default function Recipe(props: IDarkThemeProps) {
                               intent='warning'
                               icon='trash'
                             />
-                          </Tooltip2>
+                          </Tooltip>
                         }
                       />
                     </ButtonGroup>
@@ -557,7 +556,7 @@ export default function Recipe(props: IDarkThemeProps) {
                     </H4>
                     {recipe.ingredients.length > 0 && !state.editing && <Button
                       text={t('addToShopping')}
-                      minimal={true}
+                      variant='minimal'
                       intent='success'
                       icon='add'
                       onClick={addIngredientsToShoppingList}
@@ -627,8 +626,8 @@ function CancelButton(props: {
   popoverTarget: React.ReactNode;
 }) {
   const [t] = useTranslation();
-  return <Popover2
-    popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+  return <Popover
+    popoverClassName={Classes.POPOVER_CONTENT_SIZING}
     defaultIsOpen={false}
     position='bottom'
     content={
@@ -651,7 +650,7 @@ function CancelButton(props: {
     }
   >
     {props.popoverTarget}
-  </Popover2>
+  </Popover>
 }
 
 function DeleteButton(props: {
@@ -662,8 +661,8 @@ function DeleteButton(props: {
   const [t] = useTranslation();
 
 
-  return <Popover2
-    popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+  return <Popover
+    popoverClassName={Classes.POPOVER_CONTENT_SIZING}
     defaultIsOpen={false}
     disabled={props.disabled}
     position='bottom'
@@ -687,5 +686,5 @@ function DeleteButton(props: {
     }
   >
     {props.popoverTarget}
-  </Popover2>
+  </Popover>
 }

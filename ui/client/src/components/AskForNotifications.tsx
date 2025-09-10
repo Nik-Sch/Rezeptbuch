@@ -61,15 +61,15 @@ export default function AskForNotifications() {
       <div className='title-wrapper'>
         <H4>{t('askNotificationsTitle')}</H4>
         <Button
-          minimal={true}
+          variant='minimal'
           icon='cross'
           onClick={() => setDenied(true)}
         />
       </div>
       <Button
         text={t('askNotifications')}
-        minimal={true}
-        large={true}
+        variant='minimal'
+        size='large'
         intent='success'
         rightIcon='notifications-updated'
         onClick={async () => {

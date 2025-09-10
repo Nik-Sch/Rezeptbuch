@@ -109,7 +109,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
             </H4>
             {/* {recipe.ingredients.length > 0 && !state.editing && <Button
               text={t('addToShopping')}
-              minimal={true}
+              variant='minimal'
               intent='success'
               icon='add'
               onClick={addIngredientsToShoppingList}
@@ -198,7 +198,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
                     </H4>
                     {/* {recipe.ingredients.length > 0 && !state.editing && <Button
                       text={t('addToShopping')}
-                      minimal={true}
+                      variant='minimal'
                       intent='success'
                       icon='add'
                       onClick={addIngredientsToShoppingList}

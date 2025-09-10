@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Classes, Button, Dialog, ProgressBar, Intent, H5 } from '@blueprintjs/core';
+import { Classes, Popover, Button, Dialog, ProgressBar, Intent, H5 } from '@blueprintjs/core';
 import { MyImage } from '../helpers/Image';
 import { AppToasterTop } from '../../util/toaster';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,6 @@ import classNames from 'classnames';
 import './ImagePart.scss'
 import { useMobile, useWindowDimensions } from '../helpers/CustomHooks';
 import recipesHandler, { IRecipe } from '../../util/Network';
-import { Classes as Classes2, Popover2 } from '@blueprintjs/popover2';
 
 export interface IImagePartProps {
   recipe: IRecipe,
@@ -101,7 +100,7 @@ export default function ImagePart(props: IImagePartProps) {
               text={t('delete')}
               intent='danger'
               rightIcon='delete'
-              large={true}
+              size='large'
               onClick={handleDeleteImageClick}
             />
             {/* </div> */}
@@ -110,10 +109,10 @@ export default function ImagePart(props: IImagePartProps) {
       </div>
     } else {
       return <div className={props.className}>
-        <Popover2
+        <Popover
           // wrapperTagName='div'
           // usePortal={false}
-          popoverClassName={Classes2.POPOVER2_CONTENT_SIZING}
+          popoverClassName={Classes.POPOVER_CONTENT_SIZING}
           interactionKind='click'
           onInteraction={(newState) => {
             if (newState) {
@@ -156,7 +155,7 @@ export default function ImagePart(props: IImagePartProps) {
               onMouseOver: () => setIsPopoverOpen(true)
             }}
           />
-        </Popover2>
+        </Popover>
       </div>
     }
   } else {
@@ -170,7 +169,7 @@ export default function ImagePart(props: IImagePartProps) {
         />
 
         <Dialog
-          hasBackdrop={true}
+          // hasBackdrop={true}
           isOpen={showImage}
           onClose={() => setShowImage(false)}
           className='image-dialog'
