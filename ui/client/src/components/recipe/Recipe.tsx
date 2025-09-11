@@ -137,7 +137,7 @@ export default function Recipe(props: IDarkThemeProps) {
       }
     }
     setImagesToBeDeleted([]);
-    const newRecipe: IRecipe = JSON.parse(JSON.stringify(recipe));
+    const newRecipe = JSON.parse(JSON.stringify(recipe)) as IRecipe;
     if (mobile) {
       newRecipe.ingredients = ingredientsText.split('\n').filter((v) => v.trim().length > 0);
       setRecipe(newRecipe);
@@ -180,7 +180,7 @@ export default function Recipe(props: IDarkThemeProps) {
     }
   };
 
-  const handleDiscardClick = async () => {
+  const handleDiscardClick = () => {
     if (mobile) {
       setMobileCancelIsOpen(false);
     }
@@ -320,7 +320,7 @@ export default function Recipe(props: IDarkThemeProps) {
                   text={t('deleteRecipe')}
                   intent="danger"
                   className={Classes.POPOVER_DISMISS}
-                  onClick={handleDeleteClick}
+                  onClick={void handleDeleteClick}
                 />
               </div>
             </div>
@@ -346,7 +346,7 @@ export default function Recipe(props: IDarkThemeProps) {
                       icon="floppy-disk"
                       size={24}
                       intent="primary"
-                      onClick={online ? saveRecipe : undefined}
+                      onClick={online ? void saveRecipe : undefined}
                     />
                   </Tooltip>
                 </>
@@ -492,7 +492,7 @@ export default function Recipe(props: IDarkThemeProps) {
             comments={recipe.comments}
             username={status?.username ?? ''}
             recipeId={recipe.id}
-            writeAccess={typeof status !== 'undefined' && status.write}
+            writeAccess={status?.write ?? false}
           />
         )}
         <div className="bottom-padding" />
@@ -543,7 +543,7 @@ export default function Recipe(props: IDarkThemeProps) {
                               icon="floppy-disk"
                               text={t('saveRecipe')}
                               intent="primary"
-                              onClick={saveRecipe}
+                              onClick={void saveRecipe}
                             />
                           </Tooltip>
                         </ButtonGroup>
@@ -566,7 +566,7 @@ export default function Recipe(props: IDarkThemeProps) {
                             />
                           </Tooltip>
                           <DeleteButton
-                            handleDeleteClick={handleDeleteClick}
+                            handleDeleteClick={void handleDeleteClick}
                             disabled={!(online && hasWriteAccess)}
                             popoverTarget={
                               <Tooltip
@@ -676,7 +676,7 @@ export default function Recipe(props: IDarkThemeProps) {
                 comments={recipe.comments}
                 username={status?.username ?? ''}
                 recipeId={recipe.id}
-                writeAccess={typeof status !== 'undefined' && status.write}
+                writeAccess={status?.write ?? false}
               />
             )}
           </div>

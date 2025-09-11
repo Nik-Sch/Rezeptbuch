@@ -67,7 +67,8 @@ export default function ImagePart(props: IImagePartProps) {
         onSuccess: (response) => {
           AppToasterTop.show(renderUploadProgress(1, false), uploadToastKey);
           if (props.setImage) {
-            props.setImage(response.data.name);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            props.setImage(response.data.name as string);
           }
         },
         onFailure: () => {
@@ -77,7 +78,7 @@ export default function ImagePart(props: IImagePartProps) {
     }
   };
 
-  const handleDeleteImageClick = () => props.setImage && props.setImage('');
+  const handleDeleteImageClick = () => props.setImage?.('');
 
   if (props.editable) {
     if (props.recipe.image.trim() === '') {

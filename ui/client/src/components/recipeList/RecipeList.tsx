@@ -134,7 +134,7 @@ export default function RecipeList(props: IDarkThemeProps) {
   const timeout = useRef<number>();
   const mobile = useMobile();
   const status = getUserInfo();
-  const hasWriteAccess = typeof status !== 'undefined' && status.write;
+  const hasWriteAccess = status?.write ?? false;
 
   // recipe change
   useEffect(() => {

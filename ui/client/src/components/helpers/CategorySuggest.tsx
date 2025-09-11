@@ -46,22 +46,21 @@ export function CategorySuggest(props: IProps) {
   };
 
   const filterCategory: ItemPredicate<ICategory> = (query, category) => {
-    return category.name.toLowerCase().indexOf(query.toLowerCase()) >= 0;
+    return category.name.toLowerCase().includes(query.toLowerCase());
   };
 
-  const onItemSelect = (item: ICategory) => {
+  const onItemSelect = async (item: ICategory) => {
     if (item.id === -1) {
-      recipesHandler.addCategory(item.name).then((category) => {
-        if (category) {
-          AppToasterTop.show({ message: t('createdCategory'), intent: 'success' });
-          const newCategories = (categories || []).slice();
-          newCategories.push(category);
-          setCategories(newCategories);
-          props.onCategorySelected(category);
-        } else {
-          AppToasterTop.show({ message: t('createdCategoryError'), intent: 'danger' });
-        }
-      });
+      const category = await recipesHandler.addCategory(item.name);
+      if (category) {
+        AppToasterTop.show({ message: t('createdCategory'), intent: 'success' });
+        const newCategories = (categories ?? []).slice();
+        newCategories.push(category);
+        setCategories(newCategories);
+        props.onCategorySelected(category);
+      } else {
+        AppToasterTop.show({ message: t('createdCategoryError'), intent: 'danger' });
+      }
     } else {
       props.onCategorySelected(item);
     }
@@ -101,12 +100,12 @@ export function CategorySuggest(props: IProps) {
       createNewItemRenderer={maybeCreateNewCategoryRenderer}
       resetOnQuery={true}
       noResults={<MenuItem disabled={true} text={props.noResultText} />}
-      items={categories || []}
+      items={categories ?? []}
       defaultSelectedItem={props.initialCategory}
       itemsEqual="id"
       itemPredicate={filterCategory}
       itemRenderer={itemRenderer}
-      onItemSelect={onItemSelect}
+      onItemSelect={(i) => void onItemSelect(i)}
       disabled={typeof categories === 'undefined'}
       inputValueRenderer={getItemName}
       fill={true}

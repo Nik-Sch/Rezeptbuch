@@ -127,8 +127,8 @@ function apiToRecipe(
   return {
     title: r.title,
     category: {
-      name: category?.name || '',
-      id: category?.id || -1,
+      name: category?.name ?? '',
+      id: category?.id ?? -1,
     },
     ingredients: r.ingredients
       .replace(/^\s*-\s+/gm, '')
@@ -140,9 +140,9 @@ function apiToRecipe(
     date: dayjs(r.date).toString(),
     id: r.id,
     user: {
-      id: user?.id || -1,
-      readOnly: user?.readOnly || true,
-      user: user?.user || '',
+      id: user?.id ?? -1,
+      readOnly: user?.readOnly ?? true,
+      user: user?.user ?? '',
     },
     comments: recipeComments,
   };
@@ -166,9 +166,9 @@ function apiToComment(comment: IApiComment, users: IUser[]): IComment {
   return {
     text: comment.text,
     user: {
-      id: user?.id || -1,
-      readOnly: user?.readOnly || true,
-      user: user?.user || '',
+      id: user?.id ?? -1,
+      readOnly: user?.readOnly ?? true,
+      user: user?.user ?? '',
     },
     id: comment.id,
     date: comment.date,
@@ -202,7 +202,7 @@ class Recipes {
   private callbacks: ICallBack[] = [];
 
   constructor() {
-    get<IRecipe[]>(RECIPE_CACHE).then(async (result) => {
+    void get<IRecipe[]>(RECIPE_CACHE).then(async (result) => {
       if (!result) {
         return;
       }
@@ -211,18 +211,18 @@ class Recipes {
           recipe.comments = [];
         }
       }
-      this.recipeCache = result || [];
-      this.categoryCache = (await get<ICategory[]>(CATEGORY_CACHE)) || [];
-      this.userCache = (await get<IUser[]>(USER_CACHE)) || [];
+      this.recipeCache = result;
+      this.categoryCache = (await get<ICategory[]>(CATEGORY_CACHE)) ?? [];
+      this.userCache = (await get<IUser[]>(USER_CACHE)) ?? [];
       this.notify();
     });
-    this.fetchData();
+    void this.fetchData();
   }
 
   public subscribe(callback: ICallBack) {
     this.callbacks.push(callback);
     callback(this.recipeCache, this.categoryCache, this.userCache, typeof userInfo !== 'undefined');
-    this.fetchData();
+    void this.fetchData();
     return () => {
       recipesHandler.unsubscribe(callback);
     };
@@ -243,7 +243,7 @@ class Recipes {
   public uploadImage(image: File, callbacks?: IUploadCallbacks) {
     const form = new FormData();
     form.append('image', image);
-    axios
+    void axios
       .post('/api/images', form, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -261,7 +261,7 @@ class Recipes {
       method: 'DELETE',
       headers,
     });
-    this.fetchData();
+    await this.fetchData();
     return result.status === 204;
   }
 
@@ -274,7 +274,7 @@ class Recipes {
       headers,
       body: JSON.stringify(body),
     });
-    this.fetchData();
+    await this.fetchData();
     return result.status === 200;
   }
   public async addComment(comment: string, recipeId: number): Promise<boolean> {
@@ -286,7 +286,7 @@ class Recipes {
       headers,
       body: JSON.stringify(body),
     });
-    this.fetchData();
+    await this.fetchData();
     return result.status === 200;
   }
 
@@ -312,8 +312,8 @@ class Recipes {
     if (result.status !== 200) {
       return undefined;
     }
-    this.fetchData();
-    return { id: (await result.json()).id, name };
+    await this.fetchData();
+    return { id: ((await result.json()) as { id: number }).id, name };
   }
 
   public async addRecipe(recipe: IRecipe): Promise<number | undefined> {
@@ -328,8 +328,8 @@ class Recipes {
     if (result.status !== 200) {
       return undefined;
     }
-    this.fetchData();
-    return (await result.json()).id;
+    await this.fetchData();
+    return ((await result.json()) as { id: number }).id;
   }
 
   public async updateRecipe(recipe: IRecipe): Promise<boolean> {
@@ -341,7 +341,7 @@ class Recipes {
       headers,
       body: JSON.stringify(body),
     });
-    this.fetchData();
+    await this.fetchData();
     return result.status === 200;
   }
 
@@ -352,7 +352,7 @@ class Recipes {
       method: 'DELETE',
       headers,
     });
-    this.fetchData();
+    await this.fetchData();
     return result.status === 204;
   }
 
@@ -381,17 +381,17 @@ class Recipes {
       let result = await fetch(url);
       if (result.status === 204) {
         if (this.userCache.length === 0) {
-          this.userCache = (await get<IUser[]>(USER_CACHE)) || [];
+          this.userCache = (await get<IUser[]>(USER_CACHE)) ?? [];
         }
       } else if (result.status !== 200) {
         await fetchUserInfo();
         return;
       } else {
         reloadCommentsAfterFetching = true;
-        const resultJson: {
+        const resultJson = (await result.json()) as {
           users: IUser[];
           checksum: number;
-        } = await result.json();
+        };
         this.userCache = resultJson.users;
         await set(USER_CACHE, this.userCache);
         localStorage.setItem(localStorageUserChecksum, JSON.stringify(resultJson.checksum));
@@ -405,17 +405,17 @@ class Recipes {
       result = await fetch(url);
       if (result.status === 204) {
         if (this.categoryCache.length === 0) {
-          this.categoryCache = (await get<ICategory[]>(CATEGORY_CACHE)) || [];
+          this.categoryCache = (await get<ICategory[]>(CATEGORY_CACHE)) ?? [];
         }
       } else if (result.status !== 200) {
         await fetchUserInfo();
         return;
       } else {
         reloadCommentsAfterFetching = true;
-        const resultJson: {
+        const resultJson = (await result.json()) as {
           categories: IApiCategory[];
           checksum: number;
-        } = await result.json();
+        };
         this.categoryCache = apiToCategories(resultJson.categories);
         await set(CATEGORY_CACHE, this.categoryCache);
         localStorage.setItem(localStorageCategoryChecksum, JSON.stringify(resultJson.checksum));
@@ -429,17 +429,17 @@ class Recipes {
       result = await fetch(url);
       if (result.status === 204) {
         if (this.commentCache.length === 0) {
-          this.commentCache = (await get<IApiComment[]>(COMMENT_CACHE)) || [];
+          this.commentCache = (await get<IApiComment[]>(COMMENT_CACHE)) ?? [];
         }
       } else if (result.status !== 200) {
         await fetchUserInfo();
         return;
       } else {
         reloadCommentsAfterFetching = true;
-        const resultJson: {
+        const resultJson = (await result.json()) as {
           comments: IApiComment[];
           checksum: number;
-        } = await result.json();
+        };
         this.commentCache = resultJson.comments;
         await set(COMMENT_CACHE, this.commentCache);
         localStorage.setItem(localStorageCommentChecksum, JSON.stringify(resultJson.checksum));
@@ -453,17 +453,17 @@ class Recipes {
       result = await fetch(url);
       if (result.status === 204) {
         if (this.recipeCache.length === 0) {
-          this.recipeCache = (await get<IRecipe[]>(RECIPE_CACHE)) || [];
+          this.recipeCache = (await get<IRecipe[]>(RECIPE_CACHE)) ?? [];
         }
       } else if (result.status !== 200) {
         await fetchUserInfo();
         return;
       } else {
         reloadCommentsAfterFetching = false; // no need to reload comments because we do it here, anyways
-        const resultJson: {
+        const resultJson = (await result.json()) as {
           recipes: IApiRecipe[];
           checksum: number;
-        } = await result.json();
+        };
         this.recipeCache = resultJson.recipes.map((r) =>
           apiToRecipe(r, this.categoryCache, this.userCache, this.commentCache),
         );
@@ -491,7 +491,7 @@ export default recipesHandler;
 export async function fetchUniqueRecipe(uuid: string): Promise<IRecipe | undefined> {
   const result = await fetch(`/api/uniqueRecipes/${uuid}`);
   if (result.status === 200) {
-    return await result.json();
+    return (await result.json()) as IRecipe;
   } else {
     return undefined;
   }
@@ -506,7 +506,7 @@ export async function getUniqueRecipeLink(recipe: IRecipe): Promise<string | und
     body: JSON.stringify(recipe),
   });
   if (result.status === 200) {
-    const response = await result.json();
+    const response = (await result.json()) as { createdId: number };
     return `${document.location.origin}/uniqueRecipes/${response.createdId}`;
   } else {
     return undefined;
@@ -524,7 +524,7 @@ export function getUserInfo(): IStatus | undefined {
   if (typeof userInfo === 'undefined') {
     const item = localStorage.getItem(localStorageUserInfo);
     if (typeof item === 'string') {
-      userInfo = JSON.parse(item);
+      userInfo = JSON.parse(item) as IStatus;
     }
   }
   return userInfo;
@@ -533,7 +533,7 @@ export function getUserInfo(): IStatus | undefined {
 export async function fetchUserInfo(): Promise<IStatus | undefined> {
   const result = await fetch('/api/status');
   if (result.status === 200) {
-    userInfo = await result.json();
+    userInfo = (await result.json()) as IStatus;
     localStorage.setItem(localStorageUserInfo, JSON.stringify(userInfo));
   } else if (result.status === 401) {
     await clearLoginData();
@@ -549,8 +549,8 @@ export async function loginToRecipes(user: string, password: string) {
   const result = await fetch(`/api/login`, { headers });
   localStorage.clear();
   if (result.status === 200) {
-    recipesHandler.fetchData();
     await fetchUserInfo();
+    await recipesHandler.fetchData();
     return true;
   } else {
     return false;
@@ -571,7 +571,7 @@ export async function createAccount(user: string, password: string): Promise<boo
     return true;
   }
   try {
-    return (await result.json()).message;
+    return ((await result.json()) as { message: string }).message;
   } catch {
     return false;
   }

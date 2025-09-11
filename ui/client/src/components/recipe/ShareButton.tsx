@@ -8,9 +8,9 @@ import i18n from '../../util/i18n';
 import { getUniqueRecipeLink, IRecipe, emptyRecipe } from '../../util/Network';
 
 export async function shareLink(link?: string) {
-  const shareLink = link || document.location.href;
+  const shareLink = link ?? document.location.href;
   if ('share' in navigator) {
-    navigator.share({
+    await navigator.share({
       title: document.title,
       url: shareLink,
     });
@@ -24,14 +24,14 @@ export async function shareLink(link?: string) {
 }
 
 export default function ShareButton(props: { onlyLink?: boolean; recipe?: IRecipe }) {
-  const onlyLink = props.onlyLink || false;
+  const onlyLink = props.onlyLink ?? false;
   const mobile = useMobile();
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleShareClick = () => {
     if (onlyLink) {
-      shareLink();
+      void shareLink();
     } else {
       setIsOpen(true);
     }
@@ -53,25 +53,26 @@ export default function ShareButton(props: { onlyLink?: boolean; recipe?: IRecip
             <Button
               text={t('shareLink')}
               intent="primary"
-              large={mobile}
+              size={mobile ? 'large' : 'medium'}
               onClick={() => {
-                shareLink();
+                void shareLink();
                 setIsOpen(false);
               }}
             />
             <Button
               text={t('shareRO')}
               intent="primary"
-              large={mobile}
+              size={mobile ? 'large' : 'medium'}
               onClick={() => {
-                getUniqueRecipeLink(props.recipe || emptyRecipe).then((link) => {
+                void (async () => {
+                  const link = await getUniqueRecipeLink(props.recipe ?? emptyRecipe);
                   if (typeof link === 'undefined') {
                     AppToasterTop.show({ message: t('uniqueLinkError'), intent: 'danger' });
                   } else {
-                    shareLink(link);
+                    await shareLink(link);
                   }
                   setIsOpen(false);
-                });
+                })();
               }}
             />
           </div>
@@ -81,7 +82,7 @@ export default function ShareButton(props: { onlyLink?: boolean; recipe?: IRecip
         <Icon
           className={classNames(Classes.BUTTON, Classes.MINIMAL)}
           icon="share"
-          iconSize={24}
+          size={24}
           onClick={handleShareClick}
         />
       ) : (

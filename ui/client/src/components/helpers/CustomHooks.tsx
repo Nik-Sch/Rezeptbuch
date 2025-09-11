@@ -70,7 +70,7 @@ function useStoredState<T>(
   try {
     const item = storage.getItem(storageKey);
     if (typeof item === 'string') {
-      value = JSON.parse(item);
+      value = JSON.parse(item) as T;
     } else {
       value = initialValue;
     }

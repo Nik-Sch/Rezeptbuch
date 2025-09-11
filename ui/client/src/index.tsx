@@ -30,7 +30,7 @@ const node = (
   </React.StrictMode>
 );
 
-if (container && container.hasChildNodes()) {
+if (container?.hasChildNodes()) {
   hydrateRoot(container, node);
 } else {
   const root = createRoot(container!);

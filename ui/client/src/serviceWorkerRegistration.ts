@@ -73,7 +73,7 @@ function successAndUpdateCalls(registration: ServiceWorkerRegistration, config: 
             // content until all client tabs are closed.
 
             // Execute callback
-            if (config && config.onUpdate) {
+            if (config?.onUpdate) {
               config.onUpdate(registration);
             }
           } else {
@@ -82,7 +82,7 @@ function successAndUpdateCalls(registration: ServiceWorkerRegistration, config: 
             // "Content is cached for offline use." message.
 
             // Execute callback
-            if (config && config.onSuccess) {
+            if (config?.onSuccess) {
               config.onSuccess(registration);
             }
           }
@@ -95,39 +95,32 @@ function successAndUpdateCalls(registration: ServiceWorkerRegistration, config: 
 let serviceWorkerRegistered = false;
 
 export function registerSW(config: IConfig) {
+  void asyncRegisterSW(config);
+}
+
+export async function asyncRegisterSW(config: IConfig) {
   if ('serviceWorker' in navigator && 'PushManager' in window && !serviceWorkerRegistered) {
     serviceWorkerRegistered = true;
-    // console.log('Service Worker and Push is supported');
-    if (window.location.host === 'localhost:3000') {
-      navigator.serviceWorker.ready
-        .then((registration) => {
-          registration.unregister();
-          console.log('localhost:3000 -> unregistered sw');
-        })
-        .catch((error) => {
-          console.error(error.message);
-        });
-      return;
+    console.log('Service Worker and Push is supported');
+    // if (window.location.host === 'localhost:3000') {
+    //   const registration = await navigator.serviceWorker.ready
+    //   await registration.unregister();
+    //   console.log('localhost:3000 -> unregistered sw');
+    //   return;
+    // }
+
+    const swReg = await navigator.serviceWorker.register(
+      import.meta.env.MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw',
+    );
+    console.log('Service Worker is registered');
+    swRegistration = swReg;
+    successAndUpdateCalls(swReg, config);
+    const subscription = await swRegistration.pushManager.getSubscription();
+    isSubscribed = !(subscription === null);
+    notify();
+    if (subscription) {
+      await updateSubscriptionOnServer(subscription);
     }
-
-    navigator.serviceWorker
-      .register(import.meta.env.MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw')
-      .then(function (swReg) {
-        console.log('Service Worker is registered');
-
-        swRegistration = swReg;
-        successAndUpdateCalls(swReg, config);
-        swRegistration.pushManager.getSubscription().then(function (subscription) {
-          isSubscribed = !(subscription === null);
-          notify();
-          if (subscription) {
-            updateSubscriptionOnServer(subscription);
-          }
-        });
-      })
-      .catch(function (error) {
-        console.error('Service Worker Error', error);
-      });
   }
 }
 
@@ -141,7 +134,7 @@ export async function subscribeUser() {
     );
     return false;
   }
-  const result = await response.json();
+  const result = (await response.json()) as { public_key: string };
   const publicKey = result.public_key;
   const applicationServerKey = urlB64ToUint8Array(publicKey);
   if (swRegistration === null) {
@@ -153,7 +146,7 @@ export async function subscribeUser() {
       userVisibleOnly: true,
       applicationServerKey: applicationServerKey,
     });
-    updateSubscriptionOnServer(sub);
+    await updateSubscriptionOnServer(sub);
     isSubscribed = true;
   } catch (err) {
     isSubscribed = false;
@@ -172,18 +165,13 @@ export function isNotificationAvailable() {
   );
 }
 
-function updateSubscriptionOnServer(subscription: PushSubscription) {
-  fetch('/api/subscriptions/', {
+async function updateSubscriptionOnServer(subscription: PushSubscription) {
+  const response = await fetch('/api/subscriptions/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(subscription),
-  })
-    .then((response) => {
-      console.log('subscribed at server successfully', response);
-    })
-    .catch((reason) => {
-      console.error('failed to subscribe at server', reason);
-    });
+  });
+  console.log('subscribed at server successfully', response);
 }

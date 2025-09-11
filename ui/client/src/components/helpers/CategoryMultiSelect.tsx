@@ -42,7 +42,7 @@ export function CategoryMultiSelect(props: IProps) {
   };
 
   const filterCategory: ItemPredicate<ICategory> = (query, category) => {
-    return category.name.toLowerCase().indexOf(query.toLowerCase()) >= 0;
+    return category.name.toLowerCase().includes(query.toLowerCase());
   };
 
   const onItemSelect = (item: ICategory) => {

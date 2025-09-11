@@ -43,7 +43,7 @@ export function UserMultiSelect(props: IProps) {
   };
 
   const filterUser: ItemPredicate<IUser> = (query, user) => {
-    return user.user.toLowerCase().indexOf(query.toLowerCase()) >= 0;
+    return user.user.toLowerCase().includes(query.toLowerCase());
   };
 
   const onItemSelect = (item: IUser) => {

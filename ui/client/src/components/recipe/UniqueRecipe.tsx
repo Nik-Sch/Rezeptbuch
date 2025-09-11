@@ -33,7 +33,8 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
       setError(true);
       return;
     }
-    fetchUniqueRecipe(id).then((fetchedRecipe) => {
+    // TODO react19
+    void fetchUniqueRecipe(id).then((fetchedRecipe) => {
       if (typeof fetchedRecipe === 'undefined') {
         setError(true);
       } else {

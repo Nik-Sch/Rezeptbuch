@@ -59,7 +59,7 @@ const IngredientsLine = forwardRef((props: IIngredientsLine, ref) => {
         />
       )}
       <div
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
         ref={ref as any}
         className={classNames(Classes.EDITABLE_TEXT, {
           [Classes.EDITABLE_TEXT_EDITING]: isEditing,

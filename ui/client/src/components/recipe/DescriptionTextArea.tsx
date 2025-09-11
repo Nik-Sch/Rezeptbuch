@@ -292,7 +292,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
       const lineHeight = getLineHeight(contentElement.current);
       // add one line to computed <span> height if text ends in newline
       // because <span> collapses that trailing whitespace but <textarea> shows it
-      if (/\n$/.test(textContent ?? '')) {
+      if ((textContent ?? '').endsWith('\n')) {
         scrollHeight += lineHeight;
       }
       if (lineHeight > 0) {

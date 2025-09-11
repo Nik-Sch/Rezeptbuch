@@ -24,7 +24,7 @@ export default function LogoutButton() {
         intent="warning"
         onClick={() => {
           if (online) {
-            (async () => {
+            void (async () => {
               await logout();
               navigate('/login');
             })();

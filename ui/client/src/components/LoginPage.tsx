@@ -32,7 +32,8 @@ export default function LoginPage(
   const mobile = useMobile();
   const [t] = useTranslation();
 
-  const from = location.state?.from?.pathname || '/';
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const from = (location.state?.from?.pathname as string) ?? '/';
 
   useEffect(() => {
     if (typeof getUserInfo() !== 'undefined') {
@@ -59,31 +60,31 @@ export default function LoginPage(
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (login) {
-      if (details.username.trim() === '' || details.password.trim() === '') {
-        setVisited({ username: true, password: true, password2: true });
-        return;
-      }
-      setIsSubmitting(true);
-      loginToRecipes(details.username, details.password).then((success) => {
+    void (async () => {
+      if (login) {
+        if (details.username.trim() === '' || details.password.trim() === '') {
+          setVisited({ username: true, password: true, password2: true });
+          return;
+        }
+        setIsSubmitting(true);
+        const success = await loginToRecipes(details.username, details.password);
         if (success) {
           props.setAuthenticated(true);
           navigate(from, { replace: true });
         } else {
           setWrongCredentials(true);
         }
-      });
-    } else {
-      if (
-        details.username.trim() === '' ||
-        details.password.trim() === '' ||
-        details.password !== details.password2
-      ) {
-        setVisited({ username: true, password: true, password2: true });
-        return;
-      }
-      setIsSubmitting(true);
-      createAccount(details.username, details.password).then(async (created) => {
+      } else {
+        if (
+          details.username.trim() === '' ||
+          details.password.trim() === '' ||
+          details.password !== details.password2
+        ) {
+          setVisited({ username: true, password: true, password2: true });
+          return;
+        }
+        setIsSubmitting(true);
+        const created = await createAccount(details.username, details.password);
         if (created === true) {
           AppToasterTop.show({ message: t('accountCreated'), intent: 'success' });
           const success = await loginToRecipes(details.username, details.password);
@@ -101,9 +102,9 @@ export default function LoginPage(
         } else {
           AppToasterTop.show({ message: t('accountError'), intent: 'warning' });
         }
-      });
-    }
-    setIsSubmitting(false);
+      }
+      setIsSubmitting(false);
+    })();
   };
 
   const lockButton = (

@@ -37,7 +37,7 @@ export function LanguageSelect(props: IProps) {
 
   const onItemSelect = (lang: ILanguage) => {
     setSelected(lang);
-    i18n.changeLanguage(lang.key);
+    void i18n.changeLanguage(lang.key);
   };
   const flagKey = selected?.key === 'en' ? 'gb' : selected?.key;
   return (

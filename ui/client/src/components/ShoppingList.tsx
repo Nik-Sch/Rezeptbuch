@@ -33,7 +33,7 @@ import recipesHandler, {
   getUserInfo,
   updateShoppingItem,
 } from '../util/Network';
-import { useDrag, useDrop, DropTargetMonitor, DndProvider, XYCoord } from 'react-dnd';
+import { useDrag, useDrop, DropTargetMonitor, DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import update from 'immutability-helper';
@@ -167,7 +167,7 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
       const hoverBoundingRect = ref.current.getBoundingClientRect();
       const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       const clientOffset = monitor.getClientOffset();
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+      const hoverClientY = clientOffset!.y - hoverBoundingRect.top;
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
         return;
       }
@@ -262,7 +262,7 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
             )}
             onFocus={() => setIsEditing(true)}
             tabIndex={isEditing ? undefined : 0}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
             ref={forwardedRef as any}
           >
             {isEditing ? (
@@ -280,9 +280,9 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
           </div>
           <Button
             icon="cross"
-            small={!mobile}
+            size={mobile ? 'medium' : 'small'}
             variant="minimal"
-            onClick={() => props.deleteElement && props.deleteElement(props.item)}
+            onClick={() => props.deleteElement(props.item)}
           />
         </div>
         {hover ? <Divider /> : <div className="fake-divider" />}
@@ -506,8 +506,9 @@ export default function ShoppingList(props: IDarkThemeProps) {
   >([]);
 
   // fetch recipes to refresh the login information
+  // TODO react19
   useEffect(() => {
-    recipesHandler.fetchData();
+    void recipesHandler.fetchData();
   }, []);
 
   const updateItems = useCallback(
@@ -543,9 +544,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
       });
       itemsToBeAdded.splice(0, itemsToBeAdded.length);
       if (Object.keys(state.lists).length === 1) {
-        (async () => {
-          await updateItems(state.active, items, 'POST');
-        })();
+        void updateItems(state.active, items, 'POST');
       } else {
         setItemsToBeAddedDialog(items);
       }
@@ -554,7 +553,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
 
   // online
   useEffect(() => {
-    const handle = async () => {
+    const handle = () => {
       setOnline(navigator.onLine);
       if (!navigator.onLine) {
         setSynced('offline');
@@ -573,7 +572,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
 
   useEffect(() => {
     if (online && updateQueue.length > 0) {
-      (async () => {
+      void (async () => {
         setSynced('uploading');
         const element = updateQueue[0];
         await updateShoppingItem(element.listKey, element.items, element.method);
@@ -593,7 +592,8 @@ export default function ShoppingList(props: IDarkThemeProps) {
       let eventSource = new EventSource(getShoppingListUrl(state.active));
 
       const onMessage = (v: MessageEvent) => {
-        const result: IShoppingItem[] | null = JSON.parse(v.data);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        const result = JSON.parse(v.data) as IShoppingItem[] | null;
         console.log(`sse message for ${state.active}:`, result);
         if (result) {
           setState((state) =>
@@ -714,9 +714,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
         },
       }),
     );
-    (async () => {
-      await updateItems(state.active, [newItem], 'PUT');
-    })();
+    void updateItems(state.active, [newItem], 'PUT');
   };
 
   const deleteElement = (item: IShoppingItem) => {
@@ -731,9 +729,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
         },
       }),
     );
-    (async () => {
-      await updateItems(state.active, [item], 'DELETE');
-    })();
+    void updateItems(state.active, [item], 'DELETE');
   };
 
   const moveCardNotChecked = (dragIndex: number, hoverIndex: number) => {
@@ -829,7 +825,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
   );
 
   const removeAllItems = () => {
-    updateItems(state.active, state.lists[state.active].items, 'DELETE');
+    void updateItems(state.active, state.lists[state.active].items, 'DELETE');
     setState((state) =>
       update(state, {
         lists: {
@@ -845,7 +841,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
 
   const shareShoppingList = () => {
     if (state.active !== 'default') {
-      shareLink(
+      void shareLink(
         `${document.location.origin}/shoppingLists/${state.active}/${state.lists[state.active].name}`,
       );
     }
@@ -886,9 +882,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
                 const items = itemsToBeAddedDialog.slice();
                 setItemsToBeAddedDialog([]);
                 setState((state) => ({ ...state, active: shoppingListSelectValue ?? '' }));
-                (async () => {
-                  await updateItems(shoppingListSelectValue ?? '', items, 'POST');
-                })();
+                void updateItems(shoppingListSelectValue ?? '', items, 'POST');
               }}
             />
           </div>
@@ -1003,7 +997,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
                         updateElement={updateElement}
                         moveCard={moveCardNotChecked}
                         dndFinished={() =>
-                          updateItems(state.active, state.lists[state.active].items, 'PUT')
+                          void updateItems(state.active, state.lists[state.active].items, 'PUT')
                         }
                         index={index}
                         ref={(v: HTMLDivElement) => {
@@ -1042,7 +1036,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
                       },
                     }),
                   );
-                  updateItems(state.active, items, 'POST');
+                  void updateItems(state.active, items, 'POST');
                 }}
               />
               {state.lists[state.active].items.filter((v) => v.checked).length > 0 && !mobile && (
@@ -1074,7 +1068,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
                           deleteElement={deleteElement}
                           moveCard={moveCardChecked}
                           dndFinished={() =>
-                            updateItems(state.active, state.lists[state.active].items, 'PUT')
+                            void updateItems(state.active, state.lists[state.active].items, 'PUT')
                           }
                           index={index}
                           ref={(v: HTMLDivElement) => {

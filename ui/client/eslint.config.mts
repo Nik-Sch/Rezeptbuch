@@ -7,10 +7,8 @@ import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default defineConfig([
   { files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"], plugins: { js, pluginReact }, extends: ["js/recommended"], languageOptions: { globals: globals.browser } },
-  tseslint.configs.recommended,
-  tseslint.configs.stylistic,
-  // tseslint.configs.recommendedTypeChecked,
-  // tseslint.configs.stylisticTypeChecked,
+  tseslint.configs.recommendedTypeChecked,
+  tseslint.configs.stylisticTypeChecked,
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat['jsx-runtime'],
   eslintConfigPrettier,

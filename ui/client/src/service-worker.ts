@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /// <reference lib="webworker" />
 
 import { clientsClaim } from 'workbox-core';
@@ -7,7 +9,7 @@ import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 
 declare const self: ServiceWorkerGlobalScope;
 
-self.skipWaiting();
+void self.skipWaiting();
 clientsClaim();
 
 registerRoute(
@@ -16,9 +18,9 @@ registerRoute(
     cacheName: 'image-cache',
     plugins: [
       {
-        cacheKeyWillBeUsed: async ({ request }) => {
+        cacheKeyWillBeUsed: ({ request }) => {
           const url = new URL(request.url); // ignore the url parameters for images (size)
-          return url.origin + url.pathname;
+          return new Promise((resolve) => resolve(url.origin + url.pathname));
         },
       },
     ],
@@ -36,7 +38,7 @@ self.addEventListener('push', (event) => {
   }
   console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
   const recipe = event.data.json();
-  const body = recipe && recipe.titel ? recipe.titel : '';
+  const body = recipe?.titel ?? '';
 
   const title = 'A new recipe was added.';
   const options = {
@@ -56,10 +58,9 @@ self.addEventListener('notificationclick', (event) => {
   console.log('[Service Worker] Notification click Received.');
 
   event.notification.close();
-  const url =
-    event.notification.data && event.notification.data.rezept_ID
-      ? `/recipes/${event.notification.data.rezept_ID}`
-      : `/`;
+  const url = event.notification.data?.rezept_ID
+    ? `/recipes/${event.notification.data.rezept_ID}`
+    : `/`;
 
   // This looks to see if the current is already open and
   // focuses if it is

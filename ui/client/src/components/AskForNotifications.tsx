@@ -13,8 +13,9 @@ export default function AskForNotifications() {
 
   const [showing, setShowing] = useState(false);
 
+  // TODO react19
   useEffect(() => {
-    (async () => {
+    void (async () => {
       if (Notification.permission === 'denied') {
         console.log('[afn] permission denied');
         setShowing(false);
@@ -36,15 +37,15 @@ export default function AskForNotifications() {
         return;
       }
       // check if sw is registered
-      const regs = await (
-        await navigator.serviceWorker.getRegistrations()
-      ).filter((r) => r.active !== null);
+      const regs = (await navigator.serviceWorker.getRegistrations()).filter(
+        (r) => r.active !== null,
+      );
       if (regs.length === 0) {
         console.log('[afn] sw not registered');
         setShowing(false);
         return;
       }
-      console.log(`[afn] showing ${subscribed} ${regs}`);
+      console.log(`[afn] showing ${subscribed} ${JSON.stringify(regs)}`);
       setShowing(true);
     })();
   }, [denied, subscribed]);
@@ -66,13 +67,15 @@ export default function AskForNotifications() {
           size="large"
           intent="success"
           endIcon="notifications-updated"
-          onClick={async () => {
-            const success = await subscribeUser();
-            console.log(`[afn] subscribe success: ${success}`);
-            if (!success) {
-              setShowing(false);
-            }
-          }}
+          onClick={
+            void (async () => {
+              const success = await subscribeUser();
+              console.log(`[afn] subscribe success: ${success}`);
+              if (!success) {
+                setShowing(false);
+              }
+            })
+          }
         />
       </Callout>
     </>
