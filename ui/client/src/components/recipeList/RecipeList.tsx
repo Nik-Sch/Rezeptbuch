@@ -23,23 +23,6 @@ import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { UserMultiSelect } from '../helpers/UserMultiSelect';
 // import { useRegisterSW } from 'virtual:pwa-register/react'
 
-export function NavigationIcon(props: { isOpen: boolean, onClick?: () => void }) {
-  return <div className='nav-icon2-wrapper'>
-    <div
-      id="nav-icon2"
-      className={classNames(Classes.ICON, props.isOpen ? 'open' : '')}
-      onClick={props.onClick}
-    >
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </div>
-}
-
 
 const sortOptions: ISort[] = [
   { key: 'date', textKey: 'sortDate' },

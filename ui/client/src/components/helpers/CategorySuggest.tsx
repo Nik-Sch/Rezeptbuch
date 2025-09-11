@@ -1,4 +1,4 @@
-import { IItemRendererProps, ItemPredicate, Suggest } from '@blueprintjs/select';
+import { ItemRendererProps, ItemPredicate, Suggest } from '@blueprintjs/select';
 import recipesHandler, { ICategory, IRecipe } from '../../util/Network';
 
 import React, { useState, useEffect } from 'react';
@@ -19,7 +19,7 @@ interface IProps {
 
 export function CategorySuggest(props: IProps) {
   const [t] = useTranslation();
-  const CatSuggest = Suggest.ofType<ICategory>();
+  const CatSuggest = Suggest<ICategory>;
 
   const [categories, setCategories] = useState<ICategory[] | undefined>();
   const handler = (_: IRecipe[], categories: ICategory[]) => {
@@ -30,7 +30,7 @@ export function CategorySuggest(props: IProps) {
     return () => { recipesHandler.unsubscribe(handler); };
   }, []);
 
-  const itemRenderer = (category: ICategory, { handleClick, modifiers }: IItemRendererProps) => {
+  const itemRenderer = (category: ICategory, { handleClick, modifiers }: ItemRendererProps) => {
     if (!modifiers.matchesPredicate) {
       return null;
     }

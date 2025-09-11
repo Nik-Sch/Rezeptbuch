@@ -1,4 +1,4 @@
-import { IItemRendererProps, Select } from '@blueprintjs/select';
+import { ItemRendererProps, Select } from '@blueprintjs/select';
 import recipesHandler, { ICategory, IRecipe } from '../../util/Network';
 
 import React, { useState, useEffect } from 'react';
@@ -19,7 +19,7 @@ interface IProps {
 
 export function CategorySelect(props: IProps) {
   const [t] = useTranslation();
-  const CatSelect = Select.ofType<ICategory>();
+  const CatSelect = Select<ICategory>;
 
   const [categories, setCategories] = useState<ICategory[]>([]);
   const handler = (_: IRecipe[], categories: ICategory[]) => {
@@ -30,7 +30,7 @@ export function CategorySelect(props: IProps) {
     return () => { recipesHandler.unsubscribe(handler); };
   }, []);
 
-  const itemRenderer = (category: ICategory, { handleClick, modifiers }: IItemRendererProps) => {
+  const itemRenderer = (category: ICategory, { handleClick, modifiers }: ItemRendererProps) => {
     if (!modifiers.matchesPredicate) {
       return null;
     }

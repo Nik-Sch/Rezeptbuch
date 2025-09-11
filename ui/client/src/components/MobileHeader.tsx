@@ -8,9 +8,26 @@ import classNames from 'classnames';
 import { DarkModeSwitch } from './helpers/DarkModeSwitch';
 import { IDarkThemeProps } from '../App';
 import LogoutButton from './helpers/LogoutButton';
-import { NavigationIcon } from './recipeList/RecipeList';
 import { getUserInfo } from '../util/Network';
 import { INavigationLink, NavigationLinks } from './SideMenu';
+
+
+function NavigationIcon(props: { isOpen: boolean, onClick?: () => void }) {
+  return <div className='nav-icon2-wrapper'>
+    <div
+      id="nav-icon2"
+      className={classNames(Classes.ICON, props.isOpen ? 'open' : '')}
+      onClick={props.onClick}
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+}
 
 export interface IHeaderProps {
   children?: React.ReactNode;

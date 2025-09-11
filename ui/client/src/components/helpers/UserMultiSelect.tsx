@@ -1,4 +1,4 @@
-import { IItemRendererProps, ItemPredicate, MultiSelect } from '@blueprintjs/select';
+import { ItemRendererProps, ItemPredicate, MultiSelect } from '@blueprintjs/select';
 import { IUser } from '../../util/Network';
 
 import React from 'react';
@@ -18,13 +18,13 @@ interface IProps {
 }
 
 export function UserMultiSelect(props: IProps) {
-  const Select = MultiSelect.ofType<IUser>();
+  const Select = MultiSelect<IUser>;
 
   const isSelected = (user: IUser) => {
     return props.selectedUsers.findIndex((v) => v.id === user.id) !== -1;
   }
 
-  const itemRenderer = (user: IUser, { handleClick, modifiers }: IItemRendererProps) => {
+  const itemRenderer = (user: IUser, { handleClick, modifiers }: ItemRendererProps) => {
     if (!modifiers.matchesPredicate || user.user === 'gast') {
       return null;
     }

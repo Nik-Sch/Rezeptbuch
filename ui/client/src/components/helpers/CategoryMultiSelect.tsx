@@ -1,4 +1,4 @@
-import { IItemRendererProps, ItemPredicate, MultiSelect } from '@blueprintjs/select';
+import { ItemRendererProps, ItemPredicate, MultiSelect } from '@blueprintjs/select';
 import { ICategory } from '../../util/Network';
 
 import React from 'react';
@@ -18,13 +18,13 @@ interface IProps {
 }
 
 export function CategoryMultiSelect(props: IProps) {
-  const CatSelect = MultiSelect.ofType<ICategory>();
+  const CatSelect = MultiSelect<ICategory>;
 
   const isSelected = (category: ICategory) => {
     return props.selectedCategories.findIndex((v) => v.id === category.id) !== -1;
   }
 
-  const itemRenderer = (category: ICategory, { handleClick, modifiers }: IItemRendererProps) => {
+  const itemRenderer = (category: ICategory, { handleClick, modifiers }: ItemRendererProps) => {
     if (!modifiers.matchesPredicate) {
       return null;
     }

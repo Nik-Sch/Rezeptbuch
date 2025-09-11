@@ -18,7 +18,6 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'service-worker.ts',
-      
     })
   ],
   server: {
@@ -30,5 +29,8 @@ export default defineConfig({
         secure: false
       }
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 600
   }
 });
