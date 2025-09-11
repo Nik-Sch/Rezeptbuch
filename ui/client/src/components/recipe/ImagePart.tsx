@@ -51,7 +51,7 @@ export default function ImagePart(props: IImagePartProps) {
       const uploadToastKey = AppToasterTop.show(renderUploadProgress(0));
       recipesHandler.uploadImage(event.target.files[0], {
         onUploadProgress: (event) => {
-          AppToasterTop.show(renderUploadProgress(event.loaded / event.total), uploadToastKey);
+          AppToasterTop.show(renderUploadProgress(event.loaded / (event.total ?? 0)), uploadToastKey);
         },
         onSuccess: (response) => {
           AppToasterTop.show(renderUploadProgress(1, false), uploadToastKey);

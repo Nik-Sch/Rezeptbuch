@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-/* eslint-disable no-restricted-globals */
+
 
 import { clientsClaim } from 'workbox-core';
 import { registerRoute } from 'workbox-routing';
@@ -16,7 +16,7 @@ registerRoute(
   new NetworkFirst({
     cacheName: 'image-cache',
     plugins: [{
-      cacheKeyWillBeUsed: async ({ request, mode }) => {
+      cacheKeyWillBeUsed: async ({ request }) => {
         const url = new URL(request.url); // ignore the url parameters for images (size)
         return url.origin + url.pathname;
       }
@@ -31,7 +31,7 @@ precacheAndRoute(self.__WB_MANIFEST);
 self.addEventListener('push', event => {
   console.log('[Service Worker] Push Received.');
   if (event.data === null) {
-  console.log(`[Service Worker] Push had no data`);
+    console.log(`[Service Worker] Push had no data`);
     return;
   }
   console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
@@ -67,8 +67,7 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(self.clients.matchAll({
     type: "window"
   }).then(clientList => {
-    for (let i = 0; i < clientList.length; i++) {
-      const client = clientList[i];
+    for (const client of clientList) {
       if (client.url === url)
         return client.focus();
     }

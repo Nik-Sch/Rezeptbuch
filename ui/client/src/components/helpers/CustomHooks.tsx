@@ -64,7 +64,7 @@ function useStoredState<T>(storage: Storage, initialValue: T, storageKey: string
     } else {
       value = initialValue;
     }
-  } catch (err) {
+  } catch {
     value = initialValue;
   }
   const [state, setState] = useState<T>(value);

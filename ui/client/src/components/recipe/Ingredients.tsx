@@ -23,7 +23,7 @@ const IngredientsLine = forwardRef((props: IIngredientsLine, ref) => {
   }, [props.line]);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  const handleConfirm = (shouldRefocus: boolean = false) => {
+  const handleConfirm = (shouldRefocus = false) => {
     setIsEditing(false);
     if (value.trim() !== '') {
       props.replace(value, shouldRefocus);
@@ -56,7 +56,7 @@ const IngredientsLine = forwardRef((props: IIngredientsLine, ref) => {
       }}
     />}
     <div
-      ref={ref as any}
+      ref={ref}
       className={classNames(
         Classes.EDITABLE_TEXT,
         {
@@ -86,6 +86,7 @@ const IngredientsLine = forwardRef((props: IIngredientsLine, ref) => {
     </div>
   </div>
 });
+IngredientsLine.displayName = "IngredientsLine";
 
 function ExtraIngredientLine(props: {
   addIngredient: (...ing: string[]) => void
@@ -97,7 +98,7 @@ function ExtraIngredientLine(props: {
   const hasValue = value !== '';
   const placeholder = t('phIngredients');
 
-  const handleConfirm = (shouldRefocus: boolean = false) => {
+  const handleConfirm = (shouldRefocus = false) => {
     if (value.trim() !== '') {
       props.addIngredient(value);
       setValue('');

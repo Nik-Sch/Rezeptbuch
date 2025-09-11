@@ -123,7 +123,9 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
   }
 
   const handleTextChange = (v: string | undefined) => {
-    changeValue && changeValue(v);
+    if (changeValue) {
+      changeValue(v);
+    }
     const result = findMatch(v, textArea.current?.selectionStart ?? 0);
     if (result) {
       const { match } = result;
@@ -141,8 +143,10 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
       const result = findMatch(content, triggerPosition.current ?? 0);
       if (result) {
         const { match, start } = result;
-        const newValue = content.substring(0, start) + `#${item.id}` + content.substring(start + match[0].length);
-        changeValue && changeValue(newValue);
+        if (changeValue) {
+          const newValue = content.substring(0, start) + `#${item.id}` + content.substring(start + match[0].length);
+          changeValue(newValue);
+        }
         setIsOpen(false);
       }
     }

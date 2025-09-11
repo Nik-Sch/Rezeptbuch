@@ -20,7 +20,7 @@ import ShareButton from './ShareButton';
 
 
 export default function UniqueRecipe(props: IDarkThemeProps) {
-  let { id } = useParams();
+  const { id } = useParams();
   const [t] = useTranslation();
 
   const [loaded, setLoaded] = useState(false);
@@ -99,7 +99,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
               disabled={true}
               placeholder={t('phCategoryMobile')}
               category={recipe.category}
-              onCategorySelected={() => { }}
+              onCategorySelected={() => undefined}
             />
           </H3>
 
@@ -172,7 +172,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
                     placeholder={t('phTitle')}
                     disabled={true}
                     value={recipe.title}
-                    onChange={() => { }}
+                    onChange={() => undefined}
                   />
                 </H1>
                 {loaded && <div className='edit-container'>
@@ -189,7 +189,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
                       disabled={true}
                       placeholder={t('phCategory')}
                       initialCategory={recipe.category}
-                      onCategorySelected={() => { }}
+                      onCategorySelected={() => undefined}
                     />
                   </H3>
                   <div className='ingredients-title-wrapper'>
@@ -208,9 +208,9 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
                     ingredients={recipe.ingredients}
                     loaded={loaded}
                     editable={false}
-                    addIngredient={() => { }}
-                    deleteIngredient={() => { }}
-                    replaceIngredient={() => { }}
+                    addIngredient={() => undefined}
+                    deleteIngredient={() => undefined}
+                    replaceIngredient={() => undefined}
                   />
                 </div>
                 <ImagePart

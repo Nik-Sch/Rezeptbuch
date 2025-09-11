@@ -1,6 +1,6 @@
 import { Select, ItemRendererProps } from '@blueprintjs/select';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button, MenuItem } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { ILanguage, availableLanguages } from '../../util/i18n';
@@ -33,11 +33,11 @@ export function LanguageSelect(props: IProps) {
     );
   };
 
-  const onItemSelect = (lang: ILanguage, event?: React.SyntheticEvent<HTMLElement, Event>) => {
+  const onItemSelect = (lang: ILanguage) => {
     setSelected(lang);
     i18n.changeLanguage(lang.key);
   };
-    const flagKey = selected?.key === 'en' ? 'gb' : selected?.key;
+  const flagKey = selected?.key === 'en' ? 'gb' : selected?.key;
   return (
     <LangSelect
       activeItem={selected}
@@ -46,9 +46,9 @@ export function LanguageSelect(props: IProps) {
       itemRenderer={itemRenderer}
       onItemSelect={onItemSelect}
       filterable={false}
-      popoverProps={{position: 'bottom-right'}}
+      popoverProps={{ position: 'bottom-right' }}
     >
-      <Button text={<span className={`fi fi-${flagKey}`}/>} rightIcon='caret-down' />
+      <Button text={<span className={`fi fi-${flagKey}`} />} rightIcon='caret-down' />
     </LangSelect>
   );
 }

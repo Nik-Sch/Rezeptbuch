@@ -1,6 +1,6 @@
 import { useMobile } from "../helpers/CustomHooks";
 import { Icon, Classes, Button, Dialog, H5 } from "@blueprintjs/core";
-import React, { useState } from "react";
+import { useState } from "react";
 import classNames from "classnames";
 import { useTranslation } from "react-i18next";
 import { AppToasterTop } from "../../util/toaster";
@@ -11,20 +11,17 @@ import { getUniqueRecipeLink, IRecipe, emptyRecipe } from "../../util/Network";
 export async function shareLink(link?: string) {
   const shareLink = link || document.location.href;
   if ('share' in navigator) {
-    (navigator as any).share({
+    navigator.share({
       title: document.title,
       url: shareLink
     });
+  } else if ('clipboard' in navigator) {
+    await (navigator as Navigator).clipboard.writeText(shareLink);
+    AppToasterTop.show({ message: i18n.t('linkCopied') });
     return;
+  } else {
+    AppToasterTop.show({ message: i18n.t('linkDidntCopied'), intent: 'warning' });
   }
-  if ('clipboard' in navigator) {
-    try {
-      await (navigator as any).clipboard.writeText(shareLink);
-      AppToasterTop.show({ message: i18n.t('linkCopied') });
-      return;
-    } catch { }
-  }
-  AppToasterTop.show({ message: i18n.t('linkDidntCopied'), intent: 'warning' });
 }
 
 export default function ShareButton(props: { onlyLink?: boolean, recipe?: IRecipe }) {
@@ -71,7 +68,7 @@ export default function ShareButton(props: { onlyLink?: boolean, recipe?: IRecip
             onClick={() => {
               getUniqueRecipeLink(props.recipe || emptyRecipe).then(link => {
                 if (typeof link === 'undefined') {
-                  AppToasterTop.show({message: t('uniqueLinkError'), intent: 'danger'});
+                  AppToasterTop.show({ message: t('uniqueLinkError'), intent: 'danger' });
                 } else {
                   shareLink(link);
                 }

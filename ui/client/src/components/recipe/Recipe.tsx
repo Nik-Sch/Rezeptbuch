@@ -116,7 +116,7 @@ export default function Recipe(props: IDarkThemeProps) {
       }
     }
     setImagesToBeDeleted([]);
-    let newRecipe: IRecipe = JSON.parse(JSON.stringify(recipe));
+    const newRecipe: IRecipe = JSON.parse(JSON.stringify(recipe));
     if (mobile) {
       newRecipe.ingredients = ingredientsText.split('\n').filter(v => v.trim().length > 0);
       setRecipe(newRecipe);
@@ -367,7 +367,7 @@ export default function Recipe(props: IDarkThemeProps) {
                 value={recipe.title}
                 size='large'
                 placeholder={t('phTitle')}
-                onChange={(event: any) => handleSetTitle(event.target.value)}
+                onChange={(event) => handleSetTitle(event.target.value)}
               />
               :
               <span>

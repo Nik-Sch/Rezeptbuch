@@ -16,14 +16,14 @@ interface IMyFileInputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 
 export function MyFileInput(props: IMyFileInputProps) {
   let {
-    onInputChange,
-    hasSelection,
     disabled,
-    className,
-    buttonText,
     text,
     icon,
     large,
+  } = props;
+  const {
+    hasSelection,
+    className,
     ...inputProps
   } = props;
 
@@ -54,8 +54,12 @@ export function MyFileInput(props: IMyFileInputProps) {
   );
 
   const handleOnChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    props.onInputChange && props.onInputChange(e);
-    inputProps.onChange && inputProps.onChange(e);
+    if (props.onInputChange) {
+      props.onInputChange(e);
+    }
+    if (inputProps.onChange) {
+      inputProps.onChange(e);
+    }
   }
 
   return <>

@@ -46,7 +46,7 @@ export function CategorySelect(props: IProps) {
   };
 
 
-  const onItemSelect = (item: ICategory, event?: React.SyntheticEvent<HTMLElement, Event>) => {
+  const onItemSelect = (item: ICategory) => {
     if (item.id === -1) {
       recipesHandler.addCategory(item.name).then((category) => {
         if (category) {

@@ -76,7 +76,7 @@ function CommentControl(props: ICommentControlProps) {
       alignText='right'
     >
       <AnchorButton
-        rightIcon='edit'
+        endIcon='edit'
         text={t('edit')}
         disabled={!online}
         intent='primary'
@@ -89,11 +89,11 @@ function CommentControl(props: ICommentControlProps) {
         disabled={!online}
         content={deletePopoverContent}
         onClose={() => props.setDeleteOpen(false)}
-        renderTarget={({ isOpen, ref, ...popoverProps }) => (
+        renderTarget={({ ref, ...popoverProps }) => (
           <Button
             {...popoverProps}
-            ref={ref as any}
-            rightIcon='delete'
+            ref={ref}
+            endIcon='delete'
             text={t('delete')}
             intent='danger'
             disabled={!online}
@@ -269,7 +269,7 @@ function Comment(props: ICommentProps) {
         <Tooltip
           content={t('tooltipOffline')}
           disabled={online}
-          renderTarget={({ isOpen, ref, ...tooltipProps }) => (
+          renderTarget={({ ref, ...tooltipProps }) => (
             <div ref={ref} {...tooltipProps}>
               <CommentControl
                 isEditing={isEditing}
@@ -355,7 +355,7 @@ function NewComment(props: { username: string, recipeId: number }) {
           alignText='right'
         >
           <Button
-            rightIcon='undo'
+            endIcon='undo'
             text={t('cancel')}
             onClick={() => {
               setShowControls(false);
@@ -367,7 +367,7 @@ function NewComment(props: { username: string, recipeId: number }) {
             disabled={online}
           >
             <AnchorButton
-              rightIcon='comment'
+              endIcon='comment'
               text={t('comment')}
               disabled={newText.trim().length === 0 || !online}
               intent='primary'

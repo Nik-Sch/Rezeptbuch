@@ -45,7 +45,7 @@ function NewShoppingListItem(props: {
   const [text, setText] = useState('');
   const [hover, setHover] = useState(false);
 
-  const handleConfirm = (shouldRefocus: boolean = false) => {
+  const handleConfirm = (shouldRefocus = false) => {
     if (text.trim() !== '') {
       props.onConfirm(text);
     }
@@ -177,11 +177,11 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
   const [text, setText] = useState(props.item.text);
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleConfirm = (shouldRefocus: boolean = false) => {
+  const handleConfirm = (shouldRefocus = false) => {
     if (text.trim() !== '') {
       props.updateElement({ ...props.item, text }, shouldRefocus);
-    } else {
-      props.deleteElement && props.deleteElement(props.item);
+    } else if (props.deleteElement) {
+      props.deleteElement(props.item);
     }
     setIsEditing(false);
   }
@@ -242,6 +242,7 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
           )}
           onFocus={() => setIsEditing(true)}
           tabIndex={isEditing ? undefined : 0}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ref={forwardedRef as any}
         >
           {isEditing
@@ -268,7 +269,7 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
     </div>
   </div>
 });
-
+ShoppingListItem.displayName = "ShoppingListItem";
 
 type SyncState = 'initial-fetch' | 'uploading' | 'synced' | 'offline';
 
@@ -279,7 +280,7 @@ export interface ISingleShoppingList {
 }
 
 export interface IShoppingListState {
-  lists: { [key: string]: ISingleShoppingList };
+  lists: Record<string, ISingleShoppingList>;
   showChecked: boolean;
   active: string;
 }
@@ -408,14 +409,14 @@ function ShoppingListSelect(props: {
           onClick={createNewList}
         />
       </div>}
-      renderTarget={({ isOpen, ref, ...targetProps }) => (
+      renderTarget={({ ref, ...targetProps }) => (
         <Button
           {...targetProps}
-          ref={ref as any}
+          ref={ref}
           intent='primary'
           icon='add'
           size='large'
-          onClick={mobile ? () => setPopoverOpen(true) : (targetProps as any).onClick}
+          onClick={mobile ? () => setPopoverOpen(true) : targetProps.onClick}
         />
       )}
     />
@@ -532,7 +533,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
     if (online && updateQueue.length > 0) {
       (async () => {
         setSynced('uploading');
-        let element = updateQueue[0];
+        const element = updateQueue[0];
         await updateShoppingItem(element.listKey, element.items, element.method);
         setUpdateQueue(queue => {
           return queue.slice(1);
@@ -619,10 +620,10 @@ export default function ShoppingList(props: IDarkThemeProps) {
   }, [authenticated, listKey, listName, navigate, setState, state]);
 
   // was previously only a single shoppinglist
-  if (typeof (state as any).lists === 'undefined') {
+  if (typeof state.lists === 'undefined') {
     console.log('updating state', state);
     const newList: ISingleShoppingList = {
-      items: (state as any).items,
+      items: (state as unknown as ISingleShoppingList).items,
       name: 'Private'
     };
     setState({
@@ -638,7 +639,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
     { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList'), active: true }
   ];
 
-  const updateElement = (changedItem: IShoppingItem, shouldRefocus: boolean) => {
+  const updateElement = (changedItem: IShoppingItem) => {
     const oldItem = state.lists[state.active].items.find(v => v.id === changedItem.id);
     if (typeof oldItem === 'undefined') {
       throw new Error('didnt find the item');
@@ -792,7 +793,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
   };
 
 
-  const itemRefs: Map<string, HTMLDivElement> = new Map();
+  const itemRefs = new Map<string, HTMLDivElement>();
   return <>
     <Dialog
       isOpen={itemsToBeAddedDialog.length > 0}
@@ -808,6 +809,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
             {
               Object.entries(state.lists).map(([key, value]) => (<Radio
                 id={key}
+                key={key}
                 value={key}
                 label={value.name}
                 size='large'

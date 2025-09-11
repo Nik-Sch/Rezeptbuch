@@ -243,7 +243,7 @@ export default function RecipeList(props: IDarkThemeProps) {
       content={searchInIngredients ? t('tooltipSearchInIngredients') : t('tooltipNotSearchInIngredients')}
       position='bottom'
       popoverClassName={Classes.POPOVER_CONTENT_SIZING}
-      renderTarget={({ isOpen, ref, ...tooltipProps }) => (
+      renderTarget={({ ref, ...tooltipProps }) => (
         <Button
           {...tooltipProps}
           icon='properties'
@@ -302,7 +302,7 @@ export default function RecipeList(props: IDarkThemeProps) {
       disabled={online && hasWriteAccess}
       content={hasWriteAccess ? t('tooltipOffline') : t('tooltipNoWrite')}
       position='bottom'
-      renderTarget={({ isOpen, ref, ...tooltipProps }) => (
+      renderTarget={({ ref, ...tooltipProps }) => (
         <Link
           {...tooltipProps}
           ref={ref}
@@ -404,7 +404,7 @@ export default function RecipeList(props: IDarkThemeProps) {
               rowHeight={(mobile ? 175 : 150) + 20}
               scrollTop={scrollTop}
               width={listWidth}
-              rowRenderer={({ index, style, isScrolling }) => <RecipeListItem
+              rowRenderer={({ index, style }) => <RecipeListItem
                 recipe={recipesToShow[index]}
                 style={style}
                 key={recipesToShow[index].id}

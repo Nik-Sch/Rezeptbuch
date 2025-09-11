@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { Base64 } from 'js-base64';
 import { set, get, del } from 'idb-keyval';
-import axios from 'axios';
+import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
 import { localStorageUserInfo, localStorageUserChecksum, localStorageRecipeChecksum, localStorageCommentChecksum, localStorageCategoryChecksum } from "./StorageKeys";
 import { IShoppingItem } from "../components/ShoppingList";
 
@@ -161,14 +161,14 @@ function apiToComment(comment: IApiComment, users: IUser[]): IComment {
 }
 
 export function getHeaders(): Headers {
-  let headers = new Headers();
+  const headers = new Headers();
   return headers;
 }
 
 export interface IUploadCallbacks {
-  onUploadProgress?: ((event: any) => void);
-  onSuccess?: ((event: any) => void);
-  onFailure?: ((event: any) => void);
+  onUploadProgress?: ((event: AxiosProgressEvent) => void);
+  onSuccess?: ((response: AxiosResponse) => void);
+  onFailure?: ((reason: unknown) => void);
 }
 
 

@@ -48,7 +48,7 @@ export function CategorySuggest(props: IProps) {
     return category.name.toLowerCase().indexOf(query.toLowerCase()) >= 0;
   };
 
-  const onItemSelect = (item: ICategory, event?: React.SyntheticEvent<HTMLElement, Event>) => {
+  const onItemSelect = (item: ICategory) => {
     if (item.id === -1) {
       recipesHandler.addCategory(item.name).then((category) => {
         if (category) {

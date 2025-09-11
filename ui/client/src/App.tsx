@@ -168,7 +168,7 @@ function App() {
 }
 
 function RequireAuth({ authenticated, children }: { authenticated: boolean, children: JSX.Element }) {
-  let location = useLocation();
+  const location = useLocation();
 
   if (!authenticated) {
     // Redirect them to the /login page, but save the current location they were

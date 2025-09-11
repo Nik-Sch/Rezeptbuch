@@ -1,5 +1,5 @@
 import React from 'react';
-import {Divider, Classes, Icon, IconName, ButtonGroup } from '@blueprintjs/core';
+import { Divider, Classes, Icon, IconName, ButtonGroup } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import logoDark from '../static/logo-dark.svg';
 import logo from '../static/logo.svg';
@@ -15,7 +15,7 @@ import LogoutButton from './helpers/LogoutButton';
 
 
 
-export type Counts = { [id: number]: number };
+export type Counts = Record<number, number>;
 
 
 export interface INavigationLink {
@@ -52,8 +52,7 @@ export interface ISideMenuProps {
   currentNavigation: 'recipes' | 'shopping-list';
 }
 
-export default function SideMenu(myProps: ISideMenuProps) {
-  const { darkModeProps, ...props } = myProps;
+export default function SideMenu(props: ISideMenuProps) {
   const mobile = useMobile();
   const [t] = useTranslation();
 
@@ -97,13 +96,13 @@ export default function SideMenu(myProps: ISideMenuProps) {
     <div className='side-menu'>
       <Link to='/'>
         <img
-          src={darkModeProps.darkTheme ? logoDark : logo}
+          src={props.darkModeProps.darkTheme ? logoDark : logo}
           className="App-logo"
           alt="logo" />
       </Link>
 
       <div className='settings'>
-        <DarkModeSwitch {...darkModeProps} />
+        <DarkModeSwitch {...props.darkModeProps} />
         <ButtonGroup>
           <LanguageSelect className='language-select' />
           <LogoutButton />
@@ -115,7 +114,7 @@ export default function SideMenu(myProps: ISideMenuProps) {
         navigationLinks={menuLinks}
       />
 
-      {typeof props.children !== 'undefined' &&<Divider className='menu-item' />}
+      {typeof props.children !== 'undefined' && <Divider className='menu-item' />}
       {props.children}
 
 

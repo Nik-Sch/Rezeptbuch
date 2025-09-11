@@ -20,7 +20,7 @@ export default function LoginPage(props: IDarkThemeProps & { setAuthenticated: (
   const mobile = useMobile();
   const [t] = useTranslation();
 
-  const from = (location.state as any)?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || '/';
 
   useEffect(() => {
     if (typeof getUserInfo() !== 'undefined') {
@@ -92,10 +92,10 @@ export default function LoginPage(props: IDarkThemeProps & { setAuthenticated: (
       disabled={isSubmitting}
       position='right'
       popoverClassName={Classes.POPOVER_CONTENT_SIZING}
-      renderTarget={({ isOpen, ref, ...tooltipProps }) => (
+      renderTarget={({ ref, ...tooltipProps }) => (
         <Button
           {...tooltipProps}
-          ref={ref as any}
+          ref={ref}
           icon={showPassword ? "unlock" : "lock"}
           intent={Intent.WARNING}
           variant='minimal'
@@ -111,10 +111,10 @@ export default function LoginPage(props: IDarkThemeProps & { setAuthenticated: (
       popoverClassName={Classes.POPOVER_CONTENT_SIZING}
       disabled={isSubmitting}
       position='right'
-      renderTarget={({ isOpen, ref, ...tooltipProps }) => (
+      renderTarget={({ ref, ...tooltipProps }) => (
         <Button
           {...tooltipProps}
-          ref={ref as any}
+          ref={ref}
           icon={showPassword2 ? "unlock" : "lock"}
           intent={Intent.WARNING}
           variant='minimal'
@@ -138,18 +138,18 @@ export default function LoginPage(props: IDarkThemeProps & { setAuthenticated: (
           className='login'
         >
           <H1>{login ? t('loginTitle') : t('createAccount')}</H1>
-            {wrongCredentials && <Callout intent='danger' className='error-callout' icon={null}>
-              <H4 className='error-callout-content'>
-                {t('wrongCredentials')}
-                <Button
-                  icon='cross'
-                  variant='minimal'
-                  size='large'
-                  intent='danger'
-                  onClick={() => setWrongCredentials(false)}
-                />
-              </H4>
-            </Callout>}
+          {wrongCredentials && <Callout intent='danger' className='error-callout' icon={null}>
+            <H4 className='error-callout-content'>
+              {t('wrongCredentials')}
+              <Button
+                icon='cross'
+                variant='minimal'
+                size='large'
+                intent='danger'
+                onClick={() => setWrongCredentials(false)}
+              />
+            </H4>
+          </Callout>}
           <form onSubmit={handleSubmit} >
             <FormGroup
               className='form-group'

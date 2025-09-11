@@ -54,10 +54,10 @@ export function useSWSubscribed(def: boolean) {
   return subscribed;
 }
 
-type IConfig = {
+interface IConfig {
   onSuccess?: (registration: ServiceWorkerRegistration) => void;
   onUpdate?: (registration: ServiceWorkerRegistration) => void;
-};
+}
 
 function successAndUpdateCalls(registration: ServiceWorkerRegistration, config: IConfig) {
   registration.onupdatefound = () => {

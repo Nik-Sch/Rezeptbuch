@@ -1,4 +1,3 @@
-import React from 'react';
 import { Switch } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { IDarkThemeProps } from '../../App';
