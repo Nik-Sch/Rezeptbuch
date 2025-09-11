@@ -4,11 +4,11 @@
 import { clientsClaim } from 'workbox-core';
 import { registerRoute } from 'workbox-routing';
 import { NetworkFirst } from 'workbox-strategies';
-import { precacheAndRoute } from 'workbox-precaching';
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 
 declare const self: ServiceWorkerGlobalScope;
 
-// self.skipWaiting();
+self.skipWaiting();
 clientsClaim();
 
 registerRoute(
@@ -24,6 +24,7 @@ registerRoute(
   })
 );
 
+cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
 
@@ -42,8 +43,8 @@ self.addEventListener('push', event => {
   const title = 'A new recipe was added.';
   const options = {
     body: body,
-    icon: `${process.env.PUBLIC_URL}/android-chrome-512x512.png`,
-    badge: `${process.env.PUBLIC_URL}/mstile-144x144.png`,
+    icon: `/android-chrome-512x512.png`,
+    badge: `/mstile-144x144.png`,
     data: recipe,
     renotify: true, // vibrate again for a new notification
     tag: 'new-recipe',
@@ -58,8 +59,8 @@ self.addEventListener('notificationclick', event => {
 
   event.notification.close();
   const url = (event.notification.data && event.notification.data.rezept_ID)
-    ? `${process.env.PUBLIC_URL}/recipes/${event.notification.data.rezept_ID}`
-    : `${process.env.PUBLIC_URL}/`;
+    ? `/recipes/${event.notification.data.rezept_ID}`
+    : `/`;
 
   // This looks to see if the current is already open and
   // focuses if it is

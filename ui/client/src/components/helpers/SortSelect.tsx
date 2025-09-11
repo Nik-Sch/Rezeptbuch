@@ -1,4 +1,4 @@
-import { Select2, ItemRendererProps } from '@blueprintjs/select';
+import { Select, ItemRendererProps } from '@blueprintjs/select';
 
 import { Button, MenuItem, ButtonGroup, Classes } from '@blueprintjs/core';
 import { IRecipe } from '../../util/Network';
@@ -20,7 +20,7 @@ interface IProps {
 }
 
 export function SortSelect(props: IProps) {
-  const SortSelect = Select2.ofType<ISort>();
+  const SortSelect = Select<ISort>;
 
   const { t } = useTranslation();
 

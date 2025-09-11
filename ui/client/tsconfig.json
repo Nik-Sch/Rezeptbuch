@@ -4,11 +4,13 @@
     "lib": [
       "dom",
       "dom.iterable",
-      "esnext"
+      "esnext",
+      "WebWorker"
     ],
     "types": [
       "vite/client",
-      "vite-plugin-svgr/client"
+      "vite-plugin-svgr/client",
+      "vite-plugin-pwa/client",
     ],
     "allowJs": true,
     "skipLibCheck": true,

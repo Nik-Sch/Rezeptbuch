@@ -71,7 +71,7 @@ export default function AskForNotifications() {
         variant='minimal'
         size='large'
         intent='success'
-        rightIcon='notifications-updated'
+        endIcon='notifications-updated'
         onClick={async () => {
           const success = await subscribeUser();
           console.log(`[afn] subscribe success: ${success}`);

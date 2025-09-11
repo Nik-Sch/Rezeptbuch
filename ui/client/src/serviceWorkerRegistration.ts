@@ -108,7 +108,7 @@ export function registerSW(config: IConfig) {
       return;
     }
 
-    navigator.serviceWorker.register(`${process.env.PUBLIC_URL}/service-worker.js`)
+    navigator.serviceWorker.register(import.meta.env.MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw')
       .then(function (swReg) {
         console.log('Service Worker is registered');
 
@@ -174,8 +174,8 @@ function updateSubscriptionOnServer(subscription: PushSubscription) {
     },
     body: JSON.stringify(subscription)
   }).then(response => {
-    // console.log('subscribed at server successfully');
+    console.log('subscribed at server successfully', response);
   }).catch(reason => {
-    // console.error('failed to subscibe at server', reason);
+    console.error('failed to subscribe at server', reason);
   });
 }
