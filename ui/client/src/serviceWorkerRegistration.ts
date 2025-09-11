@@ -1,13 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 let isSubscribed = false;
 let swRegistration: ServiceWorkerRegistration | null = null;
 
 function urlB64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
@@ -25,30 +23,33 @@ const callbacks: ICallback[] = [];
 const observeSubscription = (callback: ICallback) => {
   callbacks.push(callback);
   callback(isSubscribed);
-}
+};
 
 const deleteCallback = (callback: ICallback) => {
-  callbacks.splice(callbacks.findIndex(a => a === callback), 1);
-}
+  callbacks.splice(
+    callbacks.findIndex((a) => a === callback),
+    1,
+  );
+};
 
 const notify = () => {
   console.log('[psw] notify', callbacks);
   for (const cb of callbacks) {
     cb(isSubscribed);
   }
-}
+};
 
 export function useSWSubscribed(def: boolean) {
   const [subscribed, setSubscribed] = useState(def);
   useEffect(() => {
     const handle = (v: boolean) => {
       setSubscribed(v);
-    }
+    };
 
     observeSubscription(handle);
     return () => {
       deleteCallback(handle);
-    }
+    };
   }, []);
 
   return subscribed;
@@ -86,9 +87,9 @@ function successAndUpdateCalls(registration: ServiceWorkerRegistration, config: 
             }
           }
         }
-      }
+      };
     }
-  }
+  };
 }
 
 let serviceWorkerRegistered = false;
@@ -98,31 +99,31 @@ export function registerSW(config: IConfig) {
     serviceWorkerRegistered = true;
     // console.log('Service Worker and Push is supported');
     if (window.location.host === 'localhost:3000') {
-      navigator.serviceWorker.ready.then(registration => {
-        registration.unregister();
-        console.log('localhost:3000 -> unregistered sw');
-      })
-        .catch(error => {
+      navigator.serviceWorker.ready
+        .then((registration) => {
+          registration.unregister();
+          console.log('localhost:3000 -> unregistered sw');
+        })
+        .catch((error) => {
           console.error(error.message);
         });
       return;
     }
 
-    navigator.serviceWorker.register(import.meta.env.MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw')
+    navigator.serviceWorker
+      .register(import.meta.env.MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw')
       .then(function (swReg) {
         console.log('Service Worker is registered');
 
         swRegistration = swReg;
         successAndUpdateCalls(swReg, config);
-        swRegistration.pushManager.getSubscription()
-          .then(function (subscription) {
-            isSubscribed = !(subscription === null);
-            notify();
-            if (subscription) {
-              updateSubscriptionOnServer(subscription);
-            }
-          });
-
+        swRegistration.pushManager.getSubscription().then(function (subscription) {
+          isSubscribed = !(subscription === null);
+          notify();
+          if (subscription) {
+            updateSubscriptionOnServer(subscription);
+          }
+        });
       })
       .catch(function (error) {
         console.error('Service Worker Error', error);
@@ -134,7 +135,10 @@ export async function subscribeUser() {
   // fetch the public key from the server:
   const response = await fetch('/api/webpush_public_key');
   if (response.ok !== true) {
-    console.error('Failed to retrieve the public key for push from the api.', await response.text());
+    console.error(
+      'Failed to retrieve the public key for push from the api.',
+      await response.text(),
+    );
     return false;
   }
   const result = await response.json();
@@ -147,7 +151,7 @@ export async function subscribeUser() {
   try {
     const sub = await swRegistration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: applicationServerKey
+      applicationServerKey: applicationServerKey,
     });
     updateSubscriptionOnServer(sub);
     isSubscribed = true;
@@ -160,22 +164,26 @@ export async function subscribeUser() {
 }
 
 export function isNotificationAvailable() {
-  return 'serviceWorker' in navigator
-    && 'PushManager' in window
-    && 'Notification' in window
-    && window.location.host !== 'localhost:3000';
+  return (
+    'serviceWorker' in navigator &&
+    'PushManager' in window &&
+    'Notification' in window &&
+    window.location.host !== 'localhost:3000'
+  );
 }
 
 function updateSubscriptionOnServer(subscription: PushSubscription) {
   fetch('/api/subscriptions/', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(subscription)
-  }).then(response => {
-    console.log('subscribed at server successfully', response);
-  }).catch(reason => {
-    console.error('failed to subscribe at server', reason);
-  });
+    body: JSON.stringify(subscription),
+  })
+    .then((response) => {
+      console.log('subscribed at server successfully', response);
+    })
+    .catch((reason) => {
+      console.error('failed to subscribe at server', reason);
+    });
 }

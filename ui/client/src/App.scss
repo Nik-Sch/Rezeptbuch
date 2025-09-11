@@ -1,12 +1,12 @@
-@use "util/variables.module";
-@use "@blueprintjs/core/lib/scss/variables" as bp;
-@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,500;0,600;1,500&family=Ubuntu:wght@400;700&display=swap");
+@use 'util/variables.module';
+@use '@blueprintjs/core/lib/scss/variables' as bp;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,500;0,600;1,500&family=Ubuntu:wght@400;700&display=swap');
 
 body,
 .#{bp.$bp-ns}-button,
 .#{bp.$bp-ns}-input,
 .#{bp.$bp-ns}-input-ghost {
-  font-family: "Ubuntu", sans-serif;
+  font-family: 'Ubuntu', sans-serif;
 }
 body {
   width: 100%;

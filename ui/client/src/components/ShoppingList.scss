@@ -1,4 +1,4 @@
-@use "@blueprintjs/core/lib/scss/variables" as bp;
+@use '@blueprintjs/core/lib/scss/variables' as bp;
 
 .create-shopping-list-popover {
   display: flex;
@@ -16,7 +16,6 @@
 
 .shopping-list-wrapper {
   margin: 20px 15px;
-
 
   .shopping-list-head {
     display: flex;
@@ -91,7 +90,7 @@
     height: 25px;
   }
   .my-spinner:after {
-    content: " ";
+    content: ' ';
     display: block;
     width: 20px;
     height: 20px;
@@ -114,5 +113,4 @@
 .#{bp.$bp-ns}-dark .shopping-list-status-element .my-spinner:after {
   border: 2.3px solid #fff;
   border-color: #fff transparent #fff transparent;
-
 }

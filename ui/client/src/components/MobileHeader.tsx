@@ -11,22 +11,23 @@ import LogoutButton from './helpers/LogoutButton';
 import { getUserInfo } from '../util/Network';
 import { INavigationLink, NavigationLinks } from './SideMenu';
 
-
-function NavigationIcon(props: { isOpen: boolean, onClick?: () => void }) {
-  return <div className='nav-icon2-wrapper'>
-    <div
-      id="nav-icon2"
-      className={classNames(Classes.ICON, props.isOpen ? 'open' : '')}
-      onClick={props.onClick}
-    >
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
+function NavigationIcon(props: { isOpen: boolean; onClick?: () => void }) {
+  return (
+    <div className="nav-icon2-wrapper">
+      <div
+        id="nav-icon2"
+        className={classNames(Classes.ICON, props.isOpen ? 'open' : '')}
+        onClick={props.onClick}
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
     </div>
-  </div>
+  );
 }
 
 export interface IHeaderProps {
@@ -39,50 +40,47 @@ export interface IHeaderProps {
 export default function MobileHeader(props: IHeaderProps) {
   const [menuIsOpen, setMenuIsOpen] = useState(false);
   const userInfo = getUserInfo();
-  return <>
-    <header
-      className='mobile-header-wrapper'
-    >
-      <div className={classNames(props.className, 'mobile-header-content')} >
-        <div className='left-align'
-          onClick={() => setMenuIsOpen(!menuIsOpen)}>
-          <NavigationIcon
-            isOpen={menuIsOpen}
-          />
-        </div>
-        <div className='right-align'>
-          {props.children}
-          <Link to='/'>
-            <img
-              src={logoNoText}
-              className='logo'
-              alt='logo'
-            />
-          </Link>
-        </div>
-      </div>
-      <Collapse
-        isOpen={menuIsOpen}
-        className={classNames('mobile-header-menu', Classes.CARD, Classes.ELEVATION_2)}
-      >
-        <div className='settings'>
-          <DarkModeSwitch {...props.darkThemeProps} />
-          <div className='spacer' />
-          <LanguageSelect />
-          {typeof userInfo !== 'undefined' && <LogoutButton />}
-        </div>
-        {props.navigationLinks && <>
-          <Divider />
-          <div className='navigation'>
-            <NavigationLinks navigationLinks={props.navigationLinks} />
+  return (
+    <>
+      <header className="mobile-header-wrapper">
+        <div className={classNames(props.className, 'mobile-header-content')}>
+          <div className="left-align" onClick={() => setMenuIsOpen(!menuIsOpen)}>
+            <NavigationIcon isOpen={menuIsOpen} />
           </div>
-        </>}
-      </Collapse>
-    </header>
-    {menuIsOpen && <div
-      className='mobile-header-menu-clicker'
-      onClick={() => setMenuIsOpen(false)}
-      onTouchStart={() => setMenuIsOpen(false)}
-    />}
-  </>
+          <div className="right-align">
+            {props.children}
+            <Link to="/">
+              <img src={logoNoText} className="logo" alt="logo" />
+            </Link>
+          </div>
+        </div>
+        <Collapse
+          isOpen={menuIsOpen}
+          className={classNames('mobile-header-menu', Classes.CARD, Classes.ELEVATION_2)}
+        >
+          <div className="settings">
+            <DarkModeSwitch {...props.darkThemeProps} />
+            <div className="spacer" />
+            <LanguageSelect />
+            {typeof userInfo !== 'undefined' && <LogoutButton />}
+          </div>
+          {props.navigationLinks && (
+            <>
+              <Divider />
+              <div className="navigation">
+                <NavigationLinks navigationLinks={props.navigationLinks} />
+              </div>
+            </>
+          )}
+        </Collapse>
+      </header>
+      {menuIsOpen && (
+        <div
+          className="mobile-header-menu-clicker"
+          onClick={() => setMenuIsOpen(false)}
+          onTouchStart={() => setMenuIsOpen(false)}
+        />
+      )}
+    </>
+  );
 }

@@ -31,3 +31,7 @@ jobs:
       - name: Build
         run: npm run build
         working-directory: ui/client
+        
+      - name: Build
+        run: npm run format
+        working-directory: ui/client

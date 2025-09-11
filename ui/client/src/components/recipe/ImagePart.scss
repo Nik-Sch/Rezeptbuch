@@ -1,4 +1,4 @@
-@use "@blueprintjs/core/lib/scss/variables" as bp;
+@use '@blueprintjs/core/lib/scss/variables' as bp;
 
 .#{bp.$bp-ns}-dialog.image-dialog {
   width: unset;
@@ -11,7 +11,7 @@
   }
 }
 
-.#{bp.$bp-ns}-dialog.image-dialog .mobile-image{
+.#{bp.$bp-ns}-dialog.image-dialog .mobile-image {
   max-width: calc(100vw - 20px);
   max-height: calc(100vh - 20px);
   border-radius: 6px;

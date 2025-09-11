@@ -1,6 +1,6 @@
-import * as React from "react";
+import * as React from 'react';
 import classNames from 'classnames';
-import { Classes, Icon, IconName } from "@blueprintjs/core";
+import { Classes, Icon, IconName } from '@blueprintjs/core';
 
 import './MyFileInput.scss';
 
@@ -15,17 +15,8 @@ interface IMyFileInputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export function MyFileInput(props: IMyFileInputProps) {
-  let {
-    disabled,
-    text,
-    icon,
-    large,
-  } = props;
-  const {
-    hasSelection,
-    className,
-    ...inputProps
-  } = props;
+  let { disabled, text, icon, large } = props;
+  const { hasSelection, className, ...inputProps } = props;
 
   if (typeof disabled === 'undefined') {
     disabled = false;
@@ -41,12 +32,11 @@ export function MyFileInput(props: IMyFileInputProps) {
     large = false;
   }
 
-
   const labelClasses = classNames(
     Classes.FILE_INPUT,
     {
       [Classes.FILE_INPUT_HAS_SELECTION]: hasSelection,
-      [Classes.DISABLED]: disabled
+      [Classes.DISABLED]: disabled,
     },
     Classes.BUTTON,
     Classes.INTENT_PRIMARY,
@@ -60,18 +50,15 @@ export function MyFileInput(props: IMyFileInputProps) {
     if (inputProps.onChange) {
       inputProps.onChange(e);
     }
-  }
+  };
 
-  return <>
-    <label className={classNames(labelClasses, 'my-file-input', large ? Classes.LARGE : '')} >
-      <Icon size={large ? 20 : 16} icon={icon} />
-      <span className='text'>{text}</span>
-      <input
-        {...inputProps}
-        onChange={handleOnChange}
-        type="file"
-        disabled={disabled}
-      />
-    </label>
-  </>
+  return (
+    <>
+      <label className={classNames(labelClasses, 'my-file-input', large ? Classes.LARGE : '')}>
+        <Icon size={large ? 20 : 16} icon={icon} />
+        <span className="text">{text}</span>
+        <input {...inputProps} onChange={handleOnChange} type="file" disabled={disabled} />
+      </label>
+    </>
+  );
 }

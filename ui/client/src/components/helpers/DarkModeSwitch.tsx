@@ -9,11 +9,12 @@ interface IProps {
 export function DarkModeSwitch(props: IProps & IDarkThemeProps) {
   const [t] = useTranslation();
 
-  return <Switch
-    checked={props.darkTheme}
-    label={t('labelDarkTheme')}
-    onChange={() => props.onDarkThemeChanged(!props.darkTheme)}
-
-    className={props.className}
-  ></Switch>;
+  return (
+    <Switch
+      checked={props.darkTheme}
+      label={t('labelDarkTheme')}
+      onChange={() => props.onDarkThemeChanged(!props.darkTheme)}
+      className={props.className}
+    ></Switch>
+  );
 }

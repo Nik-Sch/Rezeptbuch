@@ -1,4 +1,4 @@
-@use "@blueprintjs/core/lib/scss/variables" as bp;
+@use '@blueprintjs/core/lib/scss/variables' as bp;
 
 .recipe-container {
   padding: 20px;
@@ -50,7 +50,7 @@
       margin-bottom: 15px;
 
       .title {
-        font-family: "Montserrat Alternates", sans-serif;
+        font-family: 'Montserrat Alternates', sans-serif;
         // undo callout heading css (_callout.scss:56)
         line-height: unset;
         margin-bottom: unset;
@@ -112,7 +112,7 @@
     }
     .category-select,
     .category-select .#{bp.$bp-ns}-input {
-      font-family: "Montserrat Alternates", sans-serif;
+      font-family: 'Montserrat Alternates', sans-serif;
       font-style: italic;
     }
 
@@ -203,22 +203,22 @@
   overflow: hidden;
 
   .title {
-    font-family: "Montserrat Alternates", sans-serif;
+    font-family: 'Montserrat Alternates', sans-serif;
     text-align: center;
     width: 100%;
     .#{bp.$bp-ns}-input {
-      font-family: "Montserrat Alternates", sans-serif;
+      font-family: 'Montserrat Alternates', sans-serif;
     }
   }
 
   .category-select {
-    font-family: "Montserrat Alternates", sans-serif;
+    font-family: 'Montserrat Alternates', sans-serif;
     font-style: italic;
     margin: 0 auto;
     display: flex;
     justify-content: center;
     .#{bp.$bp-ns}-button {
-      font-family: "Montserrat Alternates", sans-serif;
+      font-family: 'Montserrat Alternates', sans-serif;
       font-style: italic;
     }
   }

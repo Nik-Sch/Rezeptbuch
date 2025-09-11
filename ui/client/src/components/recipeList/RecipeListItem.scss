@@ -1,5 +1,5 @@
-@use "../../util/variables.module";
-@use "@blueprintjs/core/lib/scss/variables" as bp;
+@use '../../util/variables.module';
+@use '@blueprintjs/core/lib/scss/variables' as bp;
 
 .recipe-list-item {
   display: flex;
@@ -46,7 +46,7 @@
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-      font-family: "Montserrat Alternates", sans-serif;
+      font-family: 'Montserrat Alternates', sans-serif;
       max-height: 50px;
       text-overflow: ellipsis;
       overflow: hidden;
@@ -88,7 +88,7 @@
 }
 
 .ellipsis::after {
-  content: "";
+  content: '';
   text-align: right;
   position: absolute;
   bottom: 0;
@@ -128,7 +128,7 @@
         line-height: 1.2em;
       }
       .recipe-category {
-        font-family: "Montserrat Alternates", sans-serif;
+        font-family: 'Montserrat Alternates', sans-serif;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

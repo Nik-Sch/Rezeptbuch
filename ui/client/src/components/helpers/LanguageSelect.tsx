@@ -5,7 +5,7 @@ import { Button, MenuItem } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { ILanguage, availableLanguages } from '../../util/i18n';
 
-import './LanguageSelect.scss'
+import './LanguageSelect.scss';
 
 interface IProps {
   className?: string;
@@ -15,7 +15,9 @@ export function LanguageSelect(props: IProps) {
   const [, i18n] = useTranslation();
   const LangSelect = Select<ILanguage>;
 
-  const [selected, setSelected] = useState(availableLanguages.find((v) => i18n.language.startsWith(v.key)));
+  const [selected, setSelected] = useState(
+    availableLanguages.find((v) => i18n.language.startsWith(v.key)),
+  );
   const itemRenderer = (lang: ILanguage, { handleClick, modifiers }: ItemRendererProps) => {
     if (!modifiers.matchesPredicate) {
       return null;
@@ -48,7 +50,7 @@ export function LanguageSelect(props: IProps) {
       filterable={false}
       popoverProps={{ position: 'bottom-right' }}
     >
-      <Button text={<span className={`fi fi-${flagKey}`} />} rightIcon='caret-down' />
+      <Button text={<span className={`fi fi-${flagKey}`} />} rightIcon="caret-down" />
     </LangSelect>
   );
 }

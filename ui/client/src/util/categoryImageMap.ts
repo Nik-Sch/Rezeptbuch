@@ -40,8 +40,8 @@ const map: Record<number, string> = {
   25: cocktail,
   26: main,
   27: cake,
-  33: beilagen
-}
+  33: beilagen,
+};
 export const mapPng: Record<number, string> = {
   1: expPng,
   2: cocktailPng,
@@ -59,8 +59,8 @@ export const mapPng: Record<number, string> = {
   25: cocktailPng,
   26: mainPng,
   27: cakePng,
-  33: beilagenPng
-}
+  33: beilagenPng,
+};
 
 export default function categoryImageMap() {
   if (navigator.userAgent.toLowerCase().includes('safari')) {
@@ -68,4 +68,4 @@ export default function categoryImageMap() {
   } else {
     return map;
   }
-};
+}

@@ -6,8 +6,8 @@ import { useMobile } from './CustomHooks';
 import { useTranslation } from 'react-i18next';
 
 export interface ISort {
-  key: keyof IRecipe,
-  textKey: string
+  key: keyof IRecipe;
+  textKey: string;
 }
 
 interface IProps {
@@ -45,46 +45,44 @@ export function SortSelect(props: IProps) {
 
   const handleClick = () => {
     props.onSelected(props.selectedValue, !props.selectedDesc);
-  }
+  };
 
   const mobile = useMobile();
 
-  return (<>
-    <ButtonGroup
-      fill={props.fill}
-      className={props.className}
-    >
-      <SortSelect
-        className={Classes.FILL}
-        activeItem={props.selectedValue}
-        items={props.items}
-        itemsEqual='key'
-        itemRenderer={itemRenderer}
-        onItemSelect={onItemSelect}
-        filterable={false}
-        popoverProps={{
-          position: 'bottom-left',
-          minimal: mobile
-        }}
-        fill={true}
-      >
-        <Button
-          className='sort-button'
-          large={mobile}
+  return (
+    <>
+      <ButtonGroup fill={props.fill} className={props.className}>
+        <SortSelect
+          className={Classes.FILL}
+          activeItem={props.selectedValue}
+          items={props.items}
+          itemsEqual="key"
+          itemRenderer={itemRenderer}
+          onItemSelect={onItemSelect}
+          filterable={false}
+          popoverProps={{
+            position: 'bottom-left',
+            minimal: mobile,
+          }}
           fill={true}
-          alignText={props.fill ? 'left' : 'center'}
-          icon='sort'
-          text={t(props.selectedValue.textKey)}
-          rightIcon='caret-down'
+        >
+          <Button
+            className="sort-button"
+            large={mobile}
+            fill={true}
+            alignText={props.fill ? 'left' : 'center'}
+            icon="sort"
+            text={t(props.selectedValue.textKey)}
+            rightIcon="caret-down"
+          />
+        </SortSelect>
+        <Button
+          large={mobile}
+          className={Classes.FIXED}
+          icon={props.selectedDesc ? 'sort-alphabetical-desc' : 'sort-alphabetical'}
+          onClick={handleClick}
         />
-      </SortSelect>
-      <Button
-        large={mobile}
-        className={Classes.FIXED}
-        icon={props.selectedDesc ? 'sort-alphabetical-desc' : 'sort-alphabetical'}
-        onClick={handleClick}
-      />
-    </ ButtonGroup>
+      </ButtonGroup>
     </>
   );
 }

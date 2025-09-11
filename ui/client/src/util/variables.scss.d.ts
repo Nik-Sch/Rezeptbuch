@@ -4,5 +4,5 @@ interface IVariables {
   backgroundDarkCard: string;
 }
 
-const variables: IVariables;  
+const variables: IVariables;
 export default variables;

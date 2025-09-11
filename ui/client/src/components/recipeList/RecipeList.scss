@@ -1,4 +1,4 @@
-@use "@blueprintjs/core/lib/scss/variables" as bp;
+@use '@blueprintjs/core/lib/scss/variables' as bp;
 
 .main-content {
   margin-top: 40px;
@@ -28,7 +28,7 @@
   .error {
     margin: 20px auto;
     text-align: center;
-    font-family: "Montserrat Alternates", sans-serif;
+    font-family: 'Montserrat Alternates', sans-serif;
     padding: 0 25px;
   }
 }
@@ -44,7 +44,10 @@
   font-size: 40px !important;
   // background-color: bp.$green2;
   // color: #f5f8fa;
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.2), 0 4px 8px rgba(16, 22, 26, 0.4), 0 9px 46px 6px rgba(16, 22, 26, 0.4) !important;
+  box-shadow:
+    0 0 0 1px rgba(16, 22, 26, 0.2),
+    0 4px 8px rgba(16, 22, 26, 0.4),
+    0 9px 46px 6px rgba(16, 22, 26, 0.4) !important;
   border-radius: 100%;
   border: none;
   outline: none;

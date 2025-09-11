@@ -5,7 +5,6 @@ import { subscribeUser, useSWSubscribed } from '../serviceWorkerRegistration';
 import { usePersistentState } from './helpers/CustomHooks';
 
 export default function AskForNotifications() {
-
   const [t] = useTranslation();
 
   const subscribed = useSWSubscribed(true);
@@ -22,7 +21,7 @@ export default function AskForNotifications() {
         return;
       }
       if (denied) {
-        console.log('[afn] user doesn\'t want');
+        console.log("[afn] user doesn't want");
         setShowing(false);
         return;
       }
@@ -37,7 +36,9 @@ export default function AskForNotifications() {
         return;
       }
       // check if sw is registered
-      const regs = await (await navigator.serviceWorker.getRegistrations()).filter(r => r.active !== null);
+      const regs = await (
+        await navigator.serviceWorker.getRegistrations()
+      ).filter((r) => r.active !== null);
       if (regs.length === 0) {
         console.log('[afn] sw not registered');
         setShowing(false);
@@ -52,34 +53,28 @@ export default function AskForNotifications() {
     return null;
   }
 
-  return <>
-    <Callout
-      intent='primary'
-      icon='notifications'
-      className='notification-asker'
-    >
-      <div className='title-wrapper'>
-        <H4>{t('askNotificationsTitle')}</H4>
+  return (
+    <>
+      <Callout intent="primary" icon="notifications" className="notification-asker">
+        <div className="title-wrapper">
+          <H4>{t('askNotificationsTitle')}</H4>
+          <Button variant="minimal" icon="cross" onClick={() => setDenied(true)} />
+        </div>
         <Button
-          variant='minimal'
-          icon='cross'
-          onClick={() => setDenied(true)}
+          text={t('askNotifications')}
+          variant="minimal"
+          size="large"
+          intent="success"
+          endIcon="notifications-updated"
+          onClick={async () => {
+            const success = await subscribeUser();
+            console.log(`[afn] subscribe success: ${success}`);
+            if (!success) {
+              setShowing(false);
+            }
+          }}
         />
-      </div>
-      <Button
-        text={t('askNotifications')}
-        variant='minimal'
-        size='large'
-        intent='success'
-        endIcon='notifications-updated'
-        onClick={async () => {
-          const success = await subscribeUser();
-          console.log(`[afn] subscribe success: ${success}`);
-          if (!success) {
-            setShowing(false);
-          }
-        }}
-      />
-    </Callout>
-  </>
+      </Callout>
+    </>
+  );
 }

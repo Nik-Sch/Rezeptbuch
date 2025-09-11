@@ -1,10 +1,11 @@
-@use "../util/variables.module";
-@use "@blueprintjs/core/lib/scss/variables" as bp;
+@use '../util/variables.module';
+@use '@blueprintjs/core/lib/scss/variables' as bp;
 
 .page {
   // padding-top: 85px;
   position: relative;
-  @media only screen and (max-width: variables.$mobile-width), (max-height: variables.$mobile-width) {
+  @media only screen and (max-width: variables.$mobile-width),
+    (max-height: variables.$mobile-width) {
     padding-top: bp.$pt-navbar-height;
   }
 }
@@ -69,7 +70,10 @@
     z-index: 10;
     .#{bp.$bp-ns}-dark & {
       background-color: bp.$dark-gray5;
-      box-shadow: 0 0 0 1px rgba(17,20,24,.2),0 0 0 rgba(17,20,24,0),0 1px 1px rgba(17,20,24,.4);
+      box-shadow:
+        0 0 0 1px rgba(17, 20, 24, 0.2),
+        0 0 0 rgba(17, 20, 24, 0),
+        0 1px 1px rgba(17, 20, 24, 0.4);
     }
     .settings {
       margin: 0 20px;
