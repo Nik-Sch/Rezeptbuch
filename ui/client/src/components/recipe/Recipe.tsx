@@ -121,7 +121,6 @@ export default function Recipe(props: IDarkThemeProps) {
   }, [id, t]);
 
   const saveRecipe = async () => {
-    console.log('save')
     if (!verifyRecipe(recipe)) {
       AppToasterTop.show({ message: t('minimalRecipe'), intent: 'danger' });
       return;
