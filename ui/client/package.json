@@ -4,8 +4,8 @@
   "private": true,
   "homepage": "/",
   "dependencies": {
-    "@blueprintjs/core": "^5.19.1",
-    "@blueprintjs/select": "^5.3.21",
+    "@blueprintjs/core": "^6.3.1",
+    "@blueprintjs/select": "^6.0.5",
     "@types/jest": "^27.5.2",
     "@types/node": "^22.15.32",
     "@types/react": "^18.3.23",

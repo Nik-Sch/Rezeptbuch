@@ -53,7 +53,7 @@ function CommentControl(props: ICommentControlProps) {
           text={t('deleteComment')}
           intent="danger"
           className={Classes.POPOVER_DISMISS}
-          onClick={void props.deleteComment}
+          onClick={() => void props.deleteComment()}
         />
       </div>
     </>
@@ -74,7 +74,7 @@ function CommentControl(props: ICommentControlProps) {
           icon="floppy-disk"
           disabled={!online}
           intent="primary"
-          onClick={void props.saveComment}
+          onClick={() => void props.saveComment()}
         />
       </ButtonGroup>
     );
@@ -212,7 +212,7 @@ function Comment(props: ICommentProps) {
               text={t('deleteComment')}
               intent="danger"
               className={Classes.POPOVER_DISMISS}
-              onClick={void deleteComment}
+              onClick={() => void deleteComment()}
             />
           </div>
         </div>
@@ -366,7 +366,7 @@ function NewComment(props: { username: string; recipeId: number }) {
                 text={t('comment')}
                 disabled={newText.trim().length === 0 || !online}
                 intent="primary"
-                onClick={void addComment}
+                onClick={() => void addComment()}
               />
             </Tooltip>
           </ButtonGroup>

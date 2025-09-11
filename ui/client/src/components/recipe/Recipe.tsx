@@ -121,6 +121,7 @@ export default function Recipe(props: IDarkThemeProps) {
   }, [id, t]);
 
   const saveRecipe = async () => {
+    console.log('save')
     if (!verifyRecipe(recipe)) {
       AppToasterTop.show({ message: t('minimalRecipe'), intent: 'danger' });
       return;
@@ -320,7 +321,7 @@ export default function Recipe(props: IDarkThemeProps) {
                   text={t('deleteRecipe')}
                   intent="danger"
                   className={Classes.POPOVER_DISMISS}
-                  onClick={void handleDeleteClick}
+                  onClick={() => void handleDeleteClick()}
                 />
               </div>
             </div>
@@ -346,7 +347,7 @@ export default function Recipe(props: IDarkThemeProps) {
                       icon="floppy-disk"
                       size={24}
                       intent="primary"
-                      onClick={online ? void saveRecipe : undefined}
+                      onClick={online ? () => void saveRecipe() : undefined}
                     />
                   </Tooltip>
                 </>
@@ -543,7 +544,7 @@ export default function Recipe(props: IDarkThemeProps) {
                               icon="floppy-disk"
                               text={t('saveRecipe')}
                               intent="primary"
-                              onClick={void saveRecipe}
+                              onClick={() => void saveRecipe()}
                             />
                           </Tooltip>
                         </ButtonGroup>
@@ -566,7 +567,7 @@ export default function Recipe(props: IDarkThemeProps) {
                             />
                           </Tooltip>
                           <DeleteButton
-                            handleDeleteClick={void handleDeleteClick}
+                            handleDeleteClick={handleDeleteClick}
                             disabled={!(online && hasWriteAccess)}
                             popoverTarget={
                               <Tooltip
@@ -719,7 +720,7 @@ function CancelButton(props: {
 }
 
 function DeleteButton(props: {
-  handleDeleteClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  handleDeleteClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>;
   popoverTarget: React.ReactNode;
   disabled?: boolean;
 }) {
@@ -741,7 +742,7 @@ function DeleteButton(props: {
               text={t('deleteRecipe')}
               intent="danger"
               className={Classes.POPOVER_DISMISS}
-              onClick={props.handleDeleteClick}
+              onClick={(e) => void props.handleDeleteClick(e)}
             />
           </div>
         </div>
