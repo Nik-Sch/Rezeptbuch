@@ -68,16 +68,16 @@ export function SortSelect(props: IProps) {
         >
           <Button
             className="sort-button"
-            large={mobile}
+            size={mobile ? 'large' : 'medium'}
             fill={true}
             alignText={props.fill ? 'left' : 'center'}
             icon="sort"
             text={t(props.selectedValue.textKey)}
-            rightIcon="caret-down"
+            endIcon="caret-down"
           />
         </SortSelect>
         <Button
-          large={mobile}
+          size={mobile ? 'large' : 'medium'}
           className={Classes.FIXED}
           icon={props.selectedDesc ? 'sort-alphabetical-desc' : 'sort-alphabetical'}
           onClick={handleClick}

@@ -50,7 +50,7 @@ export function LanguageSelect(props: IProps) {
       filterable={false}
       popoverProps={{ position: 'bottom-right' }}
     >
-      <Button text={<span className={`fi fi-${flagKey}`} />} rightIcon="caret-down" />
+      <Button text={<span className={`fi fi-${flagKey}`} />} endIcon="caret-down" />
     </LangSelect>
   );
 }

@@ -69,7 +69,12 @@ export function CategoryMultiSelect(props: IProps) {
 
   const clearButton =
     props.selectedCategories.length > 0 ? (
-      <Button icon="cross" variant="minimal" onClick={handleClearClick} large={mobile} />
+      <Button
+        icon="cross"
+        variant="minimal"
+        onClick={handleClearClick}
+        size={mobile ? 'large' : 'medium'}
+      />
     ) : undefined;
 
   return (

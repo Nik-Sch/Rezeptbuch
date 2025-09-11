@@ -22,13 +22,8 @@ export default defineConfig([
     settings: {
       react: { version: 'detect' }
     },
-    // rules: {
-    //   "@typescript-eslint/no-deprecated": "warn"
-    // }
+    rules: {
+      "@typescript-eslint/no-deprecated": "warn"
+    }
   }
-  // {
-  //   rules: {
-  //     'react/react-in-jsx-scope': 'off'
-  //   }
-  // }
 ]);

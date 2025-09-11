@@ -181,7 +181,7 @@ export default function LoginPage(
               >
                 <InputGroup
                   id="username"
-                  large={mobile}
+                  size={mobile ? 'large' : 'medium'}
                   placeholder={t('username')}
                   value={details.username}
                   intent={usernameWarning ? 'danger' : 'none'}
@@ -203,7 +203,7 @@ export default function LoginPage(
               >
                 <InputGroup
                   id="password"
-                  large={mobile}
+                  size={mobile ? 'large' : 'medium'}
                   placeholder={t('password')}
                   value={details.password}
                   intent={passwordWarning ? 'danger' : 'none'}
@@ -231,7 +231,7 @@ export default function LoginPage(
                     >
                       <InputGroup
                         id="password2"
-                        large={mobile}
+                        size={mobile ? 'large' : 'medium'}
                         placeholder={t('password')}
                         value={details.password2}
                         intent={password2Warning ? 'danger' : 'none'}
@@ -253,7 +253,7 @@ export default function LoginPage(
                 className="login-button"
                 type="submit"
                 text={login ? t('login') : t('create')}
-                large={mobile}
+                size={mobile ? 'large' : 'medium'}
                 disabled={isSubmitting}
               />
               {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Icon, Classes, Keys } from '@blueprintjs/core';
+import { Icon, Classes } from '@blueprintjs/core';
 import classNames from 'classnames';
 
 export function showDot(line: string): boolean {
@@ -33,9 +33,9 @@ const IngredientsLine = forwardRef((props: IIngredientsLine, ref) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.which === Keys.ENTER) {
+    if (e.key === 'Enter') {
       handleConfirm(true);
-    } else if (e.which === Keys.ESCAPE) {
+    } else if (e.key === 'Escape') {
       setIsEditing(false);
       setValue(props.line);
     }
@@ -110,9 +110,9 @@ function ExtraIngredientLine(props: { addIngredient: (...ing: string[]) => void 
     }
   };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.which === Keys.ENTER) {
+    if (e.key === 'Enter') {
       handleConfirm(true);
-    } else if (e.which === Keys.ESCAPE) {
+    } else if (e.key === 'Escape') {
       setIsEditing(false);
       setValue('');
     }

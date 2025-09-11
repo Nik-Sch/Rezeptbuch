@@ -161,7 +161,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
     }
   };
 
-  const RecipeSuggestion = QueryList.ofType<IRecipe>();
+  const RecipeSuggestion = QueryList<IRecipe>;
 
   const handlePopoverOpened = () => {
     queryList.current?.scrollActiveItemIntoView();
@@ -274,7 +274,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
               }
             }}
             value={value}
-            onKeyPress={isOpen ? handleTextAreaKeyPress : undefined}
+            onKeyDown={isOpen ? handleTextAreaKeyPress : undefined}
             onChange={(event) => handleTextChange(event.target.value)}
             onBlur={() => setIsEditing(false)}
             style={{ height: textAreaHeight }}

@@ -114,7 +114,7 @@ export default function ImagePart(props: IImagePartProps) {
                 className="delete-image"
                 text={t('delete')}
                 intent="danger"
-                rightIcon="delete"
+                endIcon="delete"
                 size="large"
                 onClick={handleDeleteImageClick}
               />
@@ -155,8 +155,7 @@ export default function ImagePart(props: IImagePartProps) {
                   <Button
                     text={t('delete')}
                     intent="danger"
-                    rightIcon="delete"
-                    large={false}
+                    endIcon="delete"
                     className="delete-image"
                     onClick={handleDeleteImageClick}
                   />

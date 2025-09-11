@@ -1,4 +1,4 @@
-import { lazy, useEffect } from 'react';
+import React, { lazy, useEffect } from 'react';
 import './App.scss';
 import {
   Route,
@@ -177,7 +177,7 @@ function RequireAuth({
   children,
 }: {
   authenticated: boolean;
-  children: JSX.Element;
+  children: React.JSX.Element;
 }) {
   const location = useLocation();
 

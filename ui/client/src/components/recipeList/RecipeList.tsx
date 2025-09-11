@@ -386,7 +386,7 @@ export default function RecipeList(props: IDarkThemeProps) {
           className={classNames(Classes.BUTTON, Classes.MINIMAL)}
           icon={filterActive ? 'filter-keep' : 'filter'}
           intent={filterActive ? 'primary' : 'none'}
-          iconSize={24}
+          size={24}
           onClick={() => {
             setFilterIsOpen(!filterIsOpen);
             if (!filterIsOpen) {
@@ -476,7 +476,7 @@ export default function RecipeList(props: IDarkThemeProps) {
           to="/recipes/new"
           className={classNames('fab-add', Classes.BUTTON, Classes.INTENT_SUCCESS)}
         >
-          <Icon icon="plus" iconSize={55} />
+          <Icon icon="plus" size={55} />
         </Link>
       )}
     </>

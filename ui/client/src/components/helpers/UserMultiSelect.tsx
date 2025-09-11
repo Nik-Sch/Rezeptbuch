@@ -70,7 +70,12 @@ export function UserMultiSelect(props: IProps) {
 
   const clearButton =
     props.selectedUsers.length > 0 ? (
-      <Button icon="cross" variant="minimal" onClick={handleClearClick} large={mobile} />
+      <Button
+        icon="cross"
+        variant="minimal"
+        onClick={handleClearClick}
+        size={mobile ? 'large' : 'medium'}
+      />
     ) : undefined;
 
   return (

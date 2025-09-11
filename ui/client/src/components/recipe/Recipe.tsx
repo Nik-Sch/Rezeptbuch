@@ -366,7 +366,7 @@ export default function Recipe(props: IDarkThemeProps) {
                           online && hasWriteAccess ? '' : Classes.DISABLED,
                         )}
                         icon="edit"
-                        iconSize={24}
+                        size={24}
                         intent="primary"
                         onClick={online && hasWriteAccess ? handleSetEditable : undefined}
                       />
@@ -377,7 +377,7 @@ export default function Recipe(props: IDarkThemeProps) {
                           online && hasWriteAccess ? '' : Classes.DISABLED,
                         )}
                         icon="trash"
-                        iconSize={24}
+                        size={24}
                         onClick={
                           online && hasWriteAccess ? () => setMobileDeleteIsOpen(true) : undefined
                         }
@@ -444,7 +444,7 @@ export default function Recipe(props: IDarkThemeProps) {
             {state.editing ? (
               <TextArea
                 className={classNames('ingredients-edit', Classes.EDITABLE_TEXT_INPUT)}
-                growVertically={true}
+                autoResize={true}
                 value={ingredientsText}
                 placeholder={t('phIngredients')}
                 onChange={(event) => {

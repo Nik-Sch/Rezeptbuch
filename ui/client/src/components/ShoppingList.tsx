@@ -8,7 +8,6 @@ import {
   Button,
   Divider,
   Classes,
-  Keys,
   Text,
   MenuItem,
   AnchorButton,
@@ -76,9 +75,9 @@ function NewShoppingListItem(props: { onConfirm: (...value: string[]) => void })
     setText('');
   };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.which === Keys.ENTER) {
+    if (e.key === 'Enter') {
       handleConfirm(true);
-    } else if (e.which === Keys.ESCAPE) {
+    } else if (e.key === 'Escape') {
       setIsEditing(false);
       setText('');
     }
@@ -139,7 +138,7 @@ function NewShoppingListItem(props: { onConfirm: (...value: string[]) => void })
             <span className={Classes.EDITABLE_TEXT_CONTENT}>{hasValue ? text : t('addItem')}</span>
           )}
         </div>
-        <Button icon="blank" small={!mobile} variant="minimal" />
+        <Button icon="blank" size={mobile ? 'medium' : 'small'} variant="minimal" />
       </div>
       {hover ? <Divider /> : <div className="fake-divider" />}
     </div>
@@ -244,7 +243,7 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
             />
           </div>
           <Checkbox
-            large={mobile}
+            size={mobile ? 'large' : 'medium'}
             className="shopping-item-checkbox"
             checked={props.item.checked}
             onChange={(event: React.FormEvent<HTMLInputElement>) => {
@@ -333,7 +332,7 @@ function ShoppingListSelect(props: {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [deleteKey, setDeleteKey] = useState<string | null>(null);
 
-  const ShoppingListSelect = Select.ofType<{ key: string; value: ISingleShoppingList }>();
+  const ShoppingListSelect = Select<{ key: string; value: ISingleShoppingList }>;
 
   const createNewList = () => {
     props.onItemSelect(uuidv4(), {
@@ -347,7 +346,7 @@ function ShoppingListSelect(props: {
   const newListInput = (
     <InputGroup
       autoFocus={true}
-      large={mobile}
+      size={mobile ? 'large' : 'medium'}
       value={newListName}
       onChange={(e) => setNewListName(e.target.value)}
       placeholder={t('newShoppingListPlaceholder')}
@@ -403,7 +402,7 @@ function ShoppingListSelect(props: {
                       setDeleteKey(item.key);
                     }}
                     variant="minimal"
-                    small={true}
+                    size="small"
                   />
                 )
               }
@@ -422,7 +421,7 @@ function ShoppingListSelect(props: {
           text={t('shoppingListName', {
             name: parentState.lists[parentState.active].name ?? 'Private',
           })}
-          rightIcon="double-caret-vertical"
+          endIcon="double-caret-vertical"
           size="large"
         />
       </ShoppingListSelect>
@@ -899,14 +898,14 @@ export default function ShoppingList(props: IDarkThemeProps) {
             )}
             icon="share"
             intent="primary"
-            iconSize={24}
+            size={24}
             onClick={shareShoppingList}
           />
           <Icon
             className={classNames(Classes.BUTTON, Classes.MINIMAL)}
             icon="trash"
             intent="warning"
-            iconSize={24}
+            size={24}
             onClick={removeAllItems}
           />
         </MobileHeader>
