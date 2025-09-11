@@ -62,8 +62,8 @@
     "serve": "vite preview",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "format": "prettier src --check",
-    "format:fix": "prettier src --write"
+    "format:check": "prettier src --check",
+    "format": "prettier src --write"
   },
   "browserslist": {
     "production": [
