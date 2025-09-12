@@ -110,7 +110,7 @@ export async function asyncRegisterSW(config: IConfig) {
     // }
 
     const swReg = await navigator.serviceWorker.register(
-      import.meta.env.MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw',
+      import.meta.env.MODE === 'production' ? '/service-worker.js' : '/dev-sw.js?dev-sw',
     );
     console.log('Service Worker is registered');
     swRegistration = swReg;

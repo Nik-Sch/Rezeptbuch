@@ -45,7 +45,7 @@ export default function AskForNotifications() {
         setShowing(false);
         return;
       }
-      console.log(`[afn] showing ${subscribed} ${JSON.stringify(regs)}`);
+      console.log(`[afn] subscribed ${subscribed} ${JSON.stringify(regs)}`);
       setShowing(true);
     })();
   }, [denied, subscribed]);
@@ -67,14 +67,15 @@ export default function AskForNotifications() {
           size="large"
           intent="success"
           endIcon="notifications-updated"
-          onClick={
+          onClick={() => {
             void (async () => {
               const success = await subscribeUser();
               console.log(`[afn] subscribe success: ${success}`);
               if (!success) {
                 setShowing(false);
               }
-            })
+            })();
+          }
           }
         />
       </Callout>

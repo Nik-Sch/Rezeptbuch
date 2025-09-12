@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /// <reference lib="webworker" />
 
 import { clientsClaim } from 'workbox-core';
@@ -30,6 +28,17 @@ registerRoute(
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
+interface IRecipe {
+  id: number;
+  title: string;
+  categoryId: number;
+  ingredients: string;
+  description: string;
+  image: string;
+  date: string;
+  userId: number;
+}
+
 self.addEventListener('push', (event) => {
   console.log('[Service Worker] Push Received.');
   if (event.data === null) {
@@ -37,10 +46,10 @@ self.addEventListener('push', (event) => {
     return;
   }
   console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
-  const recipe = event.data.json();
-  const body = recipe?.titel ?? '';
+  const recipe = event.data.json() as IRecipe|null;
+  const body = recipe?.title ?? '';
 
-  const title = 'A new recipe was added.';
+  const title = 'A new recipe was added!';
   const options = {
     body: body,
     icon: `/android-chrome-512x512.png`,
@@ -58,8 +67,9 @@ self.addEventListener('notificationclick', (event) => {
   console.log('[Service Worker] Notification click Received.');
 
   event.notification.close();
-  const url = event.notification.data?.rezept_ID
-    ? `/recipes/${event.notification.data.rezept_ID}`
+  const data = event.notification.data as IRecipe;
+  const url = data?.id
+    ? `/recipes/${data.id}`
     : `/`;
 
   // This looks to see if the current is already open and

@@ -21,9 +21,9 @@ RUN npm run build
 # Stage 2 - the production environment
 FROM node:22-alpine3.21
 WORKDIR /usr/src/app
-COPY --from=build-deps /usr/src/app/build /usr/src/app/static
 COPY server/package.json server/package-lock.json ./
 RUN npm ci
 COPY server ./
 RUN npm run build
+COPY --from=build-deps /usr/src/app/dist /usr/src/app/static
 CMD ["npm", "run", "start"]
