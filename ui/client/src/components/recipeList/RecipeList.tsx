@@ -28,7 +28,6 @@ import { WindowScroller, List } from 'react-virtualized';
 import i18n from '../../util/i18n';
 import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { UserMultiSelect } from '../helpers/UserMultiSelect';
-// import { useRegisterSW } from 'virtual:pwa-register/react'
 
 const sortOptions: ISort[] = [
   { key: 'date', textKey: 'sortDate' },
@@ -36,7 +35,6 @@ const sortOptions: ISort[] = [
 ];
 
 function onServiceWorkerSuccess() {
-  // console.log('[sw] success');
   AppToasterBottom.show({
     message: i18n.t('offline'),
     intent: 'none',
@@ -45,7 +43,6 @@ function onServiceWorkerSuccess() {
 }
 
 function onServiceWorkerUpdate() {
-  // console.log('[sw] update');
   AppToasterBottom.show({
     message: i18n.t('newVersion'),
     intent: 'primary',
@@ -67,41 +64,6 @@ export default function RecipeList(props: IDarkThemeProps) {
     onUpdate: onServiceWorkerUpdate,
     onSuccess: onServiceWorkerSuccess,
   });
-
-  // const {
-  //   offlineReady: [offlineReady, setOfflineReady],
-  //   needRefresh: [needRefresh, setNeedRefresh],
-  //   updateServiceWorker,
-  // } = useRegisterSW({
-  //   onRegistered(r) {
-  //     // eslint-disable-next-line prefer-template
-  //     console.log('SW Registered: ' + JSON.stringify(r))
-  //   },
-  //   onRegisterError(error) {
-  //     console.log('SW registration error', error)
-  //   },
-  // });
-  // console.log(`[sw] ${offlineReady}, ${needRefresh}`);
-  // if (offlineReady) {
-  //   AppToasterBottom.show({
-  //     message: i18n.t('offline'),
-  //     intent: 'none',
-  //     timeout: 7500,
-  //     onDismiss: () => setOfflineReady(false)
-  //   });
-  // }
-  // if (needRefresh) {
-  //   AppToasterBottom.show({
-  //     message: i18n.t('newVersion'),
-  //     intent: 'primary',
-  //     icon: 'updated',
-  //     action: {
-  //       onClick: () => updateServiceWorker(true),
-  //       text: i18n.t('updateNow')
-  //     },
-  //     timeout: 10000
-  //   });
-  // }
 
   const [recipes, setRecipes] = useState<IRecipe[]>([]);
   const [categories, setCategories] = useState<ICategory[]>([]);

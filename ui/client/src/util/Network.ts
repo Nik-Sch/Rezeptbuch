@@ -182,9 +182,9 @@ export function getHeaders(): Headers {
 }
 
 export interface IUploadCallbacks {
-  onUploadProgress?: (event: AxiosProgressEvent) => void;
-  onSuccess?: (response: AxiosResponse) => void;
-  onFailure?: (reason: unknown) => void;
+  onUploadProgress: (event: AxiosProgressEvent) => void;
+  onSuccess: (response: AxiosResponse) => void;
+  onFailure: (reason: unknown) => void;
 }
 
 type ICallBack = (
@@ -215,8 +215,8 @@ class Recipes {
       this.categoryCache = (await get<ICategory[]>(CATEGORY_CACHE)) ?? [];
       this.userCache = (await get<IUser[]>(USER_CACHE)) ?? [];
       this.notify();
+      void this.fetchData();
     });
-    void this.fetchData();
   }
 
   public subscribe(callback: ICallBack) {
@@ -240,18 +240,18 @@ class Recipes {
     return this.recipeCache.find((r) => r.id === id);
   }
 
-  public uploadImage(image: File, callbacks?: IUploadCallbacks) {
+  public uploadImage(image: File, callbacks: IUploadCallbacks) {
     const form = new FormData();
     form.append('image', image);
-    void axios
+    axios
       .post('/api/images', form, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        onUploadProgress: callbacks?.onUploadProgress,
+        onUploadProgress: callbacks.onUploadProgress,
       })
-      .then(callbacks?.onSuccess)
-      .catch(callbacks?.onFailure);
+      .then(callbacks.onSuccess)
+      .catch((r) => callbacks.onFailure(r));
   }
 
   public async deleteComment(comment: IComment): Promise<boolean> {

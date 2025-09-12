@@ -102,12 +102,6 @@ export async function asyncRegisterSW(config: IConfig) {
   if ('serviceWorker' in navigator && 'PushManager' in window && !serviceWorkerRegistered) {
     serviceWorkerRegistered = true;
     console.log('Service Worker and Push is supported');
-    // if (window.location.host === 'localhost:3000') {
-    //   const registration = await navigator.serviceWorker.ready
-    //   await registration.unregister();
-    //   console.log('localhost:3000 -> unregistered sw');
-    //   return;
-    // }
 
     const swReg = await navigator.serviceWorker.register(
       import.meta.env.MODE === 'production' ? '/service-worker.js' : '/dev-sw.js?dev-sw',

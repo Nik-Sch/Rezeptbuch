@@ -99,13 +99,6 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
               <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
                 {t('ingredients')}:
               </H4>
-              {/* {recipe.ingredients.length > 0 && !state.editing && <Button
-              text={t('addToShopping')}
-              variant='minimal'
-              intent='success'
-              icon='add'
-              onClick={addIngredientsToShoppingList}
-            />} */}
             </div>
             {loaded ? (
               recipe.ingredients.length > 0 ? (
@@ -200,13 +193,6 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
                       >
                         {t('ingredients')}:
                       </H4>
-                      {/* {recipe.ingredients.length > 0 && !state.editing && <Button
-                      text={t('addToShopping')}
-                      variant='minimal'
-                      intent='success'
-                      icon='add'
-                      onClick={addIngredientsToShoppingList}
-                    />} */}
                     </div>
                     <DesktopIngredients
                       ingredients={recipe.ingredients}

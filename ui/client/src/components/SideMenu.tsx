@@ -57,40 +57,8 @@ export interface ISideMenuProps {
 }
 
 export default function SideMenu(props: ISideMenuProps) {
-  const mobile = useMobile();
   const [t] = useTranslation();
 
-  if (mobile) {
-    // return <div className='menu'>
-    //   <UserMultiSelect
-    //     placeholder={t('filterForUsers')}
-    //     noResultText={t('noUsersFound')}
-    //     onUserSelected={props.onUserSelected}
-    //     userCounts={props.userCounts}
-    //     selectedUsers={props.selectedUsers}
-    //     allUsers={props.allUsers}
-    //     className='filter-users'
-    //   />
-    //   <CategoryMultiSelect
-    //     placeholder={t('filterForCategories')}
-    //     noResultText={t('noCategoryFound')}
-    //     onCategorySelected={props.onCategorySelected}
-    //     categoryCounts={props.categoryCounts}
-    //     selectedCategories={props.selectedCategories}
-    //     allCategories={props.allCategories}
-    //     className='filter-categories'
-    //   />
-    //   <Divider />
-    //   <SortSelect
-    //     fill={true}
-    //     className='sort-recipes'
-    //     items={props.sortOptions}
-    //     onSelected={props.onSortSelected}
-    //     selectedValue={props.selectedSortValue}
-    //     selectedDesc={props.selectedSortDesc}
-    //   />
-    // </div>
-  }
   const menuLinks: INavigationLink[] = [
     {
       to: '/',

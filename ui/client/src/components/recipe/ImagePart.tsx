@@ -185,12 +185,7 @@ export default function ImagePart(props: IImagePartProps) {
           onClick={() => setShowImage(true)}
         />
 
-        <Dialog
-          // hasBackdrop={true}
-          isOpen={showImage}
-          onClose={() => setShowImage(false)}
-          className="image-dialog"
-        >
+        <Dialog isOpen={showImage} onClose={() => setShowImage(false)} className="image-dialog">
           <MyImage
             size={Math.max(width, height)}
             className={mobile ? 'mobile-image' : Classes.DIALOG_BODY}

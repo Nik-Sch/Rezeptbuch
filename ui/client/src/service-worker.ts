@@ -46,7 +46,7 @@ self.addEventListener('push', (event) => {
     return;
   }
   console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
-  const recipe = event.data.json() as IRecipe|null;
+  const recipe = event.data.json() as IRecipe | null;
   const body = recipe?.title ?? '';
 
   const title = 'A new recipe was added!';
@@ -68,9 +68,7 @@ self.addEventListener('notificationclick', (event) => {
 
   event.notification.close();
   const data = event.notification.data as IRecipe;
-  const url = data?.id
-    ? `/recipes/${data.id}`
-    : `/`;
+  const url = data?.id ? `/recipes/${data.id}` : `/`;
 
   // This looks to see if the current is already open and
   // focuses if it is

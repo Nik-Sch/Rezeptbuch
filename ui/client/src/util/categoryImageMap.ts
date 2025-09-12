@@ -41,6 +41,7 @@ const map: Record<number, string> = {
   26: main,
   27: cake,
   33: beilagen,
+  34: veg,
 };
 export const mapPng: Record<number, string> = {
   1: expPng,
@@ -60,6 +61,7 @@ export const mapPng: Record<number, string> = {
   26: mainPng,
   27: cakePng,
   33: beilagenPng,
+  34: vegPng,
 };
 
 export default function categoryImageMap() {
