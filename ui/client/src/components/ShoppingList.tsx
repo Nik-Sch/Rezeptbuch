@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import MobileHeader from './MobileHeader';
 import {
   Collapse,
@@ -32,9 +32,13 @@ import recipesHandler, {
   getUserInfo,
   updateShoppingItem,
 } from '../util/Network';
-import { useDrag, useDrop, DropTargetMonitor, DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { TouchBackend } from 'react-dnd-touch-backend';
+import {
+  DragDropContext,
+  Draggable,
+  DraggableProvidedDragHandleProps,
+  Droppable,
+  DropResult,
+} from '@hello-pangea/dnd';
 import update from 'immutability-helper';
 import { v4 as uuidv4 } from 'uuid';
 import { Select } from '@blueprintjs/select';
@@ -50,12 +54,11 @@ export interface IShoppingItem {
 }
 
 interface IItemProps {
+  isDragging: boolean;
+  dragHandleProps: DraggableProvidedDragHandleProps | null;
   item: IShoppingItem;
   updateElement: (newElement: IShoppingItem, shouldRefocus: boolean) => void;
   deleteElement: (elem: IShoppingItem) => void;
-  index: number;
-  moveCard: (dragIndex: number, hoverIndex: number) => void;
-  dndFinished: () => void;
 }
 
 function NewShoppingListItem(props: { onConfirm: (...value: string[]) => void }) {
@@ -144,51 +147,7 @@ function NewShoppingListItem(props: { onConfirm: (...value: string[]) => void })
     </div>
   );
 }
-interface DragItem {
-  index: number;
-  id: string;
-  type: string;
-}
-const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const type = props.item.checked ? 'checked' : 'notChecked';
-  const [, drop] = useDrop<DragItem, void>(() => ({
-    accept: type,
-    hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (!ref.current) {
-        return;
-      }
-      const dragIndex = item.index;
-      const hoverIndex = props.index;
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = clientOffset!.y - hoverBoundingRect.top;
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      props.moveCard(dragIndex, hoverIndex);
-      item.index = hoverIndex;
-    },
-  }));
-  const [{ isDragging }, drag] = useDrag({
-    type,
-    item: () => ({ id: props.item.id, index: props.index }),
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-    end: () => {
-      props.dndFinished();
-    },
-  });
-  // drag(drop(ref));
-
+function ShoppingListItem(props: IItemProps) {
   const [hover, setHover] = useState(false);
   const mobile = useMobile();
 
@@ -220,7 +179,6 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
 
   return (
     <div
-      ref={drop}
       onMouseOver={() => {
         window.clearTimeout(hoverTimeout.current);
         hoverTimeout.current = window.setTimeout(() => setHover(true), 50);
@@ -229,17 +187,18 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
         window.clearTimeout(hoverTimeout.current);
         hoverTimeout.current = window.setTimeout(() => setHover(false), 50);
       }}
-      style={{ opacity: isDragging ? (mobile ? 0.5 : 0) : 1 }}
+      style={{ opacity: props.isDragging ? 0.5 : 1 }}
     >
-      <div ref={ref}>
+      <div>
         {hover && !mobile ? <Divider /> : <div className="fake-divider" />}
         <div
           className={classNames('shopping-item', props.item.checked ? Classes.TEXT_DISABLED : '')}
         >
-          <div ref={drag}>
+          <div>
             <Icon
-              icon={hover || mobile ? 'drag-handle-vertical' : 'blank'}
-              className={'drag-handle'}
+              icon={(hover || mobile) && !props.item.checked ? 'drag-handle-vertical' : 'blank'}
+              className={props.item.checked ? '' : 'drag-handle'}
+              {...props.dragHandleProps}
             />
           </div>
           <Checkbox
@@ -261,8 +220,6 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
             )}
             onFocus={() => setIsEditing(true)}
             tabIndex={isEditing ? undefined : 0}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-            ref={forwardedRef as any}
           >
             {isEditing ? (
               <input
@@ -288,8 +245,7 @@ const ShoppingListItem = forwardRef((props: IItemProps, forwardedRef) => {
       </div>
     </div>
   );
-});
-ShoppingListItem.displayName = 'ShoppingListItem';
+}
 
 type SyncState = 'initial-fetch' | 'uploading' | 'synced' | 'offline';
 
@@ -684,7 +640,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
   const updateElement = (changedItem: IShoppingItem) => {
     const oldItem = state.lists[state.active].items.find((v) => v.id === changedItem.id);
     if (typeof oldItem === 'undefined') {
-      throw new Error('didnt find the item');
+      throw new Error("didn't find the item");
     }
     let newPosition = changedItem.position;
     if (oldItem.checked && !changedItem.checked) {
@@ -729,65 +685,6 @@ export default function ShoppingList(props: IDarkThemeProps) {
       }),
     );
     void updateItems(state.active, [item], 'DELETE');
-  };
-
-  const moveCardNotChecked = (dragIndex: number, hoverIndex: number) => {
-    setState((state) => {
-      const list = state.lists[state.active].items
-        .filter((v) => !v.checked)
-        .sort((v, w) => v.position - w.position);
-      const dragItem = list[dragIndex];
-      const newItems = update(list, {
-        $splice: [
-          [dragIndex, 1],
-          [hoverIndex, 0, dragItem],
-        ],
-      });
-      newItems.forEach((item, i) => {
-        if (item.position !== i) {
-          item.position = i;
-        }
-      });
-
-      return update(state, {
-        lists: {
-          [state.active]: {
-            items: {
-              $apply: (items: IShoppingItem[]) => items.filter((v) => v.checked).concat(newItems),
-            },
-          },
-        },
-      });
-    });
-  };
-
-  const moveCardChecked = (dragIndex: number, hoverIndex: number) => {
-    setState((state) => {
-      const list = state.lists[state.active].items
-        .filter((v) => v.checked)
-        .sort((v, w) => v.position - w.position);
-      const dragItem = list[dragIndex];
-      const newItems = update(list, {
-        $splice: [
-          [dragIndex, 1],
-          [hoverIndex, 0, dragItem],
-        ],
-      });
-      newItems.forEach((item, i) => {
-        if (item.position !== i) {
-          item.position = i;
-        }
-      });
-      return update(state, {
-        lists: {
-          [state.active]: {
-            items: {
-              $apply: (items: IShoppingItem[]) => items.filter((v) => !v.checked).concat(newItems),
-            },
-          },
-        },
-      });
-    });
   };
 
   const statusElement = (
@@ -846,7 +743,39 @@ export default function ShoppingList(props: IDarkThemeProps) {
     }
   };
 
-  const itemRefs = new Map<string, HTMLDivElement>();
+  const onDragEnd = (result: DropResult) => {
+    if (result.destination === null) {
+      console.log('dropped empty');
+      return;
+    }
+
+    setState((state) => {
+      const list = state.lists[state.active].items
+        .filter((v) => !v.checked)
+        .sort((v, w) => v.position - w.position);
+      const sourceItem = list[result.source.index];
+      const newItems = update(list, {
+        $splice: [
+          [result.source.index, 1],
+          [result.destination!.index, 0, sourceItem],
+        ],
+      });
+      newItems.forEach((v, i) => (v.position = i));
+      const newState = update(state, {
+        lists: {
+          [state.active]: {
+            items: {
+              $apply: (items: IShoppingItem[]) => items.filter((v) => v.checked).concat(newItems),
+            },
+          },
+        },
+      });
+
+      void updateItems(newState.active, newState.lists[newState.active].items, 'PUT');
+
+      return newState;
+    });
+  };
   return (
     <>
       <Dialog
@@ -983,31 +912,39 @@ export default function ShoppingList(props: IDarkThemeProps) {
               )}
             </div>
             <div className="shopping-list">
-              <DndProvider backend={mobile ? TouchBackend : HTML5Backend}>
-                {state.lists[state.active].items
-                  .filter((v) => !v.checked)
-                  .sort((v, w) => v.position - w.position)
-                  .map((item, index) => {
-                    return (
-                      <ShoppingListItem
-                        item={item}
-                        key={item.id}
-                        deleteElement={deleteElement}
-                        updateElement={updateElement}
-                        moveCard={moveCardNotChecked}
-                        dndFinished={() =>
-                          void updateItems(state.active, state.lists[state.active].items, 'PUT')
-                        }
-                        index={index}
-                        ref={(v: HTMLDivElement) => {
-                          if (v) {
-                            itemRefs.set(item.id, v);
-                          }
-                        }}
-                      />
-                    );
-                  })}
-              </DndProvider>
+              <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="droppable">
+                  {(provided) => (
+                    <div {...provided.droppableProps} ref={provided.innerRef}>
+                      {state.lists[state.active].items
+                        .filter((v) => !v.checked)
+                        .sort((v, w) => v.position - w.position)
+                        .map((item, index) => (
+                          <Draggable key={item.id} draggableId={item.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                style={{
+                                  ...provided.draggableProps.style,
+                                }}
+                              >
+                                <ShoppingListItem
+                                  isDragging={snapshot.isDragging}
+                                  dragHandleProps={provided.dragHandleProps}
+                                  item={item}
+                                  deleteElement={deleteElement}
+                                  updateElement={updateElement}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
               <NewShoppingListItem
                 onConfirm={(...itemsToBeAdded: string[]) => {
                   const items = itemsToBeAdded.map((text, i) => {
@@ -1054,31 +991,21 @@ export default function ShoppingList(props: IDarkThemeProps) {
                 />
               )}
               <Collapse isOpen={state.showChecked}>
-                <DndProvider backend={mobile ? TouchBackend : HTML5Backend}>
-                  {state.lists[state.active].items
-                    .filter((v) => v.checked)
-                    .sort((v, w) => v.position - w.position)
-                    .map((item, index) => {
-                      return (
-                        <ShoppingListItem
-                          item={item}
-                          key={item.id}
-                          updateElement={updateElement}
-                          deleteElement={deleteElement}
-                          moveCard={moveCardChecked}
-                          dndFinished={() =>
-                            void updateItems(state.active, state.lists[state.active].items, 'PUT')
-                          }
-                          index={index}
-                          ref={(v: HTMLDivElement) => {
-                            if (v) {
-                              itemRefs.set(item.id, v);
-                            }
-                          }}
-                        />
-                      );
-                    })}
-                </DndProvider>
+                {state.lists[state.active].items
+                  .filter((v) => v.checked)
+                  .sort((v, w) => v.position - w.position)
+                  .map((item) => {
+                    return (
+                      <ShoppingListItem
+                        item={item}
+                        key={item.id}
+                        updateElement={updateElement}
+                        deleteElement={deleteElement}
+                        isDragging={false}
+                        dragHandleProps={null}
+                      />
+                    );
+                  })}
               </Collapse>
             </div>
           </div>

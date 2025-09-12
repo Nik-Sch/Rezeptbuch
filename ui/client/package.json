@@ -6,6 +6,7 @@
   "dependencies": {
     "@blueprintjs/core": "^6.3.1",
     "@blueprintjs/select": "^6.0.5",
+    "@hello-pangea/dnd": "^18.0.1",
     "@types/jest": "^27.5.2",
     "@types/node": "^22.15.32",
     "@types/react": "^18.3.23",
@@ -25,9 +26,6 @@
     "immutability-helper": "^3.1.1",
     "js-base64": "^3.7.8",
     "react": "^18.3.1",
-    "react-dnd": "^16.0.1",
-    "react-dnd-html5-backend": "^16.0.1",
-    "react-dnd-touch-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "react-helmet": "^6.1.0",
     "react-i18next": "^15.7.3",
