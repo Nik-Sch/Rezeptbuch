@@ -753,7 +753,6 @@ export default function ShoppingList(props: IDarkThemeProps) {
       const list = state.lists[state.active].items
         .filter((v) => !v.checked)
         .sort((v, w) => v.position - w.position);
-      console.log(JSON.stringify(list.map((i) => ({ pos: i.position, text: i.text }))));
       const sourceItem = list[result.source.index];
       const newItems = update(list, {
         $splice: [
@@ -762,7 +761,6 @@ export default function ShoppingList(props: IDarkThemeProps) {
         ],
       });
       newItems.forEach((v, i) => (v.position = i));
-      console.log(JSON.stringify(newItems.map((i) => ({ pos: i.position, text: i.text }))));
       const newState = update(state, {
         lists: {
           [state.active]: {
