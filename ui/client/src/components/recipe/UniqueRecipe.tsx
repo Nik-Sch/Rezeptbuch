@@ -18,9 +18,8 @@ import { DesktopIngredients, showDot } from './Ingredients';
 import './Recipe.scss';
 import ShareButton from './ShareButton';
 
-
 export default function UniqueRecipe(props: IDarkThemeProps) {
-  let { id } = useParams();
+  const { id } = useParams();
   const [t] = useTranslation();
 
   const [loaded, setLoaded] = useState(false);
@@ -34,7 +33,8 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
       setError(true);
       return;
     }
-    fetchUniqueRecipe(id).then(fetchedRecipe => {
+    // TODO react19
+    void fetchUniqueRecipe(id).then((fetchedRecipe) => {
       if (typeof fetchedRecipe === 'undefined') {
         setError(true);
       } else {
@@ -42,206 +42,195 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
         setRecipe(fetchedRecipe);
         setLoaded(true);
       }
-
-    })
+    });
   }, [id]);
 
   const navigationLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
-    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
+    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') },
   ];
 
   if (error) {
-    return <>
-      {mobile && <MobileHeader
-        darkThemeProps={props}
-        navigationLinks={navigationLinks}
-      />}
-      <div className='body'>
-        {mobile || <SideMenu
-          darkModeProps={props}
-          currentNavigation='recipes'
-        />}
-        <div className='main-content'>
-          <H2>{t('notFound')}</H2>
+    return (
+      <>
+        {mobile && <MobileHeader darkThemeProps={props} navigationLinks={navigationLinks} />}
+        <div className="body">
+          {mobile || <SideMenu darkModeProps={props} currentNavigation="recipes" />}
+          <div className="main-content">
+            <H2>{t('notFound')}</H2>
+          </div>
         </div>
-      </div>
-    </>
-
+      </>
+    );
   }
   if (mobile) {
-    return <>
-      <MobileHeader
-        darkThemeProps={props}
-        navigationLinks={navigationLinks}
-      >
-        {loaded && <div className='edit-container'>
-          <ShareButton recipe={recipe} />
-        </div>}
-      </MobileHeader>
-      <div className='recipe-container-mobile'>
-        <ImagePart
-          recipe={recipe}
-          editable={false}
-          className='image'
-        />
-        <div className='text-wrapper'>
-          <H2 className={classNames(loaded ? '' : Classes.SKELETON, 'title')}>
-            <span>
-              {recipe.title}
-            </span>
-          </H2>
-          <H3>
-            <CategorySelect
-              canAddCategory={true}
-              noResultText={t('noCategoryFound')}
-              className={classNames('category-select', Classes.TEXT_MUTED, loaded ? '' : Classes.SKELETON)}
-              disabled={true}
-              placeholder={t('phCategoryMobile')}
-              category={recipe.category}
-              onCategorySelected={() => { }}
-            />
-          </H3>
+    return (
+      <>
+        <MobileHeader darkThemeProps={props} navigationLinks={navigationLinks}>
+          {loaded && (
+            <div className="edit-container">
+              <ShareButton recipe={recipe} />
+            </div>
+          )}
+        </MobileHeader>
+        <div className="recipe-container-mobile">
+          <ImagePart recipe={recipe} editable={false} className="image" />
+          <div className="text-wrapper">
+            <H2 className={classNames(loaded ? '' : Classes.SKELETON, 'title')}>
+              <span>{recipe.title}</span>
+            </H2>
+            <H3>
+              <CategorySelect
+                canAddCategory={true}
+                noResultText={t('noCategoryFound')}
+                className={classNames(
+                  'category-select',
+                  Classes.TEXT_MUTED,
+                  loaded ? '' : Classes.SKELETON,
+                )}
+                disabled={true}
+                placeholder={t('phCategoryMobile')}
+                category={recipe.category}
+                onCategorySelected={() => undefined}
+              />
+            </H3>
 
-          <div className='ingredients-title-wrapper'>
-            <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
-              {t('ingredients')}:
-            </H4>
-            {/* {recipe.ingredients.length > 0 && !state.editing && <Button
-              text={t('addToShopping')}
-              minimal={true}
-              intent='success'
-              icon='add'
-              onClick={addIngredientsToShoppingList}
-            />} */}
-          </div>
-          {loaded
-            ? (recipe.ingredients.length > 0 ?
-              recipe.ingredients.map((line, index) => (
-                <div key={index} className='ingredients-line'>
-                  {showDot(line) && <Icon icon='dot' />}
-                  <span className='ingredients-line-text'>
-                    {line.trim()}
-                  </span>
+            <div className="ingredients-title-wrapper">
+              <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
+                {t('ingredients')}:
+              </H4>
+            </div>
+            {loaded ? (
+              recipe.ingredients.length > 0 ? (
+                recipe.ingredients.map((line, index) => (
+                  <div key={index} className="ingredients-line">
+                    {showDot(line) && <Icon icon="dot" />}
+                    <span className="ingredients-line-text">{line.trim()}</span>
+                  </div>
+                ))
+              ) : (
+                <div className={classNames(Classes.TEXT_MUTED, 'ingredients-line')}>
+                  {t('noIngredients')}
+                </div>
+              )
+            ) : (
+              [1, 2, 3].map((_, index) => (
+                <div key={-index} className="ingredients-line">
+                  <Icon icon="dot" />
+                  <span className={classNames('ingredients-line-text', Classes.SKELETON)} />
                 </div>
               ))
-              : <div className={classNames(Classes.TEXT_MUTED, 'ingredients-line')}>{t('noIngredients')}</div>
-            )
-            : [1, 2, 3].map((_, index) => (
-              <div key={-index} className='ingredients-line'>
-                <Icon icon='dot' />
-                <span className={classNames('ingredients-line-text', Classes.SKELETON)} />
-              </div>
-            ))
-          }
-          <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
-            {t('description')}:
-          </H4>
+            )}
+            <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
+              {t('description')}:
+            </H4>
 
-          <DescriptionTextArea
-            value={recipe.description}
-            editable={false}
-            placeholder={t('noDescription')}
-            className={classNames(loaded ? '' : Classes.SKELETON, 'description')}
-          />
-          <H5 className='user'>
-            {`${t('by')} ${recipe.user.user}.`}
-          </H5>
-        </div>
-      </div>
-      {recipe.id !== -1 && <CommentSection
-        comments={recipe.comments}
-        username={''}
-        recipeId={recipe.id}
-        writeAccess={false}
-      />}
-      <div className='bottom-padding' />
-    </>
-  } else {
-    return <>
-      <div className='body'>
-        <SideMenu darkModeProps={props} currentNavigation='recipes' />
-        <div className='main-content'>
-          <div className='recipe-container'>
-            <div className='recipe'>
-              <div className='title-wrapper'>
-                <H1 className='title'>
-                  <EditableText
-                    multiline={true}
-                    className={classNames(loaded ? '' : Classes.SKELETON)}
-                    placeholder={t('phTitle')}
-                    disabled={true}
-                    value={recipe.title}
-                    onChange={() => { }}
-                  />
-                </H1>
-                {loaded && <div className='edit-container'>
-                  <ShareButton recipe={recipe} />
-                </div>}
-              </div>
-              <div className='text-image-wrapper'>
-                <div className='text-wrapper'>
-                  <H3>
-                    <CategorySuggest
-                      canAddCategory={true}
-                      noResultText={t('noCategoryFound')}
-                      className={classNames('category-select', loaded ? '' : Classes.SKELETON)}
-                      disabled={true}
-                      placeholder={t('phCategory')}
-                      initialCategory={recipe.category}
-                      onCategorySelected={() => { }}
-                    />
-                  </H3>
-                  <div className='ingredients-title-wrapper'>
-                    <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'ingredients-title')}>
-                      {t('ingredients')}:
-                    </H4>
-                    {/* {recipe.ingredients.length > 0 && !state.editing && <Button
-                      text={t('addToShopping')}
-                      minimal={true}
-                      intent='success'
-                      icon='add'
-                      onClick={addIngredientsToShoppingList}
-                    />} */}
-                  </div>
-                  <DesktopIngredients
-                    ingredients={recipe.ingredients}
-                    loaded={loaded}
-                    editable={false}
-                    addIngredient={() => { }}
-                    deleteIngredient={() => { }}
-                    replaceIngredient={() => { }}
-                  />
-                </div>
-                <ImagePart
-                  recipe={recipe}
-                  editable={false}
-                  className='image'
-                />
-              </div>
-              <H4 className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}>
-                {t('description')}:
-              </H4>
-              <DescriptionTextArea
-                value={recipe.description}
-                placeholder={t('noDescription')}
-                editable={false}
-                className={classNames(loaded ? '' : Classes.SKELETON, 'description')}
-              />
-              <H5 className='user'>
-                {`${t('by')} ${recipe.user.user}.`}
-              </H5>
-            </div>
+            <DescriptionTextArea
+              value={recipe.description}
+              editable={false}
+              placeholder={t('noDescription')}
+              className={classNames(loaded ? '' : Classes.SKELETON, 'description')}
+            />
+            <H5 className="user">{`${t('by')} ${recipe.user.user}.`}</H5>
           </div>
-          {recipe.id !== -1 && <CommentSection
+        </div>
+        {recipe.id !== -1 && (
+          <CommentSection
             comments={recipe.comments}
             username={''}
             recipeId={recipe.id}
             writeAccess={false}
-          />}
+          />
+        )}
+        <div className="bottom-padding" />
+      </>
+    );
+  } else {
+    return (
+      <>
+        <div className="body">
+          <SideMenu darkModeProps={props} currentNavigation="recipes" />
+          <div className="main-content">
+            <div className="recipe-container">
+              <div className="recipe">
+                <div className="title-wrapper">
+                  <H1 className="title">
+                    <EditableText
+                      multiline={true}
+                      className={classNames(loaded ? '' : Classes.SKELETON)}
+                      placeholder={t('phTitle')}
+                      disabled={true}
+                      value={recipe.title}
+                      onChange={() => undefined}
+                    />
+                  </H1>
+                  {loaded && (
+                    <div className="edit-container">
+                      <ShareButton recipe={recipe} />
+                    </div>
+                  )}
+                </div>
+                <div className="text-image-wrapper">
+                  <div className="text-wrapper">
+                    <H3>
+                      <CategorySuggest
+                        canAddCategory={true}
+                        noResultText={t('noCategoryFound')}
+                        className={classNames('category-select', loaded ? '' : Classes.SKELETON)}
+                        disabled={true}
+                        placeholder={t('phCategory')}
+                        initialCategory={recipe.category}
+                        onCategorySelected={() => undefined}
+                      />
+                    </H3>
+                    <div className="ingredients-title-wrapper">
+                      <H4
+                        className={classNames(
+                          Classes.INTENT_PRIMARY,
+                          Classes.ICON,
+                          'ingredients-title',
+                        )}
+                      >
+                        {t('ingredients')}:
+                      </H4>
+                    </div>
+                    <DesktopIngredients
+                      ingredients={recipe.ingredients}
+                      loaded={loaded}
+                      editable={false}
+                      addIngredient={() => undefined}
+                      deleteIngredient={() => undefined}
+                      replaceIngredient={() => undefined}
+                    />
+                  </div>
+                  <ImagePart recipe={recipe} editable={false} className="image" />
+                </div>
+                <H4
+                  className={classNames(Classes.INTENT_PRIMARY, Classes.ICON, 'description-title')}
+                >
+                  {t('description')}:
+                </H4>
+                <DescriptionTextArea
+                  value={recipe.description}
+                  placeholder={t('noDescription')}
+                  editable={false}
+                  className={classNames(loaded ? '' : Classes.SKELETON, 'description')}
+                />
+                <H5 className="user">{`${t('by')} ${recipe.user.user}.`}</H5>
+              </div>
+            </div>
+            {recipe.id !== -1 && (
+              <CommentSection
+                comments={recipe.comments}
+                username={''}
+                recipeId={recipe.id}
+                writeAccess={false}
+              />
+            )}
+          </div>
         </div>
-      </div>
-      <div className='bottom-padding' />
-    </>
+        <div className="bottom-padding" />
+      </>
+    );
   }
 }

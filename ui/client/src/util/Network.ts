@@ -1,21 +1,26 @@
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 import { Base64 } from 'js-base64';
 import { set, get, del } from 'idb-keyval';
-import axios from 'axios';
-import { localStorageUserInfo, localStorageUserChecksum, localStorageRecipeChecksum, localStorageCommentChecksum, localStorageCategoryChecksum } from "./StorageKeys";
-import { IShoppingItem } from "../components/ShoppingList";
+import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
+import {
+  localStorageUserInfo,
+  localStorageUserChecksum,
+  localStorageRecipeChecksum,
+  localStorageCommentChecksum,
+  localStorageCategoryChecksum,
+} from './StorageKeys';
+import { IShoppingItem } from '../components/ShoppingList';
 
 const RECIPE_CACHE = 'recipes';
 const CATEGORY_CACHE = 'categories';
 const USER_CACHE = 'users';
 const COMMENT_CACHE = 'DBchecksum';
 
-
 export const emptyRecipe: IRecipe = {
   title: '',
   category: {
     name: '',
-    id: -1
+    id: -1,
   },
   ingredients: [],
   description: '',
@@ -25,10 +30,10 @@ export const emptyRecipe: IRecipe = {
   user: {
     id: -1,
     readOnly: true,
-    user: ''
+    user: '',
   },
   comments: [],
-}
+};
 export interface ICategory {
   id: number;
   name: string;
@@ -49,7 +54,6 @@ export interface IApiComment {
   recipeId: number;
   date: string;
   editedDate?: string;
-
 }
 
 export interface IRecipe {
@@ -65,20 +69,20 @@ export interface IRecipe {
 }
 
 interface IApiRecipe {
-  title: string,
-  categoryId: number,
-  ingredients: string,
-  description: string,
-  image: string,
-  date: string,
-  id: number,
-  userId: number
+  title: string;
+  categoryId: number;
+  ingredients: string;
+  description: string;
+  image: string;
+  date: string;
+  id: number;
+  userId: number;
 }
 
 interface IApiCategory {
-  id: number,
-  name: string,
-  userId: number
+  id: number;
+  name: string;
+  userId: number;
 }
 
 export interface IUser {
@@ -86,7 +90,6 @@ export interface IUser {
   user: string;
   readOnly: boolean;
 }
-
 
 function mapRecipeToAPI(recipe: IRecipe): IApiRecipe {
   return {
@@ -105,81 +108,92 @@ function mapRecipeToAPI(recipe: IRecipe): IApiRecipe {
     image: recipe.image,
     date: recipe.date,
     id: recipe.id,
-    userId: recipe.user.id
-  }
+    userId: recipe.user.id,
+  };
 }
 
-function apiToRecipe(r: IApiRecipe, categories: ICategory[], users: IUser[], comments: IApiComment[]): IRecipe {
-  const category = categories.find(c => c.id === r.categoryId);
-  const user = users.find(u => u.id === r.userId);
-  const recipeComments = comments.filter(c => c.recipeId === r.id).map(c => apiToComment(c, users));
+function apiToRecipe(
+  r: IApiRecipe,
+  categories: ICategory[],
+  users: IUser[],
+  comments: IApiComment[],
+): IRecipe {
+  const category = categories.find((c) => c.id === r.categoryId);
+  const user = users.find((u) => u.id === r.userId);
+  const recipeComments = comments
+    .filter((c) => c.recipeId === r.id)
+    .map((c) => apiToComment(c, users));
 
   return {
     title: r.title,
     category: {
-      name: category?.name || '',
-      id: category?.id || -1
+      name: category?.name ?? '',
+      id: category?.id ?? -1,
     },
-    ingredients: r.ingredients.replace(/^\s*-\s+/gm, '').replace(/\r/, '').split('\n').filter(v => v.trim().length > 0),
+    ingredients: r.ingredients
+      .replace(/^\s*-\s+/gm, '')
+      .replace(/\r/, '')
+      .split('\n')
+      .filter((v) => v.trim().length > 0),
     description: r.description,
     image: r.image,
     date: dayjs(r.date).toString(),
     id: r.id,
     user: {
-      id: user?.id || -1,
-      readOnly: user?.readOnly || true,
-      user: user?.user || ''
+      id: user?.id ?? -1,
+      readOnly: user?.readOnly ?? true,
+      user: user?.user ?? '',
     },
-    comments: recipeComments
+    comments: recipeComments,
   };
 }
 
 function reloadComments(r: IRecipe, users: IUser[], comments: IApiComment[]): IRecipe {
-  const recipeComments = comments.filter(c => c.recipeId === r.id).map(c => apiToComment(c, users));
-  return {...r, comments: recipeComments};
+  const recipeComments = comments
+    .filter((c) => c.recipeId === r.id)
+    .map((c) => apiToComment(c, users));
+  return { ...r, comments: recipeComments };
 }
 
 function apiToCategories(categories: IApiCategory[]): ICategory[] {
   return categories.map((c) => {
-    return { id: c.id, name: c.name }
+    return { id: c.id, name: c.name };
   });
 }
 
 function apiToComment(comment: IApiComment, users: IUser[]): IComment {
-  const user = users.find(u => u.id === comment.userId);
+  const user = users.find((u) => u.id === comment.userId);
   return {
     text: comment.text,
     user: {
-      id: user?.id || -1,
-      readOnly: user?.readOnly || true,
-      user: user?.user || ''
+      id: user?.id ?? -1,
+      readOnly: user?.readOnly ?? true,
+      user: user?.user ?? '',
     },
     id: comment.id,
     date: comment.date,
-    editedDate: comment.editedDate
-  }
+    editedDate: comment.editedDate,
+  };
 }
 
 export function getHeaders(): Headers {
-  let headers = new Headers();
+  const headers = new Headers();
   return headers;
 }
 
 export interface IUploadCallbacks {
-  onUploadProgress?: ((event: any) => void);
-  onSuccess?: ((event: any) => void);
-  onFailure?: ((event: any) => void);
+  onUploadProgress: (event: AxiosProgressEvent) => void;
+  onSuccess: (response: AxiosResponse) => void;
+  onFailure: (reason: unknown) => void;
 }
-
 
 type ICallBack = (
   recipes: IRecipe[],
   categories: ICategory[],
   users: IUser[],
-  loggedIn: boolean
-) => void
+  loggedIn: boolean,
+) => void;
 class Recipes {
-
   private recipeCache: IRecipe[] = [];
   private categoryCache: ICategory[] = [];
   private commentCache: IApiComment[] = [];
@@ -188,7 +202,7 @@ class Recipes {
   private callbacks: ICallBack[] = [];
 
   constructor() {
-    get<IRecipe[]>(RECIPE_CACHE).then(async (result) => {
+    void get<IRecipe[]>(RECIPE_CACHE).then(async (result) => {
       if (!result) {
         return;
       }
@@ -197,40 +211,47 @@ class Recipes {
           recipe.comments = [];
         }
       }
-      this.recipeCache = result || [];
-      this.categoryCache = await get<ICategory[]>(CATEGORY_CACHE) || [];
-      this.userCache = await get<IUser[]>(USER_CACHE) || [];
+      this.recipeCache = result;
+      this.categoryCache = (await get<ICategory[]>(CATEGORY_CACHE)) ?? [];
+      this.userCache = (await get<IUser[]>(USER_CACHE)) ?? [];
       this.notify();
+      void this.fetchData();
     });
-    this.fetchData();
   }
 
   public subscribe(callback: ICallBack) {
     this.callbacks.push(callback);
     callback(this.recipeCache, this.categoryCache, this.userCache, typeof userInfo !== 'undefined');
-    this.fetchData();
-    return () => { recipesHandler.unsubscribe(callback); };
+    void this.fetchData();
+    return () => {
+      recipesHandler.unsubscribe(callback);
+    };
   }
 
   public unsubscribe(cb: ICallBack) {
-    this.callbacks.splice(this.callbacks.findIndex(a => a === cb), 1);
+    this.callbacks.splice(
+      this.callbacks.findIndex((a) => a === cb),
+      1,
+    );
   }
 
   public getRecipeOnce(id: number) {
-    console.log(this.recipeCache.filter(r => r.ingredients.length === 0));
-    return this.recipeCache.find(r => r.id === id);
+    console.log(this.recipeCache.filter((r) => r.ingredients.length === 0));
+    return this.recipeCache.find((r) => r.id === id);
   }
 
-  public uploadImage(image: File, callbacks?: IUploadCallbacks) {
+  public uploadImage(image: File, callbacks: IUploadCallbacks) {
     const form = new FormData();
     form.append('image', image);
-    axios.post('/api/images', form, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      onUploadProgress: callbacks?.onUploadProgress
-    }).then(callbacks?.onSuccess)
-      .catch(callbacks?.onFailure);
+    axios
+      .post('/api/images', form, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: callbacks.onUploadProgress,
+      })
+      .then(callbacks.onSuccess)
+      .catch((r) => callbacks.onFailure(r));
   }
 
   public async deleteComment(comment: IComment): Promise<boolean> {
@@ -238,34 +259,34 @@ class Recipes {
     headers.append('Content-Type', 'application/json');
     const result = await fetch(`/api/comments/${comment.id}`, {
       method: 'DELETE',
-      headers
+      headers,
     });
-    this.fetchData();
+    await this.fetchData();
     return result.status === 204;
   }
 
   public async updateComment(comment: IComment): Promise<boolean> {
     const headers = getHeaders();
     headers.append('Content-Type', 'application/json');
-    const body = { text: comment.text }
+    const body = { text: comment.text };
     const result = await fetch(`/api/comments/${comment.id}`, {
       method: 'PUT',
       headers,
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
-    this.fetchData();
+    await this.fetchData();
     return result.status === 200;
   }
   public async addComment(comment: string, recipeId: number): Promise<boolean> {
     const headers = getHeaders();
     headers.append('Content-Type', 'application/json');
-    const body = { text: comment, recipeId: recipeId }
+    const body = { text: comment, recipeId: recipeId };
     const result = await fetch(`/api/comments`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
-    this.fetchData();
+    await this.fetchData();
     return result.status === 200;
   }
 
@@ -274,7 +295,7 @@ class Recipes {
     headers.append('Content-Type', 'application/json');
     const result = await fetch(`/api/images/${image}`, {
       method: 'DELETE',
-      headers
+      headers,
     });
     return result.status === 204;
   }
@@ -286,13 +307,13 @@ class Recipes {
     const result = await fetch(`/api/categories`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
     if (result.status !== 200) {
       return undefined;
     }
-    this.fetchData();
-    return { id: (await result.json()).id, name };
+    await this.fetchData();
+    return { id: ((await result.json()) as { id: number }).id, name };
   }
 
   public async addRecipe(recipe: IRecipe): Promise<number | undefined> {
@@ -302,25 +323,25 @@ class Recipes {
     const result = await fetch(`/api/recipes`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
     if (result.status !== 200) {
       return undefined;
     }
-    this.fetchData();
-    return (await result.json()).id;
+    await this.fetchData();
+    return ((await result.json()) as { id: number }).id;
   }
 
   public async updateRecipe(recipe: IRecipe): Promise<boolean> {
     const headers = getHeaders();
     headers.append('Content-Type', 'application/json');
-    const body = { ...mapRecipeToAPI(recipe), date: undefined, id: undefined }
+    const body = { ...mapRecipeToAPI(recipe), date: undefined, id: undefined };
     const result = await fetch(`/api/recipes/${recipe.id}`, {
       method: 'PUT',
       headers,
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
-    this.fetchData();
+    await this.fetchData();
     return result.status === 200;
   }
 
@@ -329,16 +350,21 @@ class Recipes {
     headers.append('Content-Type', 'application/json');
     const result = await fetch(`/api/recipes/${recipe.id}`, {
       method: 'DELETE',
-      headers
-    })
-    this.fetchData();
+      headers,
+    });
+    await this.fetchData();
     return result.status === 204;
   }
 
   private notify() {
     // console.debug('notifying', this.callbacks);
     for (const callback of this.callbacks) {
-      callback(this.recipeCache, this.categoryCache, this.userCache, typeof userInfo !== 'undefined');
+      callback(
+        this.recipeCache,
+        this.categoryCache,
+        this.userCache,
+        typeof userInfo !== 'undefined',
+      );
     }
   }
 
@@ -355,22 +381,21 @@ class Recipes {
       let result = await fetch(url);
       if (result.status === 204) {
         if (this.userCache.length === 0) {
-          this.userCache = await get<IUser[]>(USER_CACHE) || [];
+          this.userCache = (await get<IUser[]>(USER_CACHE)) ?? [];
         }
       } else if (result.status !== 200) {
         await fetchUserInfo();
         return;
       } else {
         reloadCommentsAfterFetching = true;
-        const resultJson: {
-          users: IUser[],
-          checksum: number
-        } = await result.json();
+        const resultJson = (await result.json()) as {
+          users: IUser[];
+          checksum: number;
+        };
         this.userCache = resultJson.users;
         await set(USER_CACHE, this.userCache);
         localStorage.setItem(localStorageUserChecksum, JSON.stringify(resultJson.checksum));
       }
-
 
       url = '/api/categories';
       checksum = localStorage.getItem(localStorageCategoryChecksum);
@@ -380,17 +405,17 @@ class Recipes {
       result = await fetch(url);
       if (result.status === 204) {
         if (this.categoryCache.length === 0) {
-          this.categoryCache = await get<ICategory[]>(CATEGORY_CACHE) || [];
+          this.categoryCache = (await get<ICategory[]>(CATEGORY_CACHE)) ?? [];
         }
       } else if (result.status !== 200) {
         await fetchUserInfo();
         return;
       } else {
         reloadCommentsAfterFetching = true;
-        const resultJson: {
-          categories: IApiCategory[],
-          checksum: number
-        } = await result.json();
+        const resultJson = (await result.json()) as {
+          categories: IApiCategory[];
+          checksum: number;
+        };
         this.categoryCache = apiToCategories(resultJson.categories);
         await set(CATEGORY_CACHE, this.categoryCache);
         localStorage.setItem(localStorageCategoryChecksum, JSON.stringify(resultJson.checksum));
@@ -404,17 +429,17 @@ class Recipes {
       result = await fetch(url);
       if (result.status === 204) {
         if (this.commentCache.length === 0) {
-          this.commentCache = await get<IApiComment[]>(COMMENT_CACHE) || [];
+          this.commentCache = (await get<IApiComment[]>(COMMENT_CACHE)) ?? [];
         }
       } else if (result.status !== 200) {
         await fetchUserInfo();
         return;
       } else {
         reloadCommentsAfterFetching = true;
-        const resultJson: {
-          comments: IApiComment[],
-          checksum: number
-        } = await result.json();
+        const resultJson = (await result.json()) as {
+          comments: IApiComment[];
+          checksum: number;
+        };
         this.commentCache = resultJson.comments;
         await set(COMMENT_CACHE, this.commentCache);
         localStorage.setItem(localStorageCommentChecksum, JSON.stringify(resultJson.checksum));
@@ -428,24 +453,28 @@ class Recipes {
       result = await fetch(url);
       if (result.status === 204) {
         if (this.recipeCache.length === 0) {
-          this.recipeCache = await get<IRecipe[]>(RECIPE_CACHE) || [];
+          this.recipeCache = (await get<IRecipe[]>(RECIPE_CACHE)) ?? [];
         }
       } else if (result.status !== 200) {
         await fetchUserInfo();
         return;
       } else {
         reloadCommentsAfterFetching = false; // no need to reload comments because we do it here, anyways
-        const resultJson: {
-          recipes: IApiRecipe[],
-          checksum: number
-        } = await result.json();
-        this.recipeCache = resultJson.recipes.map(r => apiToRecipe(r, this.categoryCache, this.userCache, this.commentCache));
+        const resultJson = (await result.json()) as {
+          recipes: IApiRecipe[];
+          checksum: number;
+        };
+        this.recipeCache = resultJson.recipes.map((r) =>
+          apiToRecipe(r, this.categoryCache, this.userCache, this.commentCache),
+        );
         await set(RECIPE_CACHE, this.recipeCache);
         localStorage.setItem(localStorageRecipeChecksum, JSON.stringify(resultJson.checksum));
       }
 
       if (reloadCommentsAfterFetching) {
-        this.recipeCache = this.recipeCache.map(r => reloadComments(r, this.userCache, this.commentCache));
+        this.recipeCache = this.recipeCache.map((r) =>
+          reloadComments(r, this.userCache, this.commentCache),
+        );
         await set(RECIPE_CACHE, this.recipeCache);
       }
     } catch (e) {
@@ -462,7 +491,7 @@ export default recipesHandler;
 export async function fetchUniqueRecipe(uuid: string): Promise<IRecipe | undefined> {
   const result = await fetch(`/api/uniqueRecipes/${uuid}`);
   if (result.status === 200) {
-    return await result.json();
+    return (await result.json()) as IRecipe;
   } else {
     return undefined;
   }
@@ -474,10 +503,10 @@ export async function getUniqueRecipeLink(recipe: IRecipe): Promise<string | und
   const result = await fetch(`/api/uniqueRecipes`, {
     method: 'POST',
     headers,
-    body: JSON.stringify(recipe)
+    body: JSON.stringify(recipe),
   });
   if (result.status === 200) {
-    const response = await result.json();
+    const response = (await result.json()) as { createdId: number };
     return `${document.location.origin}/uniqueRecipes/${response.createdId}`;
   } else {
     return undefined;
@@ -495,7 +524,7 @@ export function getUserInfo(): IStatus | undefined {
   if (typeof userInfo === 'undefined') {
     const item = localStorage.getItem(localStorageUserInfo);
     if (typeof item === 'string') {
-      userInfo = JSON.parse(item);
+      userInfo = JSON.parse(item) as IStatus;
     }
   }
   return userInfo;
@@ -504,7 +533,7 @@ export function getUserInfo(): IStatus | undefined {
 export async function fetchUserInfo(): Promise<IStatus | undefined> {
   const result = await fetch('/api/status');
   if (result.status === 200) {
-    userInfo = await result.json();
+    userInfo = (await result.json()) as IStatus;
     localStorage.setItem(localStorageUserInfo, JSON.stringify(userInfo));
   } else if (result.status === 401) {
     await clearLoginData();
@@ -518,17 +547,17 @@ export async function loginToRecipes(user: string, password: string) {
   const headers = getHeaders();
   headers.append('Authorization', 'Basic ' + Base64.encode(`${user}:${password}`));
   const result = await fetch(`/api/login`, { headers });
-  localStorage.clear()
+  localStorage.clear();
   if (result.status === 200) {
-    recipesHandler.fetchData();
     await fetchUserInfo();
+    await recipesHandler.fetchData();
     return true;
   } else {
     return false;
   }
 }
 
-export async function createAccount(user: string, password: string): Promise<boolean|string> {
+export async function createAccount(user: string, password: string): Promise<boolean | string> {
   const headers = getHeaders();
   headers.append('Content-Type', 'application/json');
   const result = await fetch('/api/users', {
@@ -536,13 +565,13 @@ export async function createAccount(user: string, password: string): Promise<boo
     body: JSON.stringify({ username: user, password }),
     headers,
   });
-  localStorage.clear()
+  localStorage.clear();
 
   if (result.ok) {
     return true;
   }
   try {
-    return (await result.json()).message;
+    return ((await result.json()) as { message: string }).message;
   } catch {
     return false;
   }
@@ -566,14 +595,18 @@ export function getShoppingListUrl(listKey: string) {
   return listKey === 'default' ? '/api/shoppingList' : `/api/shoppingLists/${listKey}`;
 }
 
-export async function updateShoppingItem(listKey: string, items: IShoppingItem[], method: 'DELETE'|'POST'|'PUT') {
+export async function updateShoppingItem(
+  listKey: string,
+  items: IShoppingItem[],
+  method: 'DELETE' | 'POST' | 'PUT',
+) {
   const headers = getHeaders();
   headers.append('Content-Type', 'application/json');
   const url = getShoppingListUrl(listKey);
   const result = await fetch(url, {
     method: method,
     body: JSON.stringify(items),
-    headers
+    headers,
   });
   return result.status === 200;
 }

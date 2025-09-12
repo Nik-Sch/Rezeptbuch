@@ -23,7 +23,7 @@ import expPng from '../static/default-images/noRecipeExp.png';
 import breadPng from '../static/default-images/noRecipeBread.png';
 import beilagenPng from '../static/default-images/noRecipeBeilagen.png';
 
-const map: { [i: number]: string } = {
+const map: Record<number, string> = {
   1: exp,
   2: cocktail,
   3: dips,
@@ -40,9 +40,10 @@ const map: { [i: number]: string } = {
   25: cocktail,
   26: main,
   27: cake,
-  33: beilagen
-}
-export const mapPng: { [i: number]: string } = {
+  33: beilagen,
+  34: veg,
+};
+export const mapPng: Record<number, string> = {
   1: expPng,
   2: cocktailPng,
   3: dipsPng,
@@ -59,8 +60,9 @@ export const mapPng: { [i: number]: string } = {
   25: cocktailPng,
   26: mainPng,
   27: cakePng,
-  33: beilagenPng
-}
+  33: beilagenPng,
+  34: vegPng,
+};
 
 export default function categoryImageMap() {
   if (navigator.userAgent.toLowerCase().includes('safari')) {
@@ -68,4 +70,4 @@ export default function categoryImageMap() {
   } else {
     return map;
   }
-};
+}

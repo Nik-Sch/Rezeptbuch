@@ -31,7 +31,7 @@ pycparser==2.20
 PyMySQL==0.9.3
 python-dateutil==2.7.3
 pytz==2018.5
-pywebpush==1.14.0
+pywebpush==2.0.1
 redis==3.5.2
 requests==2.27.1
 six==1.16.0

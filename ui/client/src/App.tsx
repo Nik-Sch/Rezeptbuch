@@ -1,6 +1,13 @@
-import { lazy, Suspense, useEffect } from 'react';
+import React, { lazy, useEffect } from 'react';
 import './App.scss';
-import { Route, BrowserRouter as Router, Routes, Navigate, useLocation } from 'react-router-dom';
+import {
+  Route,
+  createBrowserRouter,
+  Navigate,
+  useLocation,
+  createRoutesFromElements,
+  RouterProvider,
+} from 'react-router-dom';
 import { Classes, H1, H3 } from '@blueprintjs/core';
 import recipesHandler, { getUserInfo, ICategory, IRecipe, IUser } from './util/Network';
 import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
@@ -11,7 +18,6 @@ import { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { AppToasterTop } from './util/toaster';
 import SideMenu, { INavigationLink } from './components/SideMenu';
-
 
 const RecipeList = lazy(() => import('./components/recipeList/RecipeList'));
 const Recipe = lazy(() => import('./components/recipe/Recipe'));
@@ -37,25 +43,21 @@ function NotFound(props: IDarkThemeProps) {
   const mobile = useMobile();
   const navigationLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
-    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
+    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') },
   ];
 
-  return <>
-    {mobile && <MobileHeader
-      darkThemeProps={props}
-      navigationLinks={navigationLinks}
-    />}
-    <div className='body'>
-      {mobile || <SideMenu
-        darkModeProps={props}
-        currentNavigation='recipes'
-      />}
-      <div className='main-content'>
-        <H1>{t('404Header')}</H1>
-        <H3>{t('404Text')}</H3>
+  return (
+    <>
+      {mobile && <MobileHeader darkThemeProps={props} navigationLinks={navigationLinks} />}
+      <div className="body">
+        {mobile || <SideMenu darkModeProps={props} currentNavigation="recipes" />}
+        <div className="main-content">
+          <H1>{t('404Header')}</H1>
+          <H3>{t('404Text')}</H3>
+        </div>
       </div>
-    </div>
-  </>;
+    </>
+  );
 }
 
 function Fallback(props: IDarkThemeProps) {
@@ -63,48 +65,51 @@ function Fallback(props: IDarkThemeProps) {
   const { t } = useTranslation();
   const navigationLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes'), active: true },
-    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') }
+    { to: '/shoppingList', icon: 'shopping-cart', text: t('shoppingList') },
   ];
 
-  return <>
-    {mobile && <MobileHeader
-      darkThemeProps={props}
-      navigationLinks={navigationLinks}
-    />}
-    <div className='body'>
-      {mobile || <SideMenu
-        darkModeProps={props}
-        currentNavigation='recipes'
-      />}
-      <div className='main-content'>
-        <H3>Loading...</H3>
+  return (
+    <>
+      {mobile && <MobileHeader darkThemeProps={props} navigationLinks={navigationLinks} />}
+      <div className="body">
+        {mobile || <SideMenu darkModeProps={props} currentNavigation="recipes" />}
+        <div className="main-content">
+          <H3>Loading...</H3>
+        </div>
       </div>
-    </div>
-  </>;
+    </>
+  );
 }
 
 function App() {
   const [t] = useTranslation();
 
-  const [darkTheme, setDarkTheme] = usePersistentState(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches, localStorageDarkTheme);
+  const [darkTheme, setDarkTheme] = usePersistentState(
+    window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches,
+    localStorageDarkTheme,
+  );
   const handleThemeChange = (theme: boolean) => {
     changeThemeClass(theme);
     setDarkTheme(theme);
-  }
+  };
   useEffect(() => {
     changeThemeClass(darkTheme);
   }, [darkTheme]);
 
   const [authenticated, setAuthenticated] = useState(typeof getUserInfo() !== 'undefined');
   useEffect(() => {
-    const handleRecipesChange = (_recipes: IRecipe[], _categories: ICategory[], _users: IUser[], loggedIn: boolean) => {
+    const handleRecipesChange = (
+      _recipes: IRecipe[],
+      _categories: ICategory[],
+      _users: IUser[],
+      loggedIn: boolean,
+    ) => {
       if (authenticated && !loggedIn) {
         AppToasterTop.show({ message: t('loggedOut'), intent: 'danger' });
       }
       setAuthenticated(loggedIn);
-    }
+    };
     return recipesHandler.subscribe(handleRecipesChange);
-
   }, [authenticated, t]);
   const mobile = useMobile();
 
@@ -115,68 +120,73 @@ function App() {
     { path: '/shoppingLists/:listKey/:listName', Component: ShoppingList, priv: false },
     { path: '/uniqueRecipes/:id', Component: UniqueRecipe, priv: false },
     { path: '*', Component: NotFound, priv: false },
-  ]
+  ];
+
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <>
+        <Route
+          path="/login"
+          element={
+            <div className="page">
+              <LoginPage
+                darkTheme={darkTheme}
+                onDarkThemeChanged={handleThemeChange}
+                setAuthenticated={(success) => setAuthenticated(success)}
+              />
+            </div>
+          }
+        />
+        {routes.map(({ path, Component, priv }) => (
+          <Route
+            key={path || 'undefined'}
+            path={path}
+            element={
+              priv ? (
+                <RequireAuth authenticated={authenticated}>
+                  <div className="page">
+                    <Component darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange} />
+                  </div>
+                </RequireAuth>
+              ) : (
+                <div className="page">
+                  <Component darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange} />
+                </div>
+              )
+            }
+          />
+        ))}
+      </>,
+    ),
+  );
+
+  const fallback = <Fallback darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange} />;
 
   return (
     <div className={mobile ? 'mobile' : ''}>
       <Helmet>
         <meta name="color-scheme" content={darkTheme ? 'dark' : 'light'} />
       </Helmet>
-      <Router>
-        <Suspense fallback={<Fallback darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange} />}>
-          <Routes>
-            <Route
-              path='/login'
-              element={
-                <div className='page'>
-                  <LoginPage
-                    darkTheme={darkTheme}
-                    onDarkThemeChanged={handleThemeChange}
-                    setAuthenticated={(success) => setAuthenticated(success)}
-                  />
-                </div>
-              }
-            />
-            {routes.map(({ path, Component, priv }) => (
-              <Route
-                key={path || 'undefined'}
-                path={path}
-                element={priv ?
-                  <RequireAuth authenticated={authenticated}>
-                    <div className='page'>
-                      <Component
-                        darkTheme={darkTheme}
-                        onDarkThemeChanged={handleThemeChange}
-                      />
-                    </div>
-                  </RequireAuth>
-                  : <div className='page'>
-                    <Component
-                      darkTheme={darkTheme}
-                      onDarkThemeChanged={handleThemeChange}
-                    />
-                  </div>} />
-            ))}
-          </Routes>
-        </Suspense>
-      </Router>
+      <RouterProvider router={router} fallbackElement={fallback} />
     </div>
   );
 }
 
-function RequireAuth({ authenticated, children }: { authenticated: boolean, children: JSX.Element }) {
-  let location = useLocation();
+function RequireAuth({
+  authenticated,
+  children,
+}: {
+  authenticated: boolean;
+  children: React.JSX.Element;
+}) {
+  const location = useLocation();
 
   if (!authenticated) {
     // Redirect them to the /login page, but save the current location they were
     // trying to go to when they were redirected. This allows us to send them
     // along to that page after they login, which is a nicer user experience
     // than dropping them off on the home page.
-    return <Navigate
-      to="/login"
-      state={{ from: location }}
-      replace={true}
-    />;
+    return <Navigate to="/login" state={{ from: location }} replace={true} />;
   }
 
   return children;

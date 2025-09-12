@@ -1,4 +1,5 @@
 #!/bin/sh
+git config --global --add safe.directory $IMAGE_DIRECTORY
 git config --global user.email "rezeptbuch@posteo.de"
 git config --global user.name "Rezeptbuch"
 echo $(date)

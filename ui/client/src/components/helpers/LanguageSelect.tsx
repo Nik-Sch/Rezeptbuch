@@ -1,11 +1,11 @@
-import { Select, IItemRendererProps } from '@blueprintjs/select';
+import { Select, ItemRendererProps } from '@blueprintjs/select';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button, MenuItem } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { ILanguage, availableLanguages } from '../../util/i18n';
 
-import 'flag-icons/sass/flag-icons.scss';
+import './LanguageSelect.scss';
 
 interface IProps {
   className?: string;
@@ -13,10 +13,12 @@ interface IProps {
 
 export function LanguageSelect(props: IProps) {
   const [, i18n] = useTranslation();
-  const LangSelect = Select.ofType<ILanguage>();
+  const LangSelect = Select<ILanguage>;
 
-  const [selected, setSelected] = useState(availableLanguages.find((v) => i18n.language.startsWith(v.key)));
-  const itemRenderer = (lang: ILanguage, { handleClick, modifiers }: IItemRendererProps) => {
+  const [selected, setSelected] = useState(
+    availableLanguages.find((v) => i18n.language.startsWith(v.key)),
+  );
+  const itemRenderer = (lang: ILanguage, { handleClick, modifiers }: ItemRendererProps) => {
     if (!modifiers.matchesPredicate) {
       return null;
     }
@@ -33,11 +35,11 @@ export function LanguageSelect(props: IProps) {
     );
   };
 
-  const onItemSelect = (lang: ILanguage, event?: React.SyntheticEvent<HTMLElement, Event>) => {
+  const onItemSelect = (lang: ILanguage) => {
     setSelected(lang);
-    i18n.changeLanguage(lang.key);
+    void i18n.changeLanguage(lang.key);
   };
-    const flagKey = selected?.key === 'en' ? 'gb' : selected?.key;
+  const flagKey = selected?.key === 'en' ? 'gb' : selected?.key;
   return (
     <LangSelect
       activeItem={selected}
@@ -46,9 +48,9 @@ export function LanguageSelect(props: IProps) {
       itemRenderer={itemRenderer}
       onItemSelect={onItemSelect}
       filterable={false}
-      popoverProps={{position: 'bottom-right'}}
+      popoverProps={{ position: 'bottom-right' }}
     >
-      <Button text={<span className={`fi fi-${flagKey}`}/>} rightIcon='caret-down' />
+      <Button text={<span className={`fi fi-${flagKey}`} />} endIcon="caret-down" />
     </LangSelect>
   );
 }

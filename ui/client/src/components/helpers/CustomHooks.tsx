@@ -1,11 +1,11 @@
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
-import variables from '../../util/variables.scss';
+import variables from '../../util/variables.module.scss';
 
 function getWindowDimensions() {
   const { innerWidth: width, innerHeight: height } = window;
   return {
     width,
-    height
+    height,
   };
 }
 
@@ -34,37 +34,47 @@ export function useOnline() {
   useEffect(() => {
     const handle = () => {
       setOnline(navigator.onLine);
-    }
+    };
 
     window.addEventListener('online', handle);
     window.addEventListener('offline', handle);
     return () => {
       window.removeEventListener('online', handle);
       window.removeEventListener('offline', handle);
-    }
+    };
   }, []);
 
   return online;
 }
 
-export function usePersistentState<T>(initialValue: T, storageKey: string): [T, Dispatch<SetStateAction<T>>] {
+export function usePersistentState<T>(
+  initialValue: T,
+  storageKey: string,
+): [T, Dispatch<SetStateAction<T>>] {
   return useStoredState(window.localStorage, initialValue, storageKey);
 }
 
-export function useSessionState<T>(initialValue: T, storageKey: string): [T, Dispatch<SetStateAction<T>>] {
+export function useSessionState<T>(
+  initialValue: T,
+  storageKey: string,
+): [T, Dispatch<SetStateAction<T>>] {
   return useStoredState(window.sessionStorage, initialValue, storageKey);
 }
 
-function useStoredState<T>(storage: Storage, initialValue: T, storageKey: string): [T, Dispatch<SetStateAction<T>>] {
+function useStoredState<T>(
+  storage: Storage,
+  initialValue: T,
+  storageKey: string,
+): [T, Dispatch<SetStateAction<T>>] {
   let value: T;
   try {
     const item = storage.getItem(storageKey);
     if (typeof item === 'string') {
-      value = JSON.parse(item);
+      value = JSON.parse(item) as T;
     } else {
       value = initialValue;
     }
-  } catch (err) {
+  } catch {
     value = initialValue;
   }
   const [state, setState] = useState<T>(value);

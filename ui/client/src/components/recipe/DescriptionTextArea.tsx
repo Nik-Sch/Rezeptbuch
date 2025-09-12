@@ -1,13 +1,17 @@
-import React, { useState, useEffect, useRef, KeyboardEventHandler, useCallback } from "react";
-import recipesHandler, { IRecipe } from "../../util/Network";
-import { IQueryListRendererProps, IItemRendererProps, QueryList, ItemPredicate } from "@blueprintjs/select";
-import { TextAreaProps, Classes, MenuItem, Position } from "@blueprintjs/core";
-import classNames from "classnames";
+import React, { useState, useEffect, useRef, KeyboardEventHandler, useCallback } from 'react';
+import recipesHandler, { IRecipe } from '../../util/Network';
+import {
+  QueryListRendererProps,
+  ItemRendererProps,
+  QueryList,
+  ItemPredicate,
+} from '@blueprintjs/select';
+import { TextAreaProps, Classes, MenuItem, Position, Tooltip, Popover } from '@blueprintjs/core';
+import classNames from 'classnames';
 
 import './DescriptionTextArea.scss';
-import { useMobile } from "../helpers/CustomHooks";
-import { Link } from "react-router-dom";
-import { Popover2, Tooltip2 } from "@blueprintjs/popover2";
+import { useMobile } from '../helpers/CustomHooks';
+import { Link } from 'react-router-dom';
 
 interface IDescriptionTextAreaProps extends TextAreaProps {
   changeValue?: (v: string | undefined) => void;
@@ -17,19 +21,19 @@ interface IDescriptionTextAreaProps extends TextAreaProps {
 }
 
 function escapeRegExpChars(text: string) {
-  return text.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1");
+  return text.replace(/([.*+?^=!:${}()|[\]/\\])/g, '\\$1');
 }
 
 function highlightQueryText(text: string, query: string) {
   let lastIndex = 0;
   const words = query
     .split(/\s+/)
-    .filter(word => word.length > 0)
+    .filter((word) => word.length > 0)
     .map(escapeRegExpChars);
   if (words.length === 0) {
     return [text];
   }
-  const regexp = new RegExp(words.join("|"), "gi");
+  const regexp = new RegExp(words.join('|'), 'gi');
   const tokens: React.ReactNode[] = [];
   while (true) {
     const match = regexp.exec(text);
@@ -57,11 +61,11 @@ function getLineHeight(element: HTMLElement) {
   // this check will be true if line-height is a keyword like "normal"
   if (isNaN(lineHeight)) {
     // @see http://stackoverflow.com/a/18430767/6342931
-    const line = document.createElement("span");
-    line.innerHTML = "<br>";
+    const line = document.createElement('span');
+    line.innerHTML = '<br>';
     element.appendChild(line);
     const singleLineHeight = element.offsetHeight;
-    line.innerHTML = "<br><br>";
+    line.innerHTML = '<br><br>';
     const doubleLineHeight = element.offsetHeight;
     element.removeChild(line);
     // this can return 0 in edge cases
@@ -72,9 +76,8 @@ function getLineHeight(element: HTMLElement) {
 
 function getFontSize(element: HTMLElement) {
   const fontSize = getComputedStyle(element).fontSize;
-  return fontSize === "" ? 0 : parseInt(fontSize.slice(0, -2), 10);
+  return fontSize === '' ? 0 : parseInt(fontSize.slice(0, -2), 10);
 }
-
 
 export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
   const [recipes, setRecipes] = useState<IRecipe[]>([]);
@@ -91,20 +94,22 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
 
   const { changeValue, editable, value, className, ...textAreaProps } = props;
 
-
   const hasValue = typeof value !== 'undefined' && value !== '';
 
   // load recipes
   useEffect(() => {
     const handleRecipesChange = (recipes: IRecipe[]) => {
       setRecipes(recipes);
-    }
+    };
     return recipesHandler.subscribe(handleRecipesChange);
   }, []);
 
   const filterRecipe: ItemPredicate<IRecipe> = (query, recipe) => {
-    return recipe.id.toString().includes(query) || recipe.title.toLocaleLowerCase().includes(query.toLocaleLowerCase());
-  }
+    return (
+      recipe.id.toString().includes(query) ||
+      recipe.title.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+    );
+  };
 
   const findMatch = (v: string | undefined, pos: number) => {
     if (typeof v === 'undefined') {
@@ -114,17 +119,19 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
       const regex = RegExp(/#([\da-zA-Z]*)/, 'g');
       let match: RegExpExecArray | null;
       while ((match = regex.exec(v)) !== null) {
-        const start = regex.lastIndex - match[0].length
+        const start = regex.lastIndex - match[0].length;
         const end = regex.lastIndex;
         if (pos <= end && pos >= start) {
           return { match, start };
         }
       }
     }
-  }
+  };
 
   const handleTextChange = (v: string | undefined) => {
-    changeValue && changeValue(v);
+    if (changeValue) {
+      changeValue(v);
+    }
     const result = findMatch(v, textArea.current?.selectionStart ?? 0);
     if (result) {
       const { match } = result;
@@ -134,7 +141,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
     } else {
       setIsOpen(false);
     }
-  }
+  };
 
   const handleItemSelect = (item: IRecipe) => {
     if (typeof textArea.current !== 'undefined') {
@@ -142,20 +149,25 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
       const result = findMatch(content, triggerPosition.current ?? 0);
       if (result) {
         const { match, start } = result;
-        const newValue = content.substring(0, start) + `#${item.id}` + content.substring(start + match[0].length);
-        changeValue && changeValue(newValue);
+        if (changeValue) {
+          const newValue =
+            content.substring(0, start) +
+            `#${item.id}` +
+            content.substring(start + match[0].length);
+          changeValue(newValue);
+        }
         setIsOpen(false);
       }
     }
-  }
+  };
 
-  const RecipeSuggestion = QueryList.ofType<IRecipe>();
+  const RecipeSuggestion = QueryList<IRecipe>;
 
   const handlePopoverOpened = () => {
     queryList.current?.scrollActiveItemIntoView();
-  }
+  };
 
-  const handleTextAreaKeyPress: KeyboardEventHandler<HTMLTextAreaElement> = event => {
+  const handleTextAreaKeyPress: KeyboardEventHandler<HTMLTextAreaElement> = (event) => {
     console.log(event);
     const { key } = event;
     if (key === 'Escape') {
@@ -164,23 +176,28 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
     } else if (key === 'Enter') {
       event.preventDefault();
     }
-  }
+  };
 
-  const itemRenderer = (recipe: IRecipe, props: IItemRendererProps) => {
+  const itemRenderer = (recipe: IRecipe, props: ItemRendererProps) => {
     if (!props.modifiers.matchesPredicate) {
       return null;
     }
-    const text = <>{highlightQueryText(recipe.title, props.query)} (<em>{recipe.category.name}</em>)</>
-    return <MenuItem
-      active={props.modifiers.active}
-      key={recipe.id}
-      onClick={props.handleClick}
-      text={text}
-      className={mobile ? 'mobile-menu-item' : ''}
-      label={`#${recipe.id}`}
-    />;
-  }
-
+    const text = (
+      <>
+        {highlightQueryText(recipe.title, props.query)} (<em>{recipe.category.name}</em>)
+      </>
+    );
+    return (
+      <MenuItem
+        active={props.modifiers.active}
+        key={recipe.id}
+        onClick={props.handleClick}
+        text={text}
+        className={mobile ? 'mobile-menu-item' : ''}
+        label={`#${recipe.id}`}
+      />
+    );
+  };
 
   const highlightRecipeRef = (text: string) => {
     let lastIndex = 0;
@@ -197,16 +214,19 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
         tokens.push(before);
       }
       lastIndex = regexp.lastIndex;
-      const matchedRecipe = recipes.find(r => r.id === parseInt(match[1]));
+      const matchedRecipe = recipes.find((r) => r.id === parseInt(match[1]));
       if (matchedRecipe) {
-        const tooltipContent = <>
-          {matchedRecipe.title}<br />
-          <em>{matchedRecipe.category.name}</em>
-        </>;
+        const tooltipContent = (
+          <>
+            {matchedRecipe.title}
+            <br />
+            <em>{matchedRecipe.category.name}</em>
+          </>
+        );
         tokens.push(
-          <Tooltip2 key={lastIndex} content={tooltipContent} position='top'>
+          <Tooltip key={lastIndex} content={tooltipContent} position="top">
             <Link to={`/recipes/${match[1]}`}>{match[0]}</Link>
-          </Tooltip2>
+          </Tooltip>,
         );
       } else {
         tokens.push(match[0]);
@@ -217,44 +237,52 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
       tokens.push(rest);
     }
     return tokens;
-  }
+  };
 
-
-  const renderer = (listProps: IQueryListRendererProps<IRecipe>) => {
-    return <Popover2
-      autoFocus={false}
-      enforceFocus={false}
-      isOpen={isOpen}
-      position={Position.BOTTOM_LEFT}
-      className={classNames(listProps.className)}
-      popoverClassName={classNames('description-select-popover')}
-      onOpened={handlePopoverOpened}
-      onClosing={() => textArea.current?.focus()}
-      minimal={true}
-      content={
-        <div onKeyDown={listProps.handleKeyDown} onKeyUp={listProps.handleKeyUp}>
-          {listProps.itemList}
-        </div>
-      }
-    >
-      <div
-        style={{ width: '100%' }}
-        onKeyDown={isOpen ? listProps.handleKeyDown : undefined}
-        onKeyUp={isOpen ? listProps.handleKeyUp : undefined}
+  const renderer = (listProps: QueryListRendererProps<IRecipe>) => {
+    return (
+      <Popover
+        autoFocus={false}
+        enforceFocus={false}
+        isOpen={isOpen}
+        position={Position.BOTTOM_LEFT}
+        className={classNames(listProps.className)}
+        popoverClassName={classNames('description-select-popover')}
+        onOpened={handlePopoverOpened}
+        onClosing={() => textArea.current?.focus()}
+        minimal={true}
+        content={
+          <div onKeyDown={listProps.handleKeyDown} onKeyUp={listProps.handleKeyUp}>
+            {listProps.itemList}
+          </div>
+        }
       >
-        <textarea
-          {...textAreaProps}
-          className={classNames(Classes.EDITABLE_TEXT_INPUT, mobile && !isEditing ? Classes.INPUT : '')}
-          ref={ta => { if (ta) { textArea.current = ta; } }}
-          value={value}
-          onKeyPress={isOpen ? handleTextAreaKeyPress : undefined}
-          onChange={(event) => handleTextChange(event.target.value)}
-          onBlur={() => setIsEditing(false)}
-          style={{ height: textAreaHeight }}
-        />
-      </div>
-    </Popover2>
-  }
+        <div
+          style={{ width: '100%' }}
+          onKeyDown={isOpen ? listProps.handleKeyDown : undefined}
+          onKeyUp={isOpen ? listProps.handleKeyUp : undefined}
+        >
+          <textarea
+            {...textAreaProps}
+            className={classNames(
+              Classes.EDITABLE_TEXT_INPUT,
+              mobile && !isEditing ? Classes.INPUT : '',
+            )}
+            ref={(ta) => {
+              if (ta) {
+                textArea.current = ta;
+              }
+            }}
+            value={value}
+            onKeyDown={isOpen ? handleTextAreaKeyPress : undefined}
+            onChange={(event) => handleTextChange(event.target.value)}
+            onBlur={() => setIsEditing(false)}
+            style={{ height: textAreaHeight }}
+          />
+        </div>
+      </Popover>
+    );
+  };
 
   const updateHeight = useCallback(() => {
     if (contentElement.current) {
@@ -264,7 +292,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
       const lineHeight = getLineHeight(contentElement.current);
       // add one line to computed <span> height if text ends in newline
       // because <span> collapses that trailing whitespace but <textarea> shows it
-      if (/\n$/.test(textContent ?? '')) {
+      if ((textContent ?? '').endsWith('\n')) {
         scrollHeight += lineHeight;
       }
       if (lineHeight > 0) {
@@ -273,14 +301,17 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
       }
       // at least about 3 lines
       let lineHeightBoundary = parentElement ? getLineHeight(parentElement) * 3 : 0;
-      if (mobile) { // plus 20px padding for mobile
+      if (mobile) {
+        // plus 20px padding for mobile
         lineHeightBoundary += 20;
       }
       // Chrome's input caret height misaligns text so the line-height must be larger than font-size.
       // The computed scrollHeight must also account for a larger inherited line-height from the parent.
-      scrollHeight = Math.max(scrollHeight,
+      scrollHeight = Math.max(
+        scrollHeight,
         getFontSize(contentElement.current) + 1,
-        lineHeightBoundary);
+        lineHeightBoundary,
+      );
 
       // IE11 & Edge needs a small buffer so text does not shift prior to resizing
       // if (Browser.isEdge()) {
@@ -301,42 +332,48 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
     updateHeight();
   }, [updateHeight]);
 
-  return <div
-    className={classNames(
-      {
-        [Classes.EDITABLE_TEXT]: editable,
-        [Classes.EDITABLE_TEXT_EDITING]: isEditing,
-        [Classes.MULTILINE]: true,
-        [Classes.EDITABLE_TEXT_PLACEHOLDER]: !hasValue
-      },
-      className
-    )}
-    onFocus={editable ? () => setIsEditing(true) : undefined}
-  >
-    {editable && <RecipeSuggestion
-      onItemSelect={handleItemSelect}
-      renderer={renderer}
-      ref={v => { if (v) queryList.current = v; }}
-      itemRenderer={itemRenderer}
-      items={recipes}
-      itemPredicate={filterRecipe}
-      query={listQuery}
-    />}
-    <span
-      className={Classes.EDITABLE_TEXT_CONTENT}
-      ref={v => {
-        if (v) {
-          contentElement.current = v;
-          updateHeight();
-        }
-      }}
-      style={{
-        visibility: editable ? 'hidden' : undefined,
-        position: editable ? 'absolute' : undefined,
-        padding: mobile ? '10px' : undefined
-      }}
+  return (
+    <div
+      className={classNames(
+        {
+          [Classes.EDITABLE_TEXT]: editable,
+          [Classes.EDITABLE_TEXT_EDITING]: isEditing,
+          [Classes.MULTILINE]: true,
+          [Classes.EDITABLE_TEXT_PLACEHOLDER]: !hasValue,
+        },
+        className,
+      )}
+      onFocus={editable ? () => setIsEditing(true) : undefined}
     >
-      {hasValue ? highlightRecipeRef(value ?? '') : textAreaProps.placeholder}
-    </span>
-  </div>
+      {editable && (
+        <RecipeSuggestion
+          onItemSelect={handleItemSelect}
+          renderer={renderer}
+          ref={(v) => {
+            if (v) queryList.current = v;
+          }}
+          itemRenderer={itemRenderer}
+          items={recipes}
+          itemPredicate={filterRecipe}
+          query={listQuery}
+        />
+      )}
+      <span
+        className={Classes.EDITABLE_TEXT_CONTENT}
+        ref={(v) => {
+          if (v) {
+            contentElement.current = v;
+            updateHeight();
+          }
+        }}
+        style={{
+          visibility: editable ? 'hidden' : undefined,
+          position: editable ? 'absolute' : undefined,
+          padding: mobile ? '10px' : undefined,
+        }}
+      >
+        {hasValue ? highlightRecipeRef(value ?? '') : textAreaProps.placeholder}
+      </span>
+    </div>
+  );
 }

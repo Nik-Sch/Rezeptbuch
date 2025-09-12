@@ -1,4 +1,4 @@
-@import "~@blueprintjs/core/lib/scss/variables";
+@use '@blueprintjs/core/lib/scss/variables' as bp;
 
 .side-menu-wrapper {
   flex-basis: 240px;
@@ -8,7 +8,7 @@
   margin-left: 15px;
 
   .side-menu {
-    background-color: $light-gray4;
+    background-color: bp.$light-gray4;
     position: fixed;
     padding: 20px;
     margin-left: -1000px;
@@ -49,8 +49,8 @@
   }
 }
 
-.#{$bp-ns}-dark .side-menu {
-  background-color: $dark-gray3;
+.#{bp.$bp-ns}-dark .side-menu {
+  background-color: bp.$dark-gray3;
 }
 
 .mobile {

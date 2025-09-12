@@ -1,18 +1,18 @@
-@import "~@blueprintjs/core/lib/scss/variables";
-@import "util/variables";
-@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,500;0,600;1,500&family=Ubuntu:wght@400;700&display=swap");
+@use 'util/variables.module';
+@use '@blueprintjs/core/lib/scss/variables' as bp;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,500;0,600;1,500&family=Ubuntu:wght@400;700&display=swap');
 
 body,
-.#{$bp-ns}-button,
-.#{$bp-ns}-input,
-.#{$bp-ns}-input-ghost {
-  font-family: "Ubuntu", sans-serif;
+.#{bp.$bp-ns}-button,
+.#{bp.$bp-ns}-input,
+.#{bp.$bp-ns}-input-ghost {
+  font-family: 'Ubuntu', sans-serif;
 }
 body {
   width: 100%;
   .page {
     min-height: 100vh;
-    background-color: $content-background-color;
+    background-color: variables.$content-background-color;
     .body {
       display: flex;
       max-width: 1280px;
@@ -32,18 +32,18 @@ body {
   }
 }
 
-.#{$ns}-dark {
+.#{bp.$ns}-dark {
   .page {
-    background-color: $dark-content-background-color;
+    background-color: variables.$dark-content-background-color;
   }
 }
 
 // toast container was position: absolute and scrolled with the page
-.#{$ns}-toast-container.#{$ns}-toast-container-inline {
+.#{bp.$ns}-toast-container.#{bp.$ns}-toast-container-inline {
   position: fixed;
 }
 
-.#{$bp-ns}-dialog {
+.#{bp.$bp-ns}-dialog {
   margin: 30px 20px;
 }
 

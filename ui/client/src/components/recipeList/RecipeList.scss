@@ -1,4 +1,4 @@
-@import "~@blueprintjs/core/lib/scss/variables";
+@use '@blueprintjs/core/lib/scss/variables' as bp;
 
 .main-content {
   margin-top: 40px;
@@ -28,23 +28,23 @@
   .error {
     margin: 20px auto;
     text-align: center;
-    font-family: "Montserrat Alternates", sans-serif;
+    font-family: 'Montserrat Alternates', sans-serif;
     padding: 0 25px;
   }
 }
-.side-menu .sort-recipes .#{$bp-ns}-popover-wrapper .#{$bp-ns}-popover-target {
+.side-menu .sort-recipes .#{bp.$bp-ns}-popover-wrapper .#{bp.$bp-ns}-popover-target {
   display: unset;
 }
 
 .fab-add {
   position: fixed;
   top: calc(100vh - 100px);
-  // bottom: 30px;
   right: 30px;
   font-size: 40px !important;
-  // background-color: $green2;
-  // color: #f5f8fa;
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.2), 0 4px 8px rgba(16, 22, 26, 0.4), 0 9px 46px 6px rgba(16, 22, 26, 0.4) !important;
+  box-shadow:
+    0 0 0 1px rgba(16, 22, 26, 0.2),
+    0 4px 8px rgba(16, 22, 26, 0.4),
+    0 9px 46px 6px rgba(16, 22, 26, 0.4) !important;
   border-radius: 100%;
   border: none;
   outline: none;
@@ -92,12 +92,12 @@
   opacity: 1;
   transform: rotate(0deg);
   transition: 0.25s ease-in-out;
-  background: $dark-gray1;
+  background: bp.$dark-gray1;
 }
 
-.#{$bp-ns}-dark {
+.#{bp.$bp-ns}-dark {
   #nav-icon2 span {
-    background: $light-gray5;
+    background: bp.$light-gray5;
   }
 }
 

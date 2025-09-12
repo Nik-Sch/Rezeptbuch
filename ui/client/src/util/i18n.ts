@@ -5,26 +5,25 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import en from '../static/locales/en/translation.json';
 import de from '../static/locales/de/translation.json';
 
-i18n
-.use(LanguageDetector)
-.use(initReactI18next)
+await i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
   .init({
     resources: {
       en: {
-        translation: en
+        translation: en,
       },
       de: {
-        translation: de
-      }
+        translation: de,
+      },
     },
     fallbackLng: 'de',
     debug: false,
 
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
-    }
+    },
   });
-
 
 export default i18n;
 
@@ -35,10 +34,10 @@ export interface ILanguage {
 export const availableLanguages: ILanguage[] = [
   {
     key: 'de',
-    name: 'Deutsch'
+    name: 'Deutsch',
   },
   {
     key: 'en',
-    name: 'English'
-  }
+    name: 'English',
+  },
 ];

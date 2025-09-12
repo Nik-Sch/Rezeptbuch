@@ -1,0 +1,7 @@
+@use 'flag-icons/sass/flag-icons' with (
+  // Override path to flags directory
+  $flag-icons-path: 'flag-icons/flags',
+
+  // Include only specific country flags
+  $flag-icons-included-countries: ('de', 'gb')
+);

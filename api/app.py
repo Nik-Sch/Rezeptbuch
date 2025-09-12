@@ -174,7 +174,7 @@ def notifyNewRecipe(recipe: OrderedDict[str, Any], exclude: int):
                     data=json.dumps(recipe),
                     vapid_private_key=os.environ['PUSH_PRIVATE_KEY'],
                     vapid_claims={"sub": "mailto:mail@niklas-schelten.de"})
-            print('sent to: ', sub)
+            print(f"sent to: {sub}")
         except Exception as e:
             print('removing sub because of error:', e, sub)
             redisNotificationsDB.delete(sub)

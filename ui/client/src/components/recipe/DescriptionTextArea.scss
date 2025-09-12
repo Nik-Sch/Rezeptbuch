@@ -1,10 +1,10 @@
-@import "~@blueprintjs/core/lib/scss/variables";
+@use '@blueprintjs/core/lib/scss/variables' as bp;
 
-.description-select-popover .#{$bp-ns}-menu {
+.description-select-popover .#{bp.$bp-ns}-menu {
   max-height: 350px;
   max-width: 90vw;
   overflow: auto;
-  .#{$bp-ns}-popover-content {
+  .#{bp.$bp-ns}-popover-content {
     padding: 5px;
   }
 }

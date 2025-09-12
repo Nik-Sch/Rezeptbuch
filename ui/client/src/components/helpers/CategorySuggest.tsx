@@ -1,11 +1,10 @@
-import { IItemRendererProps, ItemPredicate, Suggest } from '@blueprintjs/select';
+import { ItemRendererProps, ItemPredicate, Suggest } from '@blueprintjs/select';
 import recipesHandler, { ICategory, IRecipe } from '../../util/Network';
 
 import React, { useState, useEffect } from 'react';
 import { MenuItem } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { AppToasterTop } from '../../util/toaster';
-
 
 interface IProps {
   initialCategory: ICategory;
@@ -19,18 +18,20 @@ interface IProps {
 
 export function CategorySuggest(props: IProps) {
   const [t] = useTranslation();
-  const CatSuggest = Suggest.ofType<ICategory>();
+  const CatSuggest = Suggest<ICategory>;
 
   const [categories, setCategories] = useState<ICategory[] | undefined>();
   const handler = (_: IRecipe[], categories: ICategory[]) => {
     setCategories(categories);
-  }
+  };
   useEffect(() => {
     recipesHandler.subscribe(handler);
-    return () => { recipesHandler.unsubscribe(handler); };
+    return () => {
+      recipesHandler.unsubscribe(handler);
+    };
   }, []);
 
-  const itemRenderer = (category: ICategory, { handleClick, modifiers }: IItemRendererProps) => {
+  const itemRenderer = (category: ICategory, { handleClick, modifiers }: ItemRendererProps) => {
     if (!modifiers.matchesPredicate) {
       return null;
     }
@@ -45,69 +46,72 @@ export function CategorySuggest(props: IProps) {
   };
 
   const filterCategory: ItemPredicate<ICategory> = (query, category) => {
-    return category.name.toLowerCase().indexOf(query.toLowerCase()) >= 0;
+    return category.name.toLowerCase().includes(query.toLowerCase());
   };
 
-  const onItemSelect = (item: ICategory, event?: React.SyntheticEvent<HTMLElement, Event>) => {
+  const onItemSelect = async (item: ICategory) => {
     if (item.id === -1) {
-      recipesHandler.addCategory(item.name).then((category) => {
-        if (category) {
-          AppToasterTop.show({ message: t('createdCategory'), intent: 'success' })
-          const newCategories = (categories || []).slice();
-          newCategories.push(category);
-          setCategories(newCategories)
-          props.onCategorySelected(category);
-        } else {
-          AppToasterTop.show({ message: t('createdCategoryError'), intent: 'danger' });
-        }
-      })
+      const category = await recipesHandler.addCategory(item.name);
+      if (category) {
+        AppToasterTop.show({ message: t('createdCategory'), intent: 'success' });
+        const newCategories = (categories ?? []).slice();
+        newCategories.push(category);
+        setCategories(newCategories);
+        props.onCategorySelected(category);
+      } else {
+        AppToasterTop.show({ message: t('createdCategoryError'), intent: 'danger' });
+      }
     } else {
       props.onCategorySelected(item);
     }
   };
 
-
   const createCategoryElement = (name: string): ICategory => {
     return { name, id: -1 };
-  }
+  };
 
-  const renderCreateCategory = (query: string, active: boolean, handleClick: React.MouseEventHandler<HTMLElement>) => {
-    return <MenuItem
-      icon="add"
-      text={`${t('create')} "${query}"`}
-      active={active}
-      onClick={handleClick}
-      shouldDismissPopover={false}
-    />
-  }
+  const renderCreateCategory = (
+    query: string,
+    active: boolean,
+    handleClick: React.MouseEventHandler<HTMLElement>,
+  ) => {
+    return (
+      <MenuItem
+        icon="add"
+        text={`${t('create')} "${query}"`}
+        active={active}
+        onClick={handleClick}
+        shouldDismissPopover={false}
+      />
+    );
+  };
 
   const maybeCreateNewCategory = props.canAddCategory ? createCategoryElement : undefined;
   const maybeCreateNewCategoryRenderer = props.canAddCategory ? renderCreateCategory : undefined;
 
   const getItemName = (item: ICategory) => item.name;
 
-  return (props.disabled ?
-    <span className={props.className}>
-      {props.initialCategory.name}
-    </span> :
+  return props.disabled ? (
+    <span className={props.className}>{props.initialCategory.name}</span>
+  ) : (
     <CatSuggest
       className={props.className}
       createNewItemFromQuery={maybeCreateNewCategory}
       createNewItemRenderer={maybeCreateNewCategoryRenderer}
       resetOnQuery={true}
       noResults={<MenuItem disabled={true} text={props.noResultText} />}
-      items={categories || []}
+      items={categories ?? []}
       defaultSelectedItem={props.initialCategory}
-      itemsEqual='id'
+      itemsEqual="id"
       itemPredicate={filterCategory}
       itemRenderer={itemRenderer}
-      onItemSelect={onItemSelect}
+      onItemSelect={(i) => void onItemSelect(i)}
       disabled={typeof categories === 'undefined'}
       inputValueRenderer={getItemName}
       fill={true}
       inputProps={{
         placeholder: props.placeholder,
-        large: true
+        large: true,
       }}
     />
   );
