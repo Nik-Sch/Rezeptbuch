@@ -8,10 +8,10 @@ import classNames from 'classnames';
 
 import './ImagePart.scss';
 import { useMobile, useWindowDimensions } from '../helpers/CustomHooks';
-import recipesHandler, { IRecipe } from '../../util/Network';
+import recipesHandler, { IRecipe, IRecipeWithIngredientId } from '../../util/Network';
 
 export interface IImagePartProps {
-  recipe: IRecipe;
+  recipe: IRecipe|IRecipeWithIngredientId;
   setImage?: (image: string) => void;
   editable: boolean;
   className?: string;

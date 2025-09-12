@@ -116,7 +116,7 @@
       font-style: italic;
     }
 
-    .ingredients-line {
+    .ingredients-line, .ingredients-line-draggable {
       display: flex;
       align-items: flex-start;
       margin-top: 3px;
@@ -143,6 +143,9 @@
     width: 250px;
   }
   .ingredients-line .ingredients-line-text {
+    white-space: break-spaces;
+  }
+  .ingredients-line-draggable .ingredients-line-text {
     white-space: break-spaces;
   }
 
@@ -239,6 +242,10 @@
   // .description,
   .ingredients-line {
     margin-left: 20px;
+    max-width: calc(100% - 40px);
+  }
+  .ingredients-line-draggable {
+    margin-left: 0px;
     max-width: calc(100% - 40px);
   }
 

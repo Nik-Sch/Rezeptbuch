@@ -16,7 +16,7 @@ const CATEGORY_CACHE = 'categories';
 const USER_CACHE = 'users';
 const COMMENT_CACHE = 'DBchecksum';
 
-export const emptyRecipe: IRecipe = {
+export const emptyRecipe: IRecipe&IRecipeWithIngredientId = {
   title: '',
   category: {
     name: '',
@@ -60,6 +60,21 @@ export interface IRecipe {
   title: string;
   category: ICategory;
   ingredients: string[];
+  description: string;
+  image: string;
+  date: string;
+  id: number;
+  user: IUser;
+  comments: IComment[];
+}
+interface IIngredient {
+  ingredient: string;
+  id: string;
+}
+export interface IRecipeWithIngredientId {
+  title: string;
+  category: ICategory;
+  ingredients: IIngredient[];
   description: string;
   image: string;
   date: string;
@@ -345,7 +360,7 @@ class Recipes {
     return result.status === 200;
   }
 
-  public async deleteRecipe(recipe: IRecipe): Promise<boolean> {
+  public async deleteRecipe(recipe: IRecipe|IRecipeWithIngredientId): Promise<boolean> {
     const headers = getHeaders();
     headers.append('Content-Type', 'application/json');
     const result = await fetch(`/api/recipes/${recipe.id}`, {
@@ -497,7 +512,7 @@ export async function fetchUniqueRecipe(uuid: string): Promise<IRecipe | undefin
   }
 }
 
-export async function getUniqueRecipeLink(recipe: IRecipe): Promise<string | undefined> {
+export async function getUniqueRecipeLink(recipe: IRecipe|IRecipeWithIngredientId): Promise<string | undefined> {
   const headers = getHeaders();
   headers.append('Content-Type', 'application/json');
   const result = await fetch(`/api/uniqueRecipes`, {

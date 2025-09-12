@@ -5,7 +5,12 @@ import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { AppToasterTop } from '../../util/toaster';
 import i18n from '../../util/i18n';
-import { getUniqueRecipeLink, IRecipe, emptyRecipe } from '../../util/Network';
+import {
+  getUniqueRecipeLink,
+  IRecipe,
+  emptyRecipe,
+  IRecipeWithIngredientId,
+} from '../../util/Network';
 
 export async function shareLink(link?: string) {
   const shareLink = link ?? document.location.href;
@@ -23,7 +28,10 @@ export async function shareLink(link?: string) {
   }
 }
 
-export default function ShareButton(props: { onlyLink?: boolean; recipe?: IRecipe }) {
+export default function ShareButton(props: {
+  onlyLink?: boolean;
+  recipe?: IRecipe | IRecipeWithIngredientId;
+}) {
   const onlyLink = props.onlyLink ?? false;
   const mobile = useMobile();
   const { t } = useTranslation();
