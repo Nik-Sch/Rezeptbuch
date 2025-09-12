@@ -11,7 +11,7 @@ import { useMobile, useWindowDimensions } from '../helpers/CustomHooks';
 import recipesHandler, { IRecipe, IRecipeWithIngredientId } from '../../util/Network';
 
 export interface IImagePartProps {
-  recipe: IRecipe|IRecipeWithIngredientId;
+  recipe: IRecipe | IRecipeWithIngredientId;
   setImage?: (image: string) => void;
   editable: boolean;
   className?: string;

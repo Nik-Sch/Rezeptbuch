@@ -16,7 +16,7 @@ const CATEGORY_CACHE = 'categories';
 const USER_CACHE = 'users';
 const COMMENT_CACHE = 'DBchecksum';
 
-export const emptyRecipe: IRecipe&IRecipeWithIngredientId = {
+export const emptyRecipe: IRecipe & IRecipeWithIngredientId = {
   title: '',
   category: {
     name: '',
@@ -360,7 +360,7 @@ class Recipes {
     return result.status === 200;
   }
 
-  public async deleteRecipe(recipe: IRecipe|IRecipeWithIngredientId): Promise<boolean> {
+  public async deleteRecipe(recipe: IRecipe | IRecipeWithIngredientId): Promise<boolean> {
     const headers = getHeaders();
     headers.append('Content-Type', 'application/json');
     const result = await fetch(`/api/recipes/${recipe.id}`, {
@@ -512,7 +512,9 @@ export async function fetchUniqueRecipe(uuid: string): Promise<IRecipe | undefin
   }
 }
 
-export async function getUniqueRecipeLink(recipe: IRecipe|IRecipeWithIngredientId): Promise<string | undefined> {
+export async function getUniqueRecipeLink(
+  recipe: IRecipe | IRecipeWithIngredientId,
+): Promise<string | undefined> {
   const headers = getHeaders();
   headers.append('Content-Type', 'application/json');
   const result = await fetch(`/api/uniqueRecipes`, {

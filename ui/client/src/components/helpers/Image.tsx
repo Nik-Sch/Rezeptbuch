@@ -5,7 +5,7 @@ import { IRecipe, IRecipeWithIngredientId } from '../../util/Network';
 import categoryImageMap from '../../util/categoryImageMap';
 
 interface IProps {
-  recipe: IRecipe|IRecipeWithIngredientId;
+  recipe: IRecipe | IRecipeWithIngredientId;
   className?: string;
   fallback: boolean;
   size: number;
