@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import recipesHandler, { IRecipe, ICategory, emptyRecipe, getUserInfo } from '../../util/Network';
+import recipesHandler, {
+  IRecipe,
+  ICategory,
+  emptyRecipe,
+  getUserInfo,
+  IRecipeWithIngredientId,
+} from '../../util/Network';
 import {
   H1,
   EditableText,
@@ -38,8 +44,9 @@ import CommentSection from './CommentSection';
 import SideMenu, { INavigationLink } from '../SideMenu';
 import { addShoppingItems } from '../ShoppingList';
 import ReactRouterPrompt from 'react-router-prompt';
+import { v4 } from 'uuid';
 
-function verifyRecipe(recipe: IRecipe): boolean {
+function verifyRecipe(recipe: IRecipe | IRecipeWithIngredientId): boolean {
   return recipe.title.trim() !== '' && recipe.category.id !== -1;
 }
 
@@ -52,7 +59,7 @@ export default function Recipe(props: IDarkThemeProps) {
   const navigate = useNavigate();
 
   const [state, setState] = useState({ editing: id === '-1', loaded: false, dirty: false });
-  const [recipe, setRecipe] = useState<IRecipe>(emptyRecipe);
+  const [recipe, setRecipe] = useState<IRecipeWithIngredientId>(emptyRecipe);
   const [imagesToBeDeleted, setImagesToBeDeleted] = useState<string[]>([]);
   const [ingredientsText, setIngredientsText] = useState<string>(''); // for mobile
   const [mobileCancelIsOpen, setMobileCancelIsOpen] = useState(false);
@@ -105,7 +112,11 @@ export default function Recipe(props: IDarkThemeProps) {
           loaded: true,
           dirty: false,
         });
-        setRecipe(r);
+        const newRecipe: IRecipeWithIngredientId = {
+          ...r,
+          ingredients: r.ingredients.map((v) => ({ ingredient: v, id: v4() })),
+        };
+        setRecipe(newRecipe);
         setIngredientsText(
           r.ingredients.reduce((previous, current, index) => {
             return index === 0 ? current : `${previous}\n${current}`;
@@ -137,14 +148,24 @@ export default function Recipe(props: IDarkThemeProps) {
       }
     }
     setImagesToBeDeleted([]);
-    const newRecipe = JSON.parse(JSON.stringify(recipe)) as IRecipe;
+    const newRecipeWithIds = JSON.parse(JSON.stringify(recipe)) as IRecipeWithIngredientId;
+    const newRecipe = {
+      ...newRecipeWithIds,
+      ingredients: recipe.ingredients.map((v) => v.ingredient),
+    } as IRecipe;
+
     if (mobile) {
       newRecipe.ingredients = ingredientsText.split('\n').filter((v) => v.trim().length > 0);
-      setRecipe(newRecipe);
+      newRecipeWithIds.ingredients = newRecipe.ingredients.map((v) => ({
+        ingredient: v,
+        id: v4(),
+      }));
+      setRecipe(newRecipeWithIds);
     } else {
       setIngredientsText(
         recipe.ingredients.reduce(
-          (previous, current, index) => (index === 0 ? current : `${previous}\n${current}`),
+          (previous, current, index) =>
+            index === 0 ? current.ingredient : `${previous}\n${current.ingredient}`,
           '',
         ),
       );
@@ -202,7 +223,10 @@ export default function Recipe(props: IDarkThemeProps) {
         loaded: true,
         dirty: false,
       });
-      setRecipe(r);
+      setRecipe({
+        ...r,
+        ingredients: r.ingredients.map((v) => ({ ingredient: v, id: v4() })),
+      });
       setIngredientsText(
         r.ingredients.reduce((previous, current, index) => {
           return index === 0 ? current : `${previous}\n${current}`;
@@ -250,7 +274,7 @@ export default function Recipe(props: IDarkThemeProps) {
   ];
 
   const addIngredientsToShoppingList = () => {
-    addShoppingItems(recipe.ingredients.filter(showDot));
+    addShoppingItems(recipe.ingredients.filter(showDot).map((v) => v.ingredient));
     navigate('/shoppingList');
   };
 
@@ -454,10 +478,10 @@ export default function Recipe(props: IDarkThemeProps) {
               />
             ) : state.loaded ? (
               recipe.ingredients.length > 0 ? (
-                recipe.ingredients.map((line, index) => (
-                  <div key={index} className="ingredients-line">
-                    {showDot(line) && <Icon icon="dot" />}
-                    <span className="ingredients-line-text">{line.trim()}</span>
+                recipe.ingredients.map((ingredient) => (
+                  <div key={ingredient.id} className="ingredients-line">
+                    {showDot(ingredient) && <Icon icon="dot" />}
+                    <span className="ingredients-line-text">{ingredient.ingredient.trim()}</span>
                   </div>
                 ))
               ) : (
@@ -630,22 +654,9 @@ export default function Recipe(props: IDarkThemeProps) {
                       ingredients={recipe.ingredients}
                       loaded={state.loaded}
                       editable={state.editing}
-                      addIngredient={(...values: string[]) => {
-                        setState((state) => ({ ...state, dirty: true }));
-                        const ingredients = recipe.ingredients.slice(0);
-                        ingredients.push(...values);
+                      setIngredients={(ingredients) => {
                         setRecipe((recipe) => ({ ...recipe, ingredients }));
-                      }}
-                      deleteIngredient={(index) => {
                         setState((state) => ({ ...state, dirty: true }));
-                        const ingredients = recipe.ingredients.filter((_, i) => i !== index);
-                        setRecipe((recipe) => ({ ...recipe, ingredients }));
-                      }}
-                      replaceIngredient={(index, v) => {
-                        setState((state) => ({ ...state, dirty: true }));
-                        const ingredients = recipe.ingredients.slice(0);
-                        ingredients[index] = v;
-                        setRecipe((recipe) => ({ ...recipe, ingredients }));
                       }}
                     />
                   </div>

@@ -1,11 +1,11 @@
 import React, { MouseEventHandler } from 'react';
 import noRecipe from '../../static/default-images/noRecipe.jpg';
 import { useTranslation } from 'react-i18next';
-import { IRecipe } from '../../util/Network';
+import { IRecipe, IRecipeWithIngredientId } from '../../util/Network';
 import categoryImageMap from '../../util/categoryImageMap';
 
 interface IProps {
-  recipe: IRecipe;
+  recipe: IRecipe | IRecipeWithIngredientId;
   className?: string;
   fallback: boolean;
   size: number;

@@ -17,6 +17,7 @@ import ImagePart from './ImagePart';
 import { DesktopIngredients, showDot } from './Ingredients';
 import './Recipe.scss';
 import ShareButton from './ShareButton';
+import { v4 } from 'uuid';
 
 export default function UniqueRecipe(props: IDarkThemeProps) {
   const { id } = useParams();
@@ -104,7 +105,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
               recipe.ingredients.length > 0 ? (
                 recipe.ingredients.map((line, index) => (
                   <div key={index} className="ingredients-line">
-                    {showDot(line) && <Icon icon="dot" />}
+                    {showDot({ ingredient: line, id: '' }) && <Icon icon="dot" />}
                     <span className="ingredients-line-text">{line.trim()}</span>
                   </div>
                 ))
@@ -195,12 +196,10 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
                       </H4>
                     </div>
                     <DesktopIngredients
-                      ingredients={recipe.ingredients}
+                      ingredients={recipe.ingredients.map((v) => ({ ingredient: v, id: v4() }))}
                       loaded={loaded}
                       editable={false}
-                      addIngredient={() => undefined}
-                      deleteIngredient={() => undefined}
-                      replaceIngredient={() => undefined}
+                      setIngredients={() => undefined}
                     />
                   </div>
                   <ImagePart recipe={recipe} editable={false} className="image" />
