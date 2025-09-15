@@ -100,10 +100,11 @@
 
 .mobile {
   .recipe-list-item {
-    max-width: calc(100% - 40px);
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     padding: unset;
+    margin-right: unset;
     .recipe-title {
       white-space: nowrap;
       overflow: hidden;
@@ -134,8 +135,5 @@
         }
       }
     }
-  }
-  .recipe-list-divider {
-    max-width: calc(100% - 50px); // 2 * 20px padding + 2 * 5px margin on divider
   }
 }
