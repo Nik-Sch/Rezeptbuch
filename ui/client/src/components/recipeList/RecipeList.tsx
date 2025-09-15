@@ -409,7 +409,7 @@ export default function RecipeList(props: IDarkThemeProps) {
           )}
           <WindowScroller>
             {({ height, isScrolling, onChildScroll, scrollTop, width }) => {
-              const listWidth = mobile ? width : Math.min(width, 1200) - 280; // compensate for sidebar in desktop
+              const listWidth = mobile ? width - 40 : Math.min(width, 1200) - 280; // compensate for sidebar in desktop
               return (
                 <List
                   autoHeight={true}
