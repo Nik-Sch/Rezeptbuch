@@ -1,63 +1,66 @@
-import pymysql
 import os
-from flask_restful import fields, marshal
+
+import pymysql
 from flask import make_response
+from flask_restful import fields, marshal
 from passlib.hash import pbkdf2_sha256
 
 
 class Database:
 
     __recipeFields = {
-        'id': fields.Integer,
-        'title': fields.String,
-        'categoryId': fields.Integer,
-        'ingredients': fields.String,
-        'description': fields.String,
-        'image': fields.String,
-        'date': fields.DateTime,
-        'userId': fields.Integer
+        "id": fields.Integer,
+        "title": fields.String,
+        "categoryId": fields.Integer,
+        "ingredients": fields.String,
+        "description": fields.String,
+        "image": fields.String,
+        "date": fields.DateTime,
+        "userId": fields.Integer,
     }
 
     __categoryFields = {
-        'id': fields.Integer,
-        'name': fields.String,
-        'userId': fields.Integer
+        "id": fields.Integer,
+        "name": fields.String,
+        "userId": fields.Integer,
     }
 
     __userFields = {
-        'id': fields.Integer,
-        'user': fields.String,
-        'readOnly': fields.Boolean
+        "id": fields.Integer,
+        "user": fields.String,
+        "readOnly": fields.Boolean,
     }
 
     __commentFields = {
-        'id': fields.Integer,
-        'text': fields.String,
-        'userId': fields.Integer,
-        'recipeId': fields.Integer,
-        'date': fields.DateTime,
-        'editedDate': fields.DateTime
+        "id": fields.Integer,
+        "text": fields.String,
+        "userId": fields.Integer,
+        "recipeId": fields.Integer,
+        "date": fields.DateTime,
+        "editedDate": fields.DateTime,
     }
 
     def __init__(self):
         self.connect()
 
-    def connect(self, username = None):
-        conn = pymysql.connect(host=os.environ['MYSQL_HOST'],
-                               user=os.environ['MYSQL_USER'],
-                               passwd=os.environ['MYSQL_PASSWORD'],
-                               db=os.environ['MYSQL_DATABASE'],
-                               charset='utf8mb4',
-                               cursorclass=pymysql.cursors.DictCursor)
+    def connect(self, username=None):
+        conn = pymysql.connect(
+            host=os.environ["MYSQL_HOST"],
+            user=os.environ["MYSQL_USER"],
+            passwd=os.environ["MYSQL_PASSWORD"],
+            db=os.environ["MYSQL_DATABASE"],
+            charset="utf8mb4",
+            cursorclass=pymysql.cursors.DictCursor,
+        )
         if username != None:
             cur = conn.cursor()
             cur.execute("SELECT id, user, groupId FROM user;")
             userId = -1
             groupId = -1
             for res in cur.fetchall():
-                if res['user'] == username:
-                    userId = res['id']
-                    groupId = res['groupId']
+                if res["user"] == username:
+                    userId = res["id"]
+                    groupId = res["groupId"]
                     break
             return conn, userId, groupId
         else:
@@ -69,19 +72,22 @@ class Database:
             cur = conn.cursor()
             cur.execute("CHECKSUM TABLE `user`")
             res = cur.fetchone()
-            checksum = res['Checksum']
-            if (lastChecksum == checksum):
-                return make_response('', 204)
+            checksum = res["Checksum"]
+            if lastChecksum == checksum:
+                return make_response("", 204)
 
-            cur.execute("SELECT `id`, `user`, `readOnly` FROM `user` WHERE `groupId` = %s;", [groupId])
+            cur.execute(
+                "SELECT `id`, `user`, `readOnly` FROM `user` WHERE `groupId` = %s;",
+                [groupId],
+            )
             users = []
             for res in cur.fetchall():
                 users.append(marshal(res, self.__userFields))
 
             cur.execute("CHECKSUM TABLE `user`;")
             res = cur.fetchone()
-            checksum = res['Checksum']
-            return {'users': users, 'checksum': checksum}
+            checksum = res["Checksum"]
+            return {"users": users, "checksum": checksum}
         finally:
             conn.close()
 
@@ -91,20 +97,22 @@ class Database:
             cur = conn.cursor()
             cur.execute("CHECKSUM TABLE `recipe`")
             res = cur.fetchone()
-            checksum = res['Checksum']
-            if (lastChecksum == checksum):
-                return make_response('', 204)
+            checksum = res["Checksum"]
+            if lastChecksum == checksum:
+                return make_response("", 204)
 
             cur.execute(
-                "SELECT `recipe`.* FROM `recipe` JOIN `user` ON `recipe`.`userId` = `user`.`id` WHERE `groupId` = %s;", [groupId])
+                "SELECT `recipe`.* FROM `recipe` JOIN `user` ON `recipe`.`userId` = `user`.`id` WHERE `groupId` = %s;",
+                [groupId],
+            )
             recipes = []
             for res in cur.fetchall():
                 recipes.append(marshal(res, self.__recipeFields))
 
             cur.execute("CHECKSUM TABLE `recipe`;")
             res = cur.fetchone()
-            checksum = res['Checksum']
-            return {'recipes': recipes, 'checksum': checksum}
+            checksum = res["Checksum"]
+            return {"recipes": recipes, "checksum": checksum}
         finally:
             conn.close()
 
@@ -113,12 +121,14 @@ class Database:
         try:
             cur = conn.cursor()
             cur.execute(
-                "SELECT `recipe`.* FROM `recipe` JOIN `user` ON `recipe`.`userId` = `user`.`id` WHERE `groupId` = %s and `recipe`.`id` = %s;", [groupId, rid])
+                "SELECT `recipe`.* FROM `recipe` JOIN `user` ON `recipe`.`userId` = `user`.`id` WHERE `groupId` = %s and `recipe`.`id` = %s;",
+                [groupId, rid],
+            )
             recipe = 0
             for res in cur.fetchall():
                 recipe = marshal(res, self.__recipeFields)
             if recipe != 0:
-                return {'recipe': recipe}
+                return {"recipe": recipe}
             else:
                 return None
         finally:
@@ -131,11 +141,12 @@ class Database:
             if not image:
                 image = ""
             query = "INSERT INTO recipe(title, categoryId, ingredients, description, image, userId) VALUES (%s, %s, %s, %s, %s, %s);"
-            cur.execute(query, [title, category,
-                                ingredients, description, image, userId])
+            cur.execute(
+                query, [title, category, ingredients, description, image, userId]
+            )
             # print(query)
             cur.execute("SELECT LAST_INSERT_ID() as id;")
-            id = cur.fetchone()['id']
+            id = cur.fetchone()["id"]
             cur.execute("SELECT * FROM recipe WHERE id = %s;", [id])
             res = cur.fetchone()
             return marshal(res, self.__recipeFields)
@@ -143,17 +154,35 @@ class Database:
             conn.commit()
             conn.close()
 
-    def updateRecipe(self, recipeId, username, title, category, ingredients, description, image):
+    def updateRecipe(
+        self, recipeId, username, title, category, ingredients, description, image
+    ):
         conn, userId, _ = self.connect(username)
         try:
             cur = conn.cursor()
             query = "UPDATE `recipe` SET `title` = %s, `categoryId` = %s, `ingredients` = %s,`description` = %s, `image` = %s WHERE `id` = %s AND `userId` = %s;"
-            if cur.execute(query, [title, category, ingredients, description, image, recipeId, userId]) == 1:
+            if (
+                cur.execute(
+                    query,
+                    [
+                        title,
+                        category,
+                        ingredients,
+                        description,
+                        image,
+                        recipeId,
+                        userId,
+                    ],
+                )
+                == 1
+            ):
                 return True
             else:
                 cur.execute(
-                    "SELECT COUNT(*) as c FROM `recipe` WHERE `id` = %s AND `userId` = %s;", [recipeId, userId])
-                return cur.fetchone()['c'] == 1
+                    "SELECT COUNT(*) as c FROM `recipe` WHERE `id` = %s AND `userId` = %s;",
+                    [recipeId, userId],
+                )
+                return cur.fetchone()["c"] == 1
         finally:
             conn.commit()
             conn.close()
@@ -163,14 +192,18 @@ class Database:
         try:
             cur = conn.cursor()
             cur.execute(
-                "SELECT `image` FROM `recipe` WHERE `id` = %s AND userId = %s;", [_id, userId])
+                "SELECT `image` FROM `recipe` WHERE `id` = %s AND userId = %s;",
+                [_id, userId],
+            )
             try:
                 img = cur.fetchone()["image"]
-                if (os.path.exists(IMAGE_FOLDER + img)):
+                if os.path.exists(IMAGE_FOLDER + img):
                     os.remove(IMAGE_FOLDER + img)
             except Exception as e:
                 print(e)
-            return cur.execute("DELETE FROM `recipe` WHERE `id` = %s AND `userId` = %s", [_id, userId])
+            return cur.execute(
+                "DELETE FROM `recipe` WHERE `id` = %s AND `userId` = %s", [_id, userId]
+            )
         finally:
             conn.commit()
             conn.close()
@@ -181,34 +214,38 @@ class Database:
             cur = conn.cursor()
             cur.execute("CHECKSUM TABLE `comment`")
             res = cur.fetchone()
-            checksum = res['Checksum']
-            if (lastChecksum == checksum):
-                return make_response('', 204)
+            checksum = res["Checksum"]
+            if lastChecksum == checksum:
+                return make_response("", 204)
 
             cur.execute(
-                "SELECT `comment`.* FROM `comment` JOIN `user` ON `comment`.`userId` = `user`.`id` WHERE `groupId` = %s;", [groupId])
+                "SELECT `comment`.* FROM `comment` JOIN `user` ON `comment`.`userId` = `user`.`id` WHERE `groupId` = %s;",
+                [groupId],
+            )
             comments = []
             for res in cur.fetchall():
                 comments.append(marshal(res, self.__commentFields))
 
             cur.execute("CHECKSUM TABLE `comment`;")
             res = cur.fetchone()
-            checksum = res['Checksum']
-            return {'comments': comments, 'checksum': checksum}
+            checksum = res["Checksum"]
+            return {"comments": comments, "checksum": checksum}
         finally:
             conn.close()
-            
+
     def getComment(self, username, commentId):
         conn, userId, groupId = self.connect(username)
         try:
             cur = conn.cursor()
             cur.execute(
-                "SELECT `comment`.* FROM `comment` JOIN `user` ON `comment`.`userId` = `user`.`id` WHERE `groupId` = %s and `comment`.`id` = %s;", [groupId, commentId])
+                "SELECT `comment`.* FROM `comment` JOIN `user` ON `comment`.`userId` = `user`.`id` WHERE `groupId` = %s and `comment`.`id` = %s;",
+                [groupId, commentId],
+            )
             comment = None
             for res in cur.fetchall():
                 comment = marshal(res, self.__commentFields)
             if comment != None:
-                return {'comment': comment}
+                return {"comment": comment}
             else:
                 return None
         finally:
@@ -217,10 +254,13 @@ class Database:
     def addComment(self, username, text, recipeId):
         conn, userId, _ = self.connect(username)
         try:
-            cur = conn.cursor() # todo: check if we are in the group
-            cur.execute("INSERT INTO comment(text, userId, recipeId) VALUES (%s, %s, %s);", [text, userId, recipeId])
+            cur = conn.cursor()  # todo: check if we are in the group
+            cur.execute(
+                "INSERT INTO comment(text, userId, recipeId) VALUES (%s, %s, %s);",
+                [text, userId, recipeId],
+            )
             cur.execute("SELECT LAST_INSERT_ID() as id;")
-            id = cur.fetchone()['id']
+            id = cur.fetchone()["id"]
             cur.execute("SELECT * FROM comment WHERE id = %s;", [id])
             res = cur.fetchone()
             return marshal(res, self.__commentFields)
@@ -238,17 +278,21 @@ class Database:
                 return True
             else:
                 cur.execute(
-                    "SELECT COUNT(*) as c FROM `recipe` WHERE `id` = %s AND `userId` = %s;", [commentId, userId])
-                return cur.fetchone()['c'] == 1
+                    "SELECT COUNT(*) as c FROM `recipe` WHERE `id` = %s AND `userId` = %s;",
+                    [commentId, userId],
+                )
+                return cur.fetchone()["c"] == 1
         finally:
             conn.commit()
             conn.close()
-    
+
     def deleteComment(self, username, id):
         conn, userId, _ = self.connect(username)
         try:
             cur = conn.cursor()
-            return cur.execute("DELETE FROM `comment` WHERE `id` = %s AND `userId` = %s", [id, userId])
+            return cur.execute(
+                "DELETE FROM `comment` WHERE `id` = %s AND `userId` = %s", [id, userId]
+            )
         finally:
             conn.commit()
             conn.close()
@@ -259,19 +303,22 @@ class Database:
             cur = conn.cursor()
             cur.execute("CHECKSUM TABLE `category`")
             res = cur.fetchone()
-            checksum = res['Checksum']
-            if (lastChecksum == checksum):
-                return make_response('', 204)
+            checksum = res["Checksum"]
+            if lastChecksum == checksum:
+                return make_response("", 204)
 
-            cur.execute("SELECT `category`.* FROM `category` JOIN `user` ON `category`.`userId`= `user`.`id` WHERE `user`.`groupId` = %s;", [groupId])
+            cur.execute(
+                "SELECT `category`.* FROM `category` JOIN `user` ON `category`.`userId`= `user`.`id` WHERE `user`.`groupId` = %s;",
+                [groupId],
+            )
             categories = []
             for res in cur.fetchall():
                 categories.append(marshal(res, self.__categoryFields))
 
             cur.execute("CHECKSUM TABLE `category`;")
             res = cur.fetchone()
-            checksum = res['Checksum']
-            return {'categories': categories, 'checksum': checksum}
+            checksum = res["Checksum"]
+            return {"categories": categories, "checksum": checksum}
         finally:
             conn.close()
 
@@ -283,20 +330,19 @@ class Database:
             print(query, [name, userId])
             cur.execute(query, [name, userId])
             cur.execute("SELECT LAST_INSERT_ID() as id;")
-            return {'id': cur.fetchone()['id']}
+            return {"id": cur.fetchone()["id"]}
         finally:
             conn.commit()
             conn.close()
 
-
-# authentication
+    # authentication
     def getPasswordHash(self, username):
         conn, _, _ = self.connect()
         try:
             cur = conn.cursor()
             cur.execute("SELECT `encrypted` FROM `user` WHERE `user` = %s;", [username])
             for res in cur.fetchall():
-                return res['encrypted']
+                return res["encrypted"]
         finally:
             conn.close()
 
@@ -321,7 +367,7 @@ class Database:
             cur = conn.cursor()
             cur.execute("SELECT `readOnly` FROM `user` WHERE `user` = %s;", [username])
             for res in cur.fetchall():
-                return res['readOnly'] == 0
+                return res["readOnly"] == 0
             return False
         finally:
             conn.close()
