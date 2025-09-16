@@ -54,14 +54,14 @@ jobs:
         run: poetry install
         working-directory: api
       - name: black
-        run: black --check .
+        run: poetry run black --check .
         working-directory: api
       - name: isort
-        run: isort --check .
+        run: poetry run isort --check .
         working-directory: api
       - uses: jakebailey/pyright-action@v2
         with:
           working-directory: api
       - name: flake8
-        run: flake8
+        run: poetry run flake8
         working-directory: api
