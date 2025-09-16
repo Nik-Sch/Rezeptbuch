@@ -52,10 +52,10 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
       - name: install deps
         run: poetry install
-        working-directory: ui/client
+        working-directory: api
       - name: black
         run: poetry run black --check .
-        working-directory: ui/client
+        working-directory: api
       - name: isort
         run: poetry run isort --check .
-        working-directory: ui/client
+        working-directory: api
