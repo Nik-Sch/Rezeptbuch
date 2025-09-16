@@ -1,6 +1,7 @@
 import hashlib
 import io
 import json
+import logging
 import os
 import threading
 from datetime import timedelta
@@ -172,6 +173,7 @@ def handleShoppingList(list_id: str):
 
 @app.route("/shoppingList", methods=["GET", "POST", "PUT", "DELETE"])
 def privateShoppingList():
+    logging.error("shoppinglist")
     user_name = sessionGet("userName")
     if user_name != None:
         return handleShoppingList(user_name)
@@ -214,7 +216,7 @@ def addSubscription():
     if userName == None:
         return unauthorized()
     requestData = request.json
-    if "endpoint" in requestData and "keys" in requestData:
+    if requestData is not None and "endpoint" in requestData and "keys" in requestData:
         sessionId = sessionGet("id", -1)
         try:
             subscription = {}
@@ -580,7 +582,7 @@ class ImageAPI(Resource):
 
         try:
             im = Image.open(IMAGE_FOLDER + name)
-            im.thumbnail((w, h), Image.ANTIALIAS)
+            im.thumbnail((w, h))
             output = io.BytesIO()
             try:
                 im.save(output, format="JPEG", exif=im.info["exif"])
@@ -588,7 +590,7 @@ class ImageAPI(Resource):
                 im.save(output, format="JPEG")
             output.seek(0)
             return send_file(
-                output, attachment_filename="img.jpg", mimetype="image/jpeg"
+                output, download_name="img.jpg", mimetype="image/jpeg"
             )
         except IOError:
             abort(404)
