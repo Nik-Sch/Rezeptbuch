@@ -15,7 +15,9 @@ services:
     restart: always
 
   api:
-    build: ./api
+    build:
+      context: api
+      dockerfile: Dockerfile-dev
     restart: always
     environment:
       - MYSQL_HOST=db
