@@ -145,19 +145,20 @@ def verifyShoppingListJson(requestJson: Any):
 
 
 def handleShoppingList(list_id: str):
-    requestJson: Any = request.json
     if request.method == "GET":
         resp = Response(shoppinglist_stream(list_id), mimetype="text/event-stream")
         resp.headers["X-Accel-Buffering"] = "No"
         resp.headers["Cache-Control"] = "no-transform"  # for npm dev
         return resp
     elif request.method == "POST" or request.method == "PUT":
+        requestJson: Any = request.json
         verify = verifyShoppingListJson(requestJson)
         if verify != True:
             return verify
         for item in requestJson:
             redisShoppingListDB.hset(list_id, item["id"], json.dumps(item))
     elif request.method == "DELETE":
+        requestJson: Any = request.json
         verify = verifyShoppingListJson(requestJson)
         if verify != True:
             return verify
