@@ -1,0 +1,18 @@
+FROM python:3.13
+
+WORKDIR /usr/src/app
+
+RUN curl -sSL https://install.python-poetry.org | POETRY_VERSION=2.1.2 python3 -
+COPY poetry.lock pyproject.toml Readme.md /usr/src/app/
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends mariadb-client \
+  && rm -rf /var/lib/apt/lists/*
+
+
+COPY poetry.lock .
+COPY pyproject.toml .
+RUN poetry install
+
+ENV DEBUG=true
+CMD [ "./entrypoint.sh" ]
