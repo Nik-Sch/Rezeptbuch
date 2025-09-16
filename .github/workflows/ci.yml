@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  ci:
+  ui-client:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -34,3 +34,25 @@ jobs:
       - name: Format
         run: npm run format:check
         working-directory: ui/client
+
+  python-api:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+        poetry-version: ["latest", "2.1.2"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+      - name: install deps
+        run: poetry install
+      - name: black
+        run: poetry run black --check .
+      - name: isort
+        run: poetry run isort --check .
