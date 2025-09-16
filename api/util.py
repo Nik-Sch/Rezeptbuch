@@ -52,7 +52,7 @@ class Database:
             charset="utf8mb4",
             cursorclass=pymysql.cursors.DictCursor,
         )
-        if username != None:
+        if username is not None:
             cur = conn.cursor()
             cur.execute("SELECT id, user, groupId FROM user;")
             userId = -1
@@ -244,7 +244,7 @@ class Database:
             comment = None
             for res in cur.fetchall():
                 comment = marshal(res, self.__commentFields)
-            if comment != None:
+            if comment is not None:
                 return {"comment": comment}
             else:
                 return None
@@ -354,8 +354,6 @@ class Database:
             query = "INSERT INTO `user` (`user`, `encrypted`, `readOnly`) VALUES (%s, %s, '0');"
             if cur.execute(query, [username, hash]) == 1:
                 return True
-        except:
-            return False
         finally:
             conn.commit()
             conn.close()
