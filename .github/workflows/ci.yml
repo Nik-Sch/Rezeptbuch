@@ -50,6 +50,7 @@ jobs:
         with:
           poetry-version: ${{ matrix.poetry-version }}
       - run: echo "$(poetry env info --path)/bin" >> $GITHUB_PATH
+        working-directory: api
       - name: install deps
         run: poetry install
         working-directory: api
