@@ -49,12 +49,19 @@ jobs:
       - uses: abatilo/actions-poetry@v3
         with:
           poetry-version: ${{ matrix.poetry-version }}
+      - run: echo "$(poetry env info --path)/bin" >> $GITHUB_PATH
       - name: install deps
         run: poetry install
         working-directory: api
       - name: black
-        run: poetry run black --check .
+        run: black --check .
         working-directory: api
       - name: isort
-        run: poetry run isort --check .
+        run: isort --check .
+        working-directory: api
+      - uses: jakebailey/pyright-action@v2
+        with:
+          working-directory: api
+      - name: flake8
+        run: flake8
         working-directory: api
