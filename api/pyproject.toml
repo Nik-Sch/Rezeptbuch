@@ -16,7 +16,8 @@ dependencies = [
     "flask-session (>=0.8.0,<0.9.0)",
     "pywebpush (>=2.0.3,<3.0.0)",
     "redis (>=6.4.0,<7.0.0)",
-    "passlib (>=1.7.4,<2.0.0)"
+    "passlib (>=1.7.4,<2.0.0)",
+    "pymysql (>=1.1.2,<2.0.0)"
 ]
 
 

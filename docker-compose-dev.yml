@@ -1,5 +1,3 @@
-version: '3'
-
 services:
 
   db:
@@ -22,6 +20,8 @@ services:
     environment:
       - MYSQL_HOST=db
       - IMAGE_DIRECTORY=/usr/src/images
+    volumes:
+      - ./api:/usr/src/app/
     env_file:
       - db.env
       - api/.env
