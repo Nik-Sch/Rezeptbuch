@@ -590,9 +590,7 @@ class ImageAPI(Resource):
             except:
                 im.save(output, format="JPEG")
             output.seek(0)
-            return send_file(
-                output, download_name="img.jpg", mimetype="image/jpeg"
-            )
+            return send_file(output, download_name="img.jpg", mimetype="image/jpeg")
         except IOError:
             abort(404)
 
