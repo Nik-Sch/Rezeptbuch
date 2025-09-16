@@ -37,7 +37,6 @@ jobs:
 
   python-api:
     strategy:
-      fail-fast: false
       matrix:
         python-version: ["3.12", "3.13"]
         poetry-version: ["2.1.2"]
