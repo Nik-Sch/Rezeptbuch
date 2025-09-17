@@ -30,8 +30,8 @@ from pywebpush import webpush
 
 from util import Database
 
-logger = logging.getLogger("recipes.api")
 
+logger = logging.getLogger("recipes.api")
 app = Flask(__name__)
 app.secret_key = bytes(os.environ["FLASK_KEY"], "utf-8").decode("unicode_escape")
 app.config["SESSION_TYPE"] = "redis"
