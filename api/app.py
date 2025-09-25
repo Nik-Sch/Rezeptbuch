@@ -77,6 +77,15 @@ def unauthorized():
     return make_response(jsonify({"message": "Unauthorized access"}), 401)
 
 
+
+@app.route("/test-uptime", methods=["GET"])
+@auth.login_required
+def test_uptime():
+    # login requires db connection, check if redis is also reachable
+    redisShoppingListDB.ping()
+    return "", 200
+
+
 @app.route("/login", methods=["GET"])
 @auth.login_required
 def login():
