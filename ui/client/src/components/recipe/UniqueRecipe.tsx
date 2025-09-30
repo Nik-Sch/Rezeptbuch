@@ -1,7 +1,12 @@
 import { Classes, EditableText, H1, H2, H3, H4, H5, Icon } from '@blueprintjs/core';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { emptyRecipe, fetchUniqueRecipe, IRecipe } from '../../util/Network';
+import {
+  emptyRecipe,
+  fetchUniqueRecipe,
+  IRecipe,
+  IRecipeWithIngredientId,
+} from '../../util/Network';
 
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +30,7 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
 
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-  const [recipe, setRecipe] = useState<IRecipe>(emptyRecipe);
+  const [recipe, setRecipe] = useState<IRecipe | IRecipeWithIngredientId>(emptyRecipe);
   const mobile = useMobile();
 
   // load recipes
@@ -103,12 +108,15 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
             </div>
             {loaded ? (
               recipe.ingredients.length > 0 ? (
-                recipe.ingredients.map((line, index) => (
-                  <div key={index} className="ingredients-line">
-                    {showDot({ ingredient: line, id: '' }) && <Icon icon="dot" />}
-                    <span className="ingredients-line-text">{line.trim()}</span>
-                  </div>
-                ))
+                recipe.ingredients.map((line, index) => {
+                  const ingredient = typeof line === 'string' ? { ingredient: line, id: '' } : line;
+                  return (
+                    <div key={index} className="ingredients-line">
+                      {showDot(ingredient) && <Icon icon="dot" />}
+                      <span className="ingredients-line-text">{ingredient.ingredient.trim()}</span>
+                    </div>
+                  );
+                })
               ) : (
                 <div className={classNames(Classes.TEXT_MUTED, 'ingredients-line')}>
                   {t('noIngredients')}
@@ -196,7 +204,9 @@ export default function UniqueRecipe(props: IDarkThemeProps) {
                       </H4>
                     </div>
                     <DesktopIngredients
-                      ingredients={recipe.ingredients.map((v) => ({ ingredient: v, id: v4() }))}
+                      ingredients={recipe.ingredients.map((v) =>
+                        typeof v === 'string' ? { ingredient: v, id: v4() } : v,
+                      )}
                       loaded={loaded}
                       editable={false}
                       setIngredients={() => undefined}
