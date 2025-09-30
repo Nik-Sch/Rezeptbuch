@@ -16,7 +16,7 @@ Flask-RESTful==0.3.6
 Flask-Session==0.3.2
 gevent==20.6.2
 greenlet==0.4.16
-gunicorn==20.0.4
+gunicorn==22.0.0
 http-ece==1.1.0
 idna==2.9
 itsdangerous==0.24
