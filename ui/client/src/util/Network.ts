@@ -503,7 +503,9 @@ class Recipes {
 const recipesHandler = new Recipes();
 export default recipesHandler;
 
-export async function fetchUniqueRecipe(uuid: string): Promise<IRecipe | undefined> {
+export async function fetchUniqueRecipe(
+  uuid: string,
+): Promise<IRecipe | IRecipeWithIngredientId | undefined> {
   const result = await fetch(`/api/uniqueRecipes/${uuid}`);
   if (result.status === 200) {
     return (await result.json()) as IRecipe;
