@@ -27,10 +27,10 @@ from flask_session import Session
 from passlib.hash import pbkdf2_sha256
 from PIL import Image
 from pywebpush import webpush
+from rich.console import Console
+from rich.logging import RichHandler
 
 from util import Database
-
-logger = logging.getLogger("recipes.api")
 
 app = Flask(__name__)
 app.secret_key = bytes(os.environ["FLASK_KEY"], "utf-8").decode("unicode_escape")
@@ -56,6 +56,10 @@ checksumRequestParser.add_argument(
     "checksum", type=int, required=False, help="No checksum provided", location="args"
 )
 
+logger = logging.getLogger("recipes.api")
+logger.handlers = [RichHandler(logging.INFO, markup=True, console=Console(width=250))]
+logger.setLevel(logging.INFO)
+
 
 @auth.verify_password
 def verify_password(username: str, password: str):
@@ -78,7 +82,6 @@ def unauthorized():
     session["userName"] = None
     session["id"] = None
     return make_response(jsonify({"message": "Unauthorized access"}), 401)
-
 
 
 @app.route("/test-uptime", methods=["GET"])
@@ -125,7 +128,6 @@ def shoppinglist_stream(list_id: str):
     yield "data: %s\n\n" % json.dumps(data)
     pubsub = redisShoppingListDB.pubsub()
     pubsub.subscribe(list_id)
-    print("starting")
     for message in pubsub.listen():
         if message["type"] == "message":
             m = json.loads(message["data"])
@@ -204,7 +206,7 @@ def get_push_public_key():
 
 
 def notifyNewRecipe(recipe: OrderedDict[str, Any], exclude: int):
-    print("sending notifications, but not to ", exclude)
+    logger.info(f"sending notifications, but not to {exclude=}")
     for sub in redisNotificationsDB.scan_iter():
         try:
             if sub.decode() == exclude:
@@ -216,9 +218,9 @@ def notifyNewRecipe(recipe: OrderedDict[str, Any], exclude: int):
                 vapid_private_key=os.environ["PUSH_PRIVATE_KEY"],
                 vapid_claims={"sub": "mailto:mail@niklas-schelten.de"},
             )
-            print(f"sent to: {sub}")
+            logger.info(f"sent to {sub=}")
         except Exception as e:
-            print("removing sub because of error:", e, sub)
+            logger.info(f"removing {sub=} because of {e=}")
             redisNotificationsDB.delete(sub)
 
 
@@ -230,15 +232,12 @@ def addSubscription():
     requestData = request.json
     if requestData is not None and "endpoint" in requestData and "keys" in requestData:
         sessionId = sessionGet("id", -1)
-        try:
-            subscription = {}
-            subscription["sub"] = requestData
-            subscription["userName"] = userName
-            redisNotificationsDB.set(sessionId, json.dumps(subscription))
-            print("subscribed", sessionId)
-            return make_response("", 200)
-        except Exception as e:
-            print("dunno", e)
+        subscription = {}
+        subscription["sub"] = requestData
+        subscription["userName"] = userName
+        redisNotificationsDB.set(sessionId, json.dumps(subscription))
+        logger.info(f"subscribed, {sessionId=}")
+        return make_response("", 200)
     return make_response(
         jsonify({"error": "no endpoint or keys in subscription or something else"}), 400
     )
@@ -560,7 +559,7 @@ class ImageListAPI(Resource):
             return make_response(jsonify({"error": "no write access"}), 403)
         if "image" not in request.files:
             return make_response(jsonify({"error": "No image"}), 400)
-        file = request.files["image"]  # type: ignore
+        file = request.files["image"]
         if file:
             try:
                 hash = hashlib.sha256()
@@ -569,9 +568,10 @@ class ImageListAPI(Resource):
                     hash.update(fb)
                     fb = file.read(65536)
                 name = hash.hexdigest() + ".jpg"
-                jpg = Image.open(file).convert("RGB")  # type: ignore
+                jpg = Image.open(file.stream).convert("RGB")
+                logger.info(jpg)
                 try:
-                    exif = jpg.info["exif"]
+                    exif = jpg.getexif()
                     jpg.save(IMAGE_FOLDER + name, exif=exif)
                 except (ValueError, OSError) as e:
                     logger.error(e)

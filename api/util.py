@@ -1,9 +1,16 @@
+import logging
 import os
 
 import pymysql
 from flask import make_response
 from flask_restful import fields, marshal
 from passlib.hash import pbkdf2_sha256
+from rich.console import Console
+from rich.logging import RichHandler
+
+logger = logging.getLogger("recipes.util")
+logger.handlers = [RichHandler(logging.INFO, markup=True, console=Console(width=250))]
+logger.setLevel(logging.INFO)
 
 
 class Database:
@@ -144,7 +151,6 @@ class Database:
             cur.execute(
                 query, [title, category, ingredients, description, image, userId]
             )
-            # print(query)
             cur.execute("SELECT LAST_INSERT_ID() as id;")
             id = cur.fetchone()["id"]
             cur.execute("SELECT * FROM recipe WHERE id = %s;", [id])
@@ -200,7 +206,7 @@ class Database:
                 if os.path.exists(IMAGE_FOLDER + img):
                     os.remove(IMAGE_FOLDER + img)
             except Exception as e:
-                print(e)
+                logger.info(e)
             return cur.execute(
                 "DELETE FROM `recipe` WHERE `id` = %s AND `userId` = %s", [_id, userId]
             )
@@ -273,7 +279,7 @@ class Database:
         try:
             cur = conn.cursor()
             query = "UPDATE `comment` SET `text` = %s, `editedDate` = CURRENT_TIMESTAMP() WHERE `id` = %s AND `userId` = %s;"
-            print(query, [text, commentId, userId])
+            logger.info(f"{query=}, {text=}, {commentId=}, {userId=}")
             if cur.execute(query, [text, commentId, userId]) == 1:
                 return True
             else:
@@ -327,7 +333,7 @@ class Database:
         try:
             cur = conn.cursor()
             query = "INSERT INTO category(name, userId) VALUES (%s, %s);"
-            print(query, [name, userId])
+            logger.info(f"{query=}, [{name=}, {userId=}]")
             cur.execute(query, [name, userId])
             cur.execute("SELECT LAST_INSERT_ID() as id;")
             return {"id": cur.fetchone()["id"]}
