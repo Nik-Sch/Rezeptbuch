@@ -297,6 +297,18 @@ export default function Recipe(props: IDarkThemeProps) {
   );
 
   if (mobile) {
+    if (error) {
+      return (
+        <div className="body">
+          <MobileHeader darkThemeProps={props} navigationLinks={navigationLinks} />
+          <div className="recipe-container-mobile">
+            <div className="text-wrapper">
+              <H2 className='title'>{t('notFound')}</H2>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <>
         {prompt}
@@ -422,7 +434,6 @@ export default function Recipe(props: IDarkThemeProps) {
             className="image"
           />
           <div className="text-wrapper">
-            {error && <H3>{t('notFound')}</H3>}
             <H2 className={classNames(state.loaded ? '' : Classes.SKELETON, 'title')}>
               {state.editing ? (
                 <InputGroup
@@ -523,6 +534,18 @@ export default function Recipe(props: IDarkThemeProps) {
       </>
     );
   } else {
+    if (error) {
+      return <div className="body">
+        <SideMenu darkModeProps={props} currentNavigation="recipes" />
+        <div className="main-content">
+          <div className="recipe-container">
+            <div className="recipe">
+              <H2>{t('notFound')}</H2>
+            </div>
+          </div>
+        </div>
+      </div>;
+    }
     return (
       <>
         {prompt}
@@ -531,7 +554,6 @@ export default function Recipe(props: IDarkThemeProps) {
           <div className="main-content">
             <div className="recipe-container">
               <div className="recipe">
-                {error && <H3>{t('notFound')}</H3>}
                 <div className="title-wrapper">
                   <H1 className="title">
                     <EditableText
