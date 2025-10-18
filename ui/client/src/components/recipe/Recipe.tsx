@@ -303,7 +303,7 @@ export default function Recipe(props: IDarkThemeProps) {
           <MobileHeader darkThemeProps={props} navigationLinks={navigationLinks} />
           <div className="recipe-container-mobile">
             <div className="text-wrapper">
-              <H2 className='title'>{t('notFound')}</H2>
+              <H2 className="title">{t('notFound')}</H2>
             </div>
           </div>
         </div>
@@ -535,16 +535,18 @@ export default function Recipe(props: IDarkThemeProps) {
     );
   } else {
     if (error) {
-      return <div className="body">
-        <SideMenu darkModeProps={props} currentNavigation="recipes" />
-        <div className="main-content">
-          <div className="recipe-container">
-            <div className="recipe">
-              <H2>{t('notFound')}</H2>
+      return (
+        <div className="body">
+          <SideMenu darkModeProps={props} currentNavigation="recipes" />
+          <div className="main-content">
+            <div className="recipe-container">
+              <div className="recipe">
+                <H2>{t('notFound')}</H2>
+              </div>
             </div>
           </div>
         </div>
-      </div>;
+      );
     }
     return (
       <>
