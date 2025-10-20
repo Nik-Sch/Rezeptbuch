@@ -49,7 +49,9 @@ db = Database()
 Session(app)
 redisNotificationsDB = redis.StrictRedis(host="redis", port=6379, db=0)
 redisUniqueRecipeDB = redis.StrictRedis(host="redis", port=6379, db=1)
-redisShoppingListDB = redis.StrictRedis(host="redis", port=6379, db=2)
+redisShoppingListDB = redis.StrictRedis(
+    host="redis", port=6379, db=2, decode_responses=True
+)
 
 checksumRequestParser = reqparse.RequestParser()
 checksumRequestParser.add_argument(
@@ -116,8 +118,27 @@ def status():
     userName = sessionGet("userName")
     if userName is not None:
         return make_response(
-            jsonify({"username": userName, "write": db.hasWriteAccess(userName)}), 200
+            jsonify(
+                {
+                    "username": userName,
+                    "write": db.hasWriteAccess(userName),
+                }
+            ),
+            200,
         )
+    else:
+        return unauthorized()
+
+
+@app.route("/shoppingLists", methods=["GET"])
+def listOfshoppingLists():
+    user_name = sessionGet("userName")
+    if user_name is not None:
+        key = f"lists:{user_name}"
+        if redisShoppingListDB.llen(key) == 0:
+            redisShoppingListDB.lpush(key, user_name)
+        lists = redisShoppingListDB.lrange(key, 0, -1)
+        return jsonify(lists)
     else:
         return unauthorized()
 
@@ -187,7 +208,6 @@ def handleShoppingList(list_id: str):
 
 @app.route("/shoppingList", methods=["GET", "POST", "PUT", "DELETE"])
 def privateShoppingList():
-    logger.error("shoppinglist")
     user_name = sessionGet("userName")
     if user_name is not None:
         return handleShoppingList(user_name)
