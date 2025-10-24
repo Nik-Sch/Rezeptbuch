@@ -16,7 +16,7 @@
     "@types/react-virtualized": "^9.21.30",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^5.0.2",
-    "axios": "^1.11.0",
+    "axios": "^1.12.0",
     "dayjs": "^1.11.18",
     "flag-icons": "^7.5.0",
     "i18next": "^25.5.2",
