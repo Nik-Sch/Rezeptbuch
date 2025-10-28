@@ -18,6 +18,8 @@ import {
   RadioGroup,
   Popover,
   Tooltip,
+  DialogBody,
+  DialogFooter,
 } from '@blueprintjs/core';
 import { usePersistentState, useMobile } from './helpers/CustomHooks';
 import { useTranslation } from 'react-i18next';
@@ -28,9 +30,11 @@ import './ShoppingList.scss';
 import classNames from 'classnames';
 import { localStorageShoppingList } from '../util/StorageKeys';
 import recipesHandler, {
+  getShoppingLists,
   getShoppingListUrl,
   getUserInfo,
   updateShoppingItem,
+  updateShoppingLists,
 } from '../util/Network';
 import {
   DragDropContext,
@@ -258,17 +262,12 @@ export interface IShoppingListState {
   lists: Record<string, ISingleShoppingList>;
   showChecked: boolean;
   active: string;
+  version?: number;
 }
 
 const defaultShoppingList: ISingleShoppingList = {
   items: [],
   name: 'Private',
-};
-
-const defaultState: IShoppingListState = {
-  lists: { default: defaultShoppingList },
-  showChecked: true,
-  active: 'default',
 };
 
 const itemsToBeAdded: string[] = [];
@@ -323,20 +322,22 @@ function ShoppingListSelect(props: {
         isCloseButtonShown={true}
         onClose={() => setDeleteKey(null)}
       >
-        <div className={Classes.DIALOG_BODY} />
-        <div className={Classes.DIALOG_FOOTER}>
-          <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-            <Button text={t('cancel')} onClick={() => setDeleteKey(null)} />
-            <Button
-              intent="danger"
-              text={t('delete')}
-              onClick={() => {
-                props.onItemDelete(deleteKey ?? '');
-                setDeleteKey(null);
-              }}
-            />
-          </div>
-        </div>
+        <DialogBody>{t('deleteShoppingListBody')}</DialogBody>
+        <DialogFooter
+          actions={
+            <>
+              <Button text={t('cancel')} onClick={() => setDeleteKey(null)} />
+              <Button
+                intent="danger"
+                text={t('delete')}
+                onClick={() => {
+                  props.onItemDelete(deleteKey ?? '');
+                  setDeleteKey(null);
+                }}
+              />
+            </>
+          }
+        />
       </Dialog>
       <ShoppingListSelect
         items={Object.entries(parentState.lists).map(([key, value]) => ({ key, value }))}
@@ -349,7 +350,7 @@ function ShoppingListSelect(props: {
               text={item.value.name ?? 'Private'}
               onClick={handleClick}
               labelElement={
-                item.key === 'default' ? undefined : (
+                item.key === getUserInfo()?.username ? undefined : (
                   <Button
                     icon="cross"
                     onClick={(e) => {
@@ -413,9 +414,9 @@ function ShoppingListSelect(props: {
         onClose={() => setPopoverOpen(false)}
         title={t('createNewList')}
       >
-        <div className={Classes.DIALOG_BODY}>{newListInput}</div>
-        <div className={Classes.DIALOG_FOOTER}>
-          <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+        <DialogBody>{newListInput}</DialogBody>
+        <DialogFooter
+          actions={
             <Button
               size="large"
               className={Classes.POPOVER_DISMISS}
@@ -423,8 +424,8 @@ function ShoppingListSelect(props: {
               intent="success"
               onClick={createNewList}
             />
-          </div>
-        </div>
+          }
+        />
       </Dialog>
     </ButtonGroup>
   );
@@ -435,11 +436,19 @@ export default function ShoppingList(props: IDarkThemeProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const mobile = useMobile();
-  const authenticated = typeof getUserInfo() !== 'undefined';
+  const userInfo = getUserInfo();
+  const authenticated = typeof userInfo !== 'undefined';
 
   document.title = t('shoppingList');
 
   const [online, setOnline] = useState(navigator.onLine);
+
+  const defaultState: IShoppingListState = {
+    lists: {},
+    showChecked: true,
+    active: userInfo?.username ?? '',
+  };
+  defaultState.lists[userInfo?.username ?? ''] = defaultShoppingList;
 
   const [state, setState] = usePersistentState<IShoppingListState>(
     defaultState,
@@ -478,6 +487,44 @@ export default function ShoppingList(props: IDarkThemeProps) {
     },
     [online, updateQueue],
   );
+
+  // migration !77:
+  // - default shopping list is renamed to <userName>
+  // - set version to 1
+  // - add lists to user
+  useEffect(() => {
+    console.log(`version: ${state.version}, ${JSON.stringify(Object.keys(state.lists))}`);
+    if (typeof state.version === 'undefined') {
+      const name = userInfo?.username;
+      if (typeof name === 'string' && 'default' in state.lists) {
+        console.log(
+          `Found legacy shoppinglist with default key, migrating to username key "${name}".`,
+        );
+        for (const key in state.lists) {
+          const id = key === 'default' ? name : key;
+          console.log(`Uploading ${id} with name ${state.lists[key].name ?? ''}`);
+          void updateShoppingLists(id, state.lists[key].name ?? '', 'POST');
+        }
+        const defaultList = JSON.parse(JSON.stringify(state.lists.default)) as ISingleShoppingList;
+        setState((state) =>
+          update(state, {
+            lists: {
+              [name]: {
+                $set: defaultList,
+              },
+              $unset: ['default'],
+            },
+            active: {
+              $set: name,
+            },
+            version: {
+              $set: 1,
+            },
+          }),
+        );
+      }
+    }
+  }, [state, setState]);
 
   // itemsToBeAdded
   useEffect(() => {
@@ -525,6 +572,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
     };
   }, [state.active]);
 
+  // upload updated elements
   useEffect(() => {
     if (online && updateQueue.length > 0) {
       void (async () => {
@@ -544,6 +592,21 @@ export default function ShoppingList(props: IDarkThemeProps) {
   useEffect(() => {
     if (online) {
       setSynced('initial-fetch');
+      void (async () => {
+        const newLists: Record<string, ISingleShoppingList> = {};
+        ((await getShoppingLists()) ?? [])
+          .filter((v) => !(v.id in state.lists))
+          .forEach((v) => (newLists[v.id] = { items: [], name: v.name }));
+        console.log(`adding ${JSON.stringify(newLists)}`);
+
+        setState((state) =>
+          update(state, {
+            lists: {
+              $merge: newLists,
+            },
+          }),
+        );
+      })();
       let eventSource = new EventSource(getShoppingListUrl(state.active));
 
       const onMessage = (v: MessageEvent) => {
@@ -583,6 +646,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
     }
   }, [online, setState, state.active]);
 
+  // opening shared list
   useEffect(() => {
     if (listKey) {
       if (authenticated) {
@@ -600,6 +664,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
           },
         });
         // set state doesn't work when navigating away
+        void updateShoppingLists(listKey, listName ?? '', 'POST');
         localStorage.setItem(localStorageShoppingList, JSON.stringify(newState));
         navigate('/shoppingList');
       } else if (state.active !== listKey) {
@@ -616,21 +681,6 @@ export default function ShoppingList(props: IDarkThemeProps) {
       }
     }
   }, [authenticated, listKey, listName, navigate, setState, state]);
-
-  // was previously only a single shoppinglist
-  if (typeof state.lists === 'undefined') {
-    console.log('updating state', state);
-    const newList: ISingleShoppingList = {
-      items: (state as unknown as ISingleShoppingList).items,
-      name: 'Private',
-    };
-    setState({
-      lists: { default: newList },
-      active: 'default',
-      showChecked: state.showChecked,
-    });
-    return <></>;
-  }
 
   const navigationLinks: INavigationLink[] = [
     { to: '/', icon: 'git-repo', text: t('recipes') },
@@ -736,7 +786,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
   };
 
   const shareShoppingList = () => {
-    if (state.active !== 'default') {
+    if (state.active !== userInfo?.username) {
       void shareLink(
         `${document.location.origin}/shoppingLists/${state.active}/${state.lists[state.active].name}`,
       );
@@ -783,7 +833,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
         title={t('selectShoppingList')}
         onClose={() => setItemsToBeAddedDialog([])}
       >
-        <div className={Classes.DIALOG_BODY}>
+        <DialogBody>
           <div className="shopping-list-select-list">
             <RadioGroup
               selectedValue={shoppingListSelectValue}
@@ -794,27 +844,29 @@ export default function ShoppingList(props: IDarkThemeProps) {
               ))}
             </RadioGroup>
           </div>
-        </div>
-        <div className={Classes.DIALOG_FOOTER}>
-          <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-            <Button
-              text={t('cancel')}
-              intent="danger"
-              onClick={() => setItemsToBeAddedDialog([])}
-            />
-            <Button
-              text={t('add')}
-              intent="success"
-              disabled={typeof shoppingListSelectValue === 'undefined'}
-              onClick={() => {
-                const items = itemsToBeAddedDialog.slice();
-                setItemsToBeAddedDialog([]);
-                setState((state) => ({ ...state, active: shoppingListSelectValue ?? '' }));
-                void updateItems(shoppingListSelectValue ?? '', items, 'POST');
-              }}
-            />
-          </div>
-        </div>
+        </DialogBody>
+        <DialogFooter
+          actions={
+            <>
+              <Button
+                text={t('cancel')}
+                intent="danger"
+                onClick={() => setItemsToBeAddedDialog([])}
+              />
+              <Button
+                text={t('add')}
+                intent="success"
+                disabled={typeof shoppingListSelectValue === 'undefined'}
+                onClick={() => {
+                  const items = itemsToBeAddedDialog.slice();
+                  setItemsToBeAddedDialog([]);
+                  setState((state) => ({ ...state, active: shoppingListSelectValue ?? '' }));
+                  void updateItems(shoppingListSelectValue ?? '', items, 'POST');
+                }}
+              />
+            </>
+          }
+        />
       </Dialog>
       {mobile && (
         <MobileHeader darkThemeProps={props} navigationLinks={navigationLinks}>
@@ -823,7 +875,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
             className={classNames(
               Classes.BUTTON,
               Classes.MINIMAL,
-              state.active === 'default' && Classes.DISABLED,
+              state.active === userInfo?.username && Classes.DISABLED,
             )}
             icon="share"
             intent="primary"
@@ -846,7 +898,10 @@ export default function ShoppingList(props: IDarkThemeProps) {
             <div className="shopping-list-head">
               {authenticated ? (
                 <ShoppingListSelect
-                  onItemSelect={(key, value) =>
+                  onItemSelect={(key, value) => {
+                    if (!(key in state.lists)) {
+                      void updateShoppingLists(key, value.name ?? '', 'POST');
+                    }
                     setState((state) =>
                       update(state, {
                         active: {
@@ -858,20 +913,19 @@ export default function ShoppingList(props: IDarkThemeProps) {
                           },
                         },
                       }),
-                    )
-                  }
+                    );
+                  }}
                   onItemDelete={(key) =>
                     setState((state) => {
-                      const x = update(state, {
+                      void updateShoppingLists(key, state.lists[key].name ?? '', 'DELETE');
+                      return update(state, {
                         active: {
-                          $set: 'default',
+                          $set: userInfo.username,
                         },
                         lists: {
                           $unset: [key],
                         },
                       });
-                      console.log(x);
-                      return x;
                     })
                   }
                   parentState={state}
@@ -885,7 +939,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
                   <ButtonGroup vertical={false} alignText="right">
                     <Tooltip
                       content={
-                        state.active === 'default'
+                        state.active === userInfo?.username
                           ? t('shoppingListNoShare')
                           : t('shoppingListShare')
                       }
@@ -896,7 +950,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
                         variant={mobile ? 'minimal' : 'solid'}
                         size={mobile ? 'large' : 'medium'}
                         text={mobile ? undefined : t('share')}
-                        disabled={state.active === 'default'}
+                        disabled={state.active === userInfo?.username}
                         intent="primary"
                         onClick={shareShoppingList}
                       />

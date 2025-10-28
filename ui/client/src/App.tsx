@@ -8,7 +8,7 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from 'react-router-dom';
-import { Classes, H1, H3 } from '@blueprintjs/core';
+import { BlueprintProvider, Classes, H1, H3 } from '@blueprintjs/core';
 import recipesHandler, { getUserInfo, ICategory, IRecipe, IUser } from './util/Network';
 import { usePersistentState, useMobile } from './components/helpers/CustomHooks';
 import { localStorageDarkTheme } from './util/StorageKeys';
@@ -167,7 +167,9 @@ function App() {
       <Helmet>
         <meta name="color-scheme" content={darkTheme ? 'dark' : 'light'} />
       </Helmet>
-      <RouterProvider router={router} fallbackElement={fallback} />
+      <BlueprintProvider>
+        <RouterProvider router={router} fallbackElement={fallback} />
+      </BlueprintProvider>
     </div>
   );
 }

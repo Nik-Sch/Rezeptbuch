@@ -1,5 +1,5 @@
 import { useMobile } from '../helpers/CustomHooks';
-import { Icon, Classes, Button, Dialog, H5 } from '@blueprintjs/core';
+import { Icon, Classes, Button, Dialog, H5, DialogBody, DialogFooter } from '@blueprintjs/core';
 import { useState } from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -53,38 +53,40 @@ export default function ShareButton(props: {
         onClose={() => setIsOpen(false)}
         title={t('shareOptionTitle')}
       >
-        <div className={Classes.DIALOG_BODY}>
+        <DialogBody>
           <H5>{t('shareOptions')}</H5>
-        </div>
-        <div className={Classes.DIALOG_FOOTER}>
-          <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-            <Button
-              text={t('shareLink')}
-              intent="primary"
-              size={mobile ? 'large' : 'medium'}
-              onClick={() => {
-                void shareLink();
-                setIsOpen(false);
-              }}
-            />
-            <Button
-              text={t('shareRO')}
-              intent="primary"
-              size={mobile ? 'large' : 'medium'}
-              onClick={() => {
-                void (async () => {
-                  const link = await getUniqueRecipeLink(props.recipe ?? emptyRecipe);
-                  if (typeof link === 'undefined') {
-                    AppToasterTop.show({ message: t('uniqueLinkError'), intent: 'danger' });
-                  } else {
-                    await shareLink(link);
-                  }
+        </DialogBody>
+        <DialogFooter
+          actions={
+            <>
+              <Button
+                text={t('shareLink')}
+                intent="primary"
+                size={mobile ? 'large' : 'medium'}
+                onClick={() => {
+                  void shareLink();
                   setIsOpen(false);
-                })();
-              }}
-            />
-          </div>
-        </div>
+                }}
+              />
+              <Button
+                text={t('shareRO')}
+                intent="primary"
+                size={mobile ? 'large' : 'medium'}
+                onClick={() => {
+                  void (async () => {
+                    const link = await getUniqueRecipeLink(props.recipe ?? emptyRecipe);
+                    if (typeof link === 'undefined') {
+                      AppToasterTop.show({ message: t('uniqueLinkError'), intent: 'danger' });
+                    } else {
+                      await shareLink(link);
+                    }
+                    setIsOpen(false);
+                  })();
+                }}
+              />
+            </>
+          }
+        />
       </Dialog>
       {mobile ? (
         <Icon

@@ -12,6 +12,8 @@ import {
   AnchorButton,
   Popover,
   Tooltip,
+  DialogFooter,
+  DialogBody,
 } from '@blueprintjs/core';
 import './CommentSection.scss';
 import classNames from 'classnames';
@@ -199,23 +201,28 @@ function Comment(props: ICommentProps) {
         onClose={() => setDeleteDialogIsOpen(false)}
         title={t('confirmDeleteTitle')}
       >
-        <div className={Classes.DIALOG_BODY}>
-          <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-            <Button
-              text={t('cancel')}
-              size="large"
-              className={'popover-left'}
-              onClick={() => setDeleteDialogIsOpen(false)}
-            />
-            <Button
-              size="large"
-              text={t('deleteComment')}
-              intent="danger"
-              className={Classes.POPOVER_DISMISS}
-              onClick={() => void deleteComment()}
-            />
-          </div>
-        </div>
+        <DialogBody>
+          <H5>{t('confirmDelete')}</H5>
+        </DialogBody>
+        <DialogFooter
+          actions={
+            <>
+              <Button
+                text={t('cancel')}
+                size="large"
+                className={'popover-left'}
+                onClick={() => setDeleteDialogIsOpen(false)}
+              />
+              <Button
+                size="large"
+                text={t('deleteComment')}
+                intent="danger"
+                className={Classes.POPOVER_DISMISS}
+                onClick={() => void deleteComment()}
+              />
+            </>
+          }
+        />
       </Dialog>
       <div className="comment-content">
         <div className="comment-header">
