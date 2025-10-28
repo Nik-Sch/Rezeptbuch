@@ -340,7 +340,9 @@ function ShoppingListSelect(props: {
         />
       </Dialog>
       <ShoppingListSelect
-        items={Object.entries(parentState.lists).map(([key, value]) => ({ key, value }))}
+        items={Object.entries(parentState.lists)
+          .toSorted((a, b) => a[1].name?.localeCompare(b[1].name ?? '') ?? 0)
+          .map(([key, value]) => ({ key, value }))}
         filterable={false}
         itemRenderer={(item, { handleClick, modifiers }) =>
           modifiers.matchesPredicate ? (
