@@ -128,5 +128,6 @@
   "selectShoppingList": "Einkaufsliste auswählen",
   "shoppingListNoShare": "Du musst eine neue Einkaufsliste erstellen, um sie zu teilen",
   "shoppingListShare": "Teile die Einkaufsliste mit allen",
-  "shoppingListName": "{{name}} Einkaufsliste"
+  "shoppingListName": "{{name}} Einkaufsliste",
+  "migratedShoppingLists": "Die Liste an Einkaufslisten wurde aktualisiert und synchronisiert sich jetzt zwischen verschiedenen Geräten."
 }

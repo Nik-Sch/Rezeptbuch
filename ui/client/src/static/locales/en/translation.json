@@ -130,5 +130,6 @@
   "ok": "Ok",
   "shoppingListName": "{{name}} Shopping List",
   "loggedOut": "You have been logged out",
-  "loadingRecipes": "Loading Recipes..."
+  "loadingRecipes": "Loading Recipes...",
+  "migratedShoppingLists": "The list of shoppinglists has been uploaded and will now sync between devices."
 }

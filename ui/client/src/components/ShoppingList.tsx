@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, version } from 'react';
 import MobileHeader from './MobileHeader';
 import {
   Collapse,
@@ -48,6 +48,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Select } from '@blueprintjs/select';
 import { useNavigate, useParams } from 'react-router-dom';
 import { shareLink } from './recipe/ShareButton';
+import { AppToasterTop } from '../util/toaster';
 
 export interface IShoppingItem {
   text: string;
@@ -490,42 +491,77 @@ export default function ShoppingList(props: IDarkThemeProps) {
     [online, updateQueue],
   );
 
-  // migration !77:
-  // - default shopping list is renamed to <userName>
-  // - set version to 1
-  // - add lists to user
+  // update list of shopping lists
   useEffect(() => {
-    console.log(`version: ${state.version}, ${JSON.stringify(Object.keys(state.lists))}`);
-    if (typeof state.version === 'undefined') {
-      const name = userInfo?.username;
-      if (typeof name === 'string' && 'default' in state.lists) {
-        console.log(
-          `Found legacy shoppinglist with default key, migrating to username key "${name}".`,
-        );
-        for (const key in state.lists) {
-          const id = key === 'default' ? name : key;
-          console.log(`Uploading ${id} with name ${state.lists[key].name ?? ''}`);
-          void updateShoppingLists(id, state.lists[key].name ?? '', 'POST');
+    void (async () => {
+      // migration !77:
+      // - default shopping list is renamed to <userName>
+      // - set version to 1
+      // - add lists to user
+      if (typeof state.version === 'undefined') {
+        const name = userInfo?.username;
+        if (typeof name === 'string' && 'default' in state.lists) {
+          console.log(
+            `Found legacy shoppinglist with default key, migrating to username key "${name}".`,
+          );
+          for (const key in state.lists) {
+            const id = key === 'default' ? name : key;
+            await updateShoppingLists(id, state.lists[key].name ?? '', 'POST');
+          }
+          const defaultList = JSON.parse(
+            JSON.stringify(state.lists.default),
+          ) as ISingleShoppingList;
+          setState((state) =>
+            update(state, {
+              lists: {
+                [name]: {
+                  $set: defaultList,
+                },
+                $unset: ['default'],
+              },
+              active: {
+                $set: name,
+              },
+              version: {
+                $set: 1,
+              },
+            }),
+          );
+          AppToasterTop.show(
+            { message: t('migratedShoppingLists'), intent: 'primary' },
+            'shoppingListMigration',
+          );
+        } else {
+          setState((state) => update(state, { version: { $set: 1 } }));
         }
-        const defaultList = JSON.parse(JSON.stringify(state.lists.default)) as ISingleShoppingList;
+      } else {
+        const onlineLists = (await getShoppingLists()) ?? [];
+
+        const newLists: Record<string, ISingleShoppingList> = {};
+        onlineLists
+          .filter((v) => !(v.id in state.lists))
+          .forEach((v) => (newLists[v.id] = { items: [], name: v.name }));
+
+        const oldLists = Object.keys(state.lists).filter(
+          // v => false
+          (v) => !onlineLists.map((v) => v.id).includes(v),
+        );
+        const newActive = oldLists.includes(state.active)
+          ? (userInfo?.username ?? '')
+          : state.active;
         setState((state) =>
           update(state, {
             lists: {
-              [name]: {
-                $set: defaultList,
-              },
-              $unset: ['default'],
+              $merge: newLists,
+              $unset: oldLists,
             },
             active: {
-              $set: name,
-            },
-            version: {
-              $set: 1,
+              $set: newActive,
             },
           }),
         );
       }
-    }
+    })();
   }, [state, setState]);
 
   // itemsToBeAdded
@@ -594,27 +630,11 @@ export default function ShoppingList(props: IDarkThemeProps) {
   useEffect(() => {
     if (online) {
       setSynced('initial-fetch');
-      void (async () => {
-        const newLists: Record<string, ISingleShoppingList> = {};
-        ((await getShoppingLists()) ?? [])
-          .filter((v) => !(v.id in state.lists))
-          .forEach((v) => (newLists[v.id] = { items: [], name: v.name }));
-        console.log(`adding ${JSON.stringify(newLists)}`);
-
-        setState((state) =>
-          update(state, {
-            lists: {
-              $merge: newLists,
-            },
-          }),
-        );
-      })();
       let eventSource = new EventSource(getShoppingListUrl(state.active));
 
       const onMessage = (v: MessageEvent) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const result = JSON.parse(v.data) as IShoppingItem[] | null;
-        console.log(`sse message for ${state.active}:`, result);
         if (result) {
           setState((state) =>
             update(state, {
@@ -641,7 +661,6 @@ export default function ShoppingList(props: IDarkThemeProps) {
       eventSource.onerror = onError;
       return () => {
         eventSource.close();
-        console.log(`[shopping list] sse for ${state.active} closed`);
       };
     } else {
       setSynced('offline');
