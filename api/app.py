@@ -49,7 +49,9 @@ db = Database()
 Session(app)
 redisNotificationsDB = redis.StrictRedis(host="redis", port=6379, db=0)
 redisUniqueRecipeDB = redis.StrictRedis(host="redis", port=6379, db=1)
-redisShoppingListDB = redis.StrictRedis(host="redis", port=6379, db=2)
+redisShoppingListDB = redis.StrictRedis(
+    host="redis", port=6379, db=2, decode_responses=True
+)
 
 checksumRequestParser = reqparse.RequestParser()
 checksumRequestParser.add_argument(
@@ -116,10 +118,46 @@ def status():
     userName = sessionGet("userName")
     if userName is not None:
         return make_response(
-            jsonify({"username": userName, "write": db.hasWriteAccess(userName)}), 200
+            jsonify(
+                {
+                    "username": userName,
+                    "write": db.hasWriteAccess(userName),
+                }
+            ),
+            200,
         )
     else:
         return unauthorized()
+
+
+@app.route("/shoppingLists", methods=["GET", "POST", "DELETE"])
+def listOfshoppingLists():
+    user_name = sessionGet("userName")
+    if user_name is None:
+        return unauthorized()
+
+    key = f"lists:{user_name}"
+    if request.method == "GET":
+        if redisShoppingListDB.llen(key) == 0:
+            redisShoppingListDB.lpush(key, json.dumps({"id": user_name, "name": "Private"}))
+        lists = redisShoppingListDB.lrange(key, 0, -1)
+        decoded = [json.loads(x) for x in lists]
+        return jsonify(decoded)
+    elif request.method == "POST":
+        if request.json is None or 'id' not in request.json:
+            return make_response(jsonify({"error": "Expected 'id' key"}), 400)
+        if "name" not in request.json:
+            return make_response(jsonify({"error": "Expected 'name' key"}), 400)
+        # make sure the list is unique
+        redisShoppingListDB.lrem(key, 0, json.dumps(request.json))
+        redisShoppingListDB.lpush(key, json.dumps(request.json))
+    else:
+        if request.json is None or 'id' not in request.json:
+            return make_response(jsonify({"error": "Expected 'id' key"}), 400)
+        if "name" not in request.json:
+            return make_response(jsonify({"error": "Expected 'name' key"}), 400)
+        redisShoppingListDB.lrem(key, 0, json.dumps(request.json))
+    return make_response("", 200)
 
 
 def shoppinglist_stream(list_id: str):
@@ -134,7 +172,7 @@ def shoppinglist_stream(list_id: str):
             yield "data: %s\n\n" % m["data"]
 
 
-def verifyShoppingListJson(requestJson: Any):
+def verifyShoppingListJson(requestJson: Any|None):
     if not isinstance(requestJson, list):
         return make_response(jsonify({"error": "Expected an array"}), 400)
     for item in requestJson:
@@ -187,7 +225,6 @@ def handleShoppingList(list_id: str):
 
 @app.route("/shoppingList", methods=["GET", "POST", "PUT", "DELETE"])
 def privateShoppingList():
-    logger.error("shoppinglist")
     user_name = sessionGet("userName")
     if user_name is not None:
         return handleShoppingList(user_name)
