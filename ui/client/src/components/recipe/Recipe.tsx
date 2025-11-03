@@ -25,6 +25,8 @@ import {
   Alert,
   Tooltip,
   Popover,
+  DialogFooter,
+  DialogBody,
 } from '@blueprintjs/core';
 
 import { AppToasterTop } from '../../util/toaster';
@@ -319,23 +321,28 @@ export default function Recipe(props: IDarkThemeProps) {
             onClose={() => setMobileCancelIsOpen(false)}
             title={t('confirmCancelTitle')}
           >
-            <div className={Classes.DIALOG_BODY}>
-              <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                <Button
-                  text={t('cancel')}
-                  size="large"
-                  className={'popover-left'}
-                  onClick={() => setMobileCancelIsOpen(false)}
-                />
-                <Button
-                  size="large"
-                  text={t('discardChanges')}
-                  intent="danger"
-                  className={Classes.POPOVER_DISMISS}
-                  onClick={handleDiscardClick}
-                />
-              </div>
-            </div>
+            <DialogBody>
+              <H5>{t('confirmCancelBody')}</H5>
+            </DialogBody>
+            <DialogFooter
+              actions={
+                <>
+                  <Button
+                    text={t('cancel')}
+                    size="large"
+                    className={'popover-left'}
+                    onClick={() => setMobileCancelIsOpen(false)}
+                  />
+                  <Button
+                    size="large"
+                    text={t('discardChanges')}
+                    intent="danger"
+                    className={Classes.POPOVER_DISMISS}
+                    onClick={handleDiscardClick}
+                  />
+                </>
+              }
+            />
           </Dialog>
           <Dialog
             className="mobile-delete-dialog"
@@ -343,23 +350,28 @@ export default function Recipe(props: IDarkThemeProps) {
             onClose={() => setMobileDeleteIsOpen(false)}
             title={t('confirmDeleteTitle')}
           >
-            <div className={Classes.DIALOG_BODY}>
-              <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                <Button
-                  text={t('cancel')}
-                  size="large"
-                  className={'popover-left'}
-                  onClick={() => setMobileDeleteIsOpen(false)}
-                />
-                <Button
-                  size="large"
-                  text={t('deleteRecipe')}
-                  intent="danger"
-                  className={Classes.POPOVER_DISMISS}
-                  onClick={() => void handleDeleteClick()}
-                />
-              </div>
-            </div>
+            <DialogBody>
+              <H5>{t('confirmDelete')}</H5>
+            </DialogBody>
+            <DialogFooter
+              actions={
+                <>
+                  <Button
+                    text={t('cancel')}
+                    size="large"
+                    className={'popover-left'}
+                    onClick={() => setMobileDeleteIsOpen(false)}
+                  />
+                  <Button
+                    size="large"
+                    text={t('deleteRecipe')}
+                    intent="danger"
+                    className={Classes.POPOVER_DISMISS}
+                    onClick={() => void handleDeleteClick()}
+                  />
+                </>
+              }
+            />
           </Dialog>
           {state.loaded && (
             <div className="edit-container">

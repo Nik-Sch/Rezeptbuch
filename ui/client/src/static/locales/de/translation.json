@@ -3,6 +3,7 @@
   "cancel": "Abbrechen",
   "cancelEdit": "Bearbeitung abbrechen",
   "confirmCancelTitle": "Wirklich abbrechen?",
+  "confirmCancelBody": "Die Änderungen werden verloren gehen.",
   "discardChanges": "Änderungen verwerfen",
   "editRecipe": "Rezept bearbeiten",
   "labelDarkTheme": "Dark Mode",
@@ -120,11 +121,13 @@
   "createNewList": "Neue Einkaufsliste erstellen",
   "createNewShoppingList": "Neue Einkaufsliste",
   "deleteShoppingList": "Einkaufsliste '{{name}}' löschen?",
+  "deleteShoppingListBody": "Die Einkaufsliste wird von allen Geräten gelöscht!",
   "filter": "Filtern und sortieren",
   "newShoppingListPlaceholder": "Name der Einkaufsliste...",
   "ok": "Ok",
   "selectShoppingList": "Einkaufsliste auswählen",
   "shoppingListNoShare": "Du musst eine neue Einkaufsliste erstellen, um sie zu teilen",
   "shoppingListShare": "Teile die Einkaufsliste mit allen",
-  "shoppingListName": "{{name}} Einkaufsliste"
+  "shoppingListName": "{{name}} Einkaufsliste",
+  "migratedShoppingLists": "Die Liste an Einkaufslisten wurde aktualisiert und synchronisiert sich jetzt zwischen verschiedenen Geräten."
 }

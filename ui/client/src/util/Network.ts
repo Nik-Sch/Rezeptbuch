@@ -611,7 +611,7 @@ export async function logout() {
 }
 
 export function getShoppingListUrl(listKey: string) {
-  return listKey === 'default' ? '/api/shoppingList' : `/api/shoppingLists/${listKey}`;
+  return `/api/shoppingLists/${listKey}`;
 }
 
 export async function updateShoppingItem(
@@ -628,4 +628,28 @@ export async function updateShoppingItem(
     headers,
   });
   return result.status === 200;
+}
+
+export async function updateShoppingLists(
+  listKey: string,
+  name: string,
+  method: 'POST' | 'DELETE',
+) {
+  const headers = getHeaders();
+  headers.append('Content-Type', 'application/json');
+  const url = '/api/shoppingLists';
+  const result = await fetch(url, {
+    method: method,
+    body: JSON.stringify({ id: listKey, name }),
+    headers,
+  });
+  return result.status === 200;
+}
+
+export async function getShoppingLists(): Promise<{ id: string; name: string }[] | undefined> {
+  const result = await fetch('/api/shoppingLists');
+  if (result.ok) {
+    return (await result.json()) as { id: string; name: string }[];
+  }
+  return undefined;
 }

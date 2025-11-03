@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import recipesHandler, { IRecipe, ICategory, getUserInfo, IUser } from '../../util/Network';
-import { Classes, Icon, InputGroup, Button, H3, Dialog, Divider, Tooltip } from '@blueprintjs/core';
+import {
+  Classes,
+  Icon,
+  InputGroup,
+  Button,
+  H3,
+  Dialog,
+  Divider,
+  Tooltip,
+  DialogBody,
+  DialogFooter,
+} from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { ISort, SortSelect } from '../helpers/SortSelect';
@@ -372,19 +383,19 @@ export default function RecipeList(props: IDarkThemeProps) {
 
   const mobileFilterDialog = (
     <Dialog isOpen={filterIsOpen} onClose={() => setFilterIsOpen(false)} title={t('filter')}>
-      <div className={classNames(Classes.DIALOG_BODY, 'mobile')}>
+      <DialogBody className="mobile">
         <div className="sort-filter">{sortAndFilter}</div>
-      </div>
-      <div className={Classes.DIALOG_FOOTER}>
-        <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+      </DialogBody>
+      <DialogFooter
+        actions={
           <Button
             text={t('ok')}
             intent="success"
             size="large"
             onClick={() => setFilterIsOpen(false)}
           />
-        </div>
-      </div>
+        }
+      />
     </Dialog>
   );
 
