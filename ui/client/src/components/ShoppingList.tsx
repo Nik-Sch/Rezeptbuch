@@ -493,75 +493,76 @@ export default function ShoppingList(props: IDarkThemeProps) {
 
   // update list of shopping lists
   useEffect(() => {
-    void (async () => {
-      // migration !77:
-      // - default shopping list is renamed to <userName>
-      // - set version to 1
-      // - add lists to user
-      if (typeof state.version === 'undefined') {
-        const name = userInfo?.username;
-        if (typeof name === 'string' && 'default' in state.lists) {
-          console.log(
-            `Found legacy shoppinglist with default key, migrating to username key "${name}".`,
-          );
-          for (const key in state.lists) {
-            const id = key === 'default' ? name : key;
-            await updateShoppingLists(id, state.lists[key].name ?? '', 'POST');
+    if (authenticated) {
+      void (async () => {
+        // migration !77:
+        // - default shopping list is renamed to <userName>
+        // - set version to 1
+        // - add lists to user
+        if (typeof state.version === 'undefined') {
+          const name = userInfo.username;
+          if (typeof name === 'string' && 'default' in state.lists) {
+            console.log(
+              `Found legacy shoppinglist with default key, migrating to username key "${name}".`,
+            );
+            for (const key in state.lists) {
+              const id = key === 'default' ? name : key;
+              await updateShoppingLists(id, state.lists[key].name ?? '', 'POST');
+            }
+            const defaultList = JSON.parse(
+              JSON.stringify(state.lists.default),
+            ) as ISingleShoppingList;
+            setState((state) =>
+              update(state, {
+                lists: {
+                  [name]: {
+                    $set: defaultList,
+                  },
+                  $unset: ['default'],
+                },
+                active: {
+                  $set: name,
+                },
+                version: {
+                  $set: 1,
+                },
+              }),
+            );
+            AppToasterTop.show(
+              { message: t('migratedShoppingLists'), intent: 'primary' },
+              'shoppingListMigration',
+            );
+          } else {
+            setState((state) => update(state, { version: { $set: 1 } }));
           }
-          const defaultList = JSON.parse(
-            JSON.stringify(state.lists.default),
-          ) as ISingleShoppingList;
+        } else {
+          const onlineLists = (await getShoppingLists()) ?? [];
+  
+          const newLists: Record<string, ISingleShoppingList> = {};
+          onlineLists
+            .filter((v) => !(v.id in state.lists))
+            .forEach((v) => (newLists[v.id] = { items: [], name: v.name }));
+  
+          const oldLists = Object.keys(state.lists).filter(
+            (v) => !onlineLists.map((v) => v.id).includes(v),
+          );
+          const newActive = oldLists.includes(state.active)
+            ? (userInfo.username)
+            : state.active;
           setState((state) =>
             update(state, {
               lists: {
-                [name]: {
-                  $set: defaultList,
-                },
-                $unset: ['default'],
+                $merge: newLists,
+                $unset: oldLists,
               },
               active: {
-                $set: name,
-              },
-              version: {
-                $set: 1,
+                $set: newActive,
               },
             }),
           );
-          AppToasterTop.show(
-            { message: t('migratedShoppingLists'), intent: 'primary' },
-            'shoppingListMigration',
-          );
-        } else {
-          setState((state) => update(state, { version: { $set: 1 } }));
         }
-      } else {
-        const onlineLists = (await getShoppingLists()) ?? [];
-
-        const newLists: Record<string, ISingleShoppingList> = {};
-        onlineLists
-          .filter((v) => !(v.id in state.lists))
-          .forEach((v) => (newLists[v.id] = { items: [], name: v.name }));
-
-        const oldLists = Object.keys(state.lists).filter(
-          // v => false
-          (v) => !onlineLists.map((v) => v.id).includes(v),
-        );
-        const newActive = oldLists.includes(state.active)
-          ? (userInfo?.username ?? '')
-          : state.active;
-        setState((state) =>
-          update(state, {
-            lists: {
-              $merge: newLists,
-              $unset: oldLists,
-            },
-            active: {
-              $set: newActive,
-            },
-          }),
-        );
-      }
-    })();
+      })();
+    }
   }, [state, setState]);
 
   // itemsToBeAdded
@@ -669,7 +670,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
 
   // opening shared list
   useEffect(() => {
-    if (listKey) {
+    if (typeof listKey !== 'undefined') {
       if (authenticated) {
         const newState = update(state, {
           lists: {
