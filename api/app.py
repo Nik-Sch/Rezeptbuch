@@ -610,8 +610,7 @@ class ImageListAPI(Resource):
                 jpg = Image.open(file.stream).convert("RGB")
                 logger.info(jpg)
                 try:
-                    exif = jpg.getexif()
-                    jpg.save(IMAGE_FOLDER + name, exif=exif)
+                    jpg.save(IMAGE_FOLDER + name, exif=jpg.getexif())
                 except (ValueError, OSError) as e:
                     logger.error(e)
                     jpg.save(IMAGE_FOLDER + name)
@@ -638,7 +637,7 @@ class ImageAPI(Resource):
             im.thumbnail((w, h))
             output = io.BytesIO()
             try:
-                im.save(output, format="JPEG", exif=im.info["exif"])
+                im.save(output, format="JPEG", exif=im.getexif())
             except (ValueError, OSError) as e:
                 logger.error(e)
                 im.save(output, format="JPEG")
