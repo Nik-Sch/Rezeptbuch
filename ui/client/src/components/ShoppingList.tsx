@@ -537,18 +537,16 @@ export default function ShoppingList(props: IDarkThemeProps) {
           }
         } else {
           const onlineLists = (await getShoppingLists()) ?? [];
-  
+
           const newLists: Record<string, ISingleShoppingList> = {};
           onlineLists
             .filter((v) => !(v.id in state.lists))
             .forEach((v) => (newLists[v.id] = { items: [], name: v.name }));
-  
+
           const oldLists = Object.keys(state.lists).filter(
             (v) => !onlineLists.map((v) => v.id).includes(v),
           );
-          const newActive = oldLists.includes(state.active)
-            ? (userInfo.username)
-            : state.active;
+          const newActive = oldLists.includes(state.active) ? userInfo.username : state.active;
           setState((state) =>
             update(state, {
               lists: {

@@ -5,7 +5,7 @@ import logging
 import os
 import threading
 from datetime import timedelta
-from typing import Any, Literal, OrderedDict
+from typing import Any, Literal, OrderedDict, cast
 from uuid import uuid4
 
 import redis
@@ -142,7 +142,7 @@ def listOfshoppingLists():
             redisShoppingListDB.lpush(
                 key, json.dumps({"id": user_name, "name": "Private"})
             )
-        lists = redisShoppingListDB.lrange(key, 0, -1)
+        lists = cast(list, redisShoppingListDB.lrange(key, 0, -1))
         decoded = [json.loads(x) for x in lists]
         return jsonify(decoded)
     elif request.method == "POST":

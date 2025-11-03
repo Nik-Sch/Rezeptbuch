@@ -630,7 +630,11 @@ export async function updateShoppingItem(
   return result.status === 200;
 }
 
-export async function updateShoppingLists(listKey: string, name: string, method: 'POST' | 'DELETE') {
+export async function updateShoppingLists(
+  listKey: string,
+  name: string,
+  method: 'POST' | 'DELETE',
+) {
   const headers = getHeaders();
   headers.append('Content-Type', 'application/json');
   const url = '/api/shoppingLists';
@@ -642,10 +646,10 @@ export async function updateShoppingLists(listKey: string, name: string, method:
   return result.status === 200;
 }
 
-export async function getShoppingLists(): Promise<{ id: string, name: string }[] | undefined> {
+export async function getShoppingLists(): Promise<{ id: string; name: string }[] | undefined> {
   const result = await fetch('/api/shoppingLists');
   if (result.ok) {
-    return await result.json() as { id: string, name: string }[];
+    return (await result.json()) as { id: string; name: string }[];
   }
   return undefined;
 }
