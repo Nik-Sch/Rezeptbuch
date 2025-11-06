@@ -1,13 +1,36 @@
+// {
+//   "compilerOptions": {
+//     "target": "es2021",
+//     "module": "esnext",
+//     "esModuleInterop": true,
+//     "moduleResolution": "node",
+//     "sourceMap": false,
+//     "outDir": "dist"
+//   },
+//   "lib": [
+//     "esnext"
+//   ]
+// }
 {
   "compilerOptions": {
-    "target": "es2021",
-    "module": "esnext",
+    "target": "esnext",
+    "lib": [
+      "esnext"
+    ],
+    "skipLibCheck": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
     "moduleResolution": "node",
-    "sourceMap": false,
-    "outDir": "dist"
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "outDir": "build"
   },
-  "lib": [
-    "esnext"
+  "include": [
+    "src"
   ]
 }

@@ -1,6 +1,6 @@
 
 # Stage 1 - the build process
-FROM node:22-alpine3.21 AS build-deps
+FROM node:24-alpine3.21 AS build-deps
 WORKDIR /usr/src/app
 # Installs latest Chromium (63) package.
 RUN apk update && apk upgrade && \
@@ -19,10 +19,10 @@ COPY client ./
 RUN npm run build
 
 # Stage 2 - the production environment
-FROM node:22-alpine3.21
+FROM node:24-alpine3.21
 WORKDIR /usr/src/app
 COPY server/package.json server/package-lock.json ./
-RUN npm ci
+RUN npm ci --production
 COPY server ./
 RUN npm run build
 COPY --from=build-deps /usr/src/app/dist /usr/src/app/static

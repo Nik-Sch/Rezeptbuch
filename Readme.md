@@ -18,11 +18,13 @@ Access to the database
 - `PUSH_PRIVATE_KEY=...`: vapid key for notification pushing ([generator](https://vapidkeys.com/)) *You need to change the mail address in api/app.py:176 accordingly*
 - `BACKUP_REPO=https://user:password@some_git.repository` A repository which is used to backup the sql db and all uploaded images. This should be a private repo which will be pushed everytime the `api/backup.sh` script is called. (You may want to make a crontab in the host similiarly to: `0 0 * * * /usr/bin/docker exec rezeptbuch_api_1 ./backup.sh`)
 The repository should contain a `backup.sql` file which creates the tables accordingly in order for the initial db setup to work. You may want to clone https://github.com/rezeptbuch/backup-example
+- `EXPRESS_SECRET`: a secret for the server side renderer to have access to the recipe api to prefetch recipe information to fill link previews.
 
 ### ui/.env
 - `PORT=80` defines the port to serve the ui
 - `API_URI=http://api/` the docker local uri to access the api
 - `STATIC_DIR=./static` defines the directory to be used for static files
+- `EXPRESS_SECRET`: same as in api/.env
 
 
 ## Docker Compose

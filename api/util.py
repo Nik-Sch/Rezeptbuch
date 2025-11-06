@@ -123,21 +123,15 @@ class Database:
         finally:
             conn.close()
 
-    def getRecipe(self, username, rid):
-        conn, userId, groupId = self.connect(username)
+    def getRecipe(self, recipeId):
+        conn, _, _ = self.connect()
         try:
             cur = conn.cursor()
             cur.execute(
-                "SELECT `recipe`.* FROM `recipe` JOIN `user` ON `recipe`.`userId` = `user`.`id` WHERE `groupId` = %s and `recipe`.`id` = %s;",
-                [groupId, rid],
+                "SELECT * FROM `recipe`  WHERE `id` = %s;",
+                [recipeId],
             )
-            recipe = 0
-            for res in cur.fetchall():
-                recipe = marshal(res, self.__recipeFields)
-            if recipe != 0:
-                return {"recipe": recipe}
-            else:
-                return None
+            return marshal(cur.fetchone(), self.__recipeFields)
         finally:
             conn.close()
 
