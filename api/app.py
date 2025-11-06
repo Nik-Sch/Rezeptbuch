@@ -32,6 +32,11 @@ from rich.logging import RichHandler
 
 from util import Database
 
+assert "FLASK_KEY" in os.environ, "Missing env variable FLASK_KEY"
+assert "EXPRESS_SECRET" in os.environ, "Missing env variable EXPRESS_SECRET"
+assert "PUSH_PUBLIC_KEY" in os.environ, "Missing env variable PUSH_PUBLIC_KEY"
+assert "PUSH_PRIVATE_KEY" in os.environ, "Missing env variable PUSH_PRIVATE_KEY"
+
 app = Flask(__name__)
 app.secret_key = bytes(os.environ["FLASK_KEY"], "utf-8").decode("unicode_escape")
 app.config["SESSION_TYPE"] = "redis"
@@ -515,14 +520,17 @@ class RecipeAPI(Resource):
 
         super(RecipeAPI, self).__init__()
 
+    # only for express to load the preview
     def get(self, recipeId: int):
-        userName = sessionGet("userName")
-        if userName is None:
-            return unauthorized()
-        result = db.getRecipe(userName, recipeId)
-        if result is not None:
-            return result
-        return make_response(jsonify({"error": "Not found"}), 404)
+        if (
+            "express-secret" in request.headers
+            and request.headers["express-secret"] == os.environ["EXPRESS_SECRET"]
+        ):
+            result = db.getRecipe(recipeId)
+            if result is not None:
+                return result
+            return make_response(jsonify({"error": "Not found"}), 404)
+        return unauthorized()
 
     def put(self, recipeId: int):
         userName = sessionGet("userName")
