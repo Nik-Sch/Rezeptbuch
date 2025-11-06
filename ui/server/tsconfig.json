@@ -1,16 +1,3 @@
-// {
-//   "compilerOptions": {
-//     "target": "es2021",
-//     "module": "esnext",
-//     "esModuleInterop": true,
-//     "moduleResolution": "node",
-//     "sourceMap": false,
-//     "outDir": "dist"
-//   },
-//   "lib": [
-//     "esnext"
-//   ]
-// }
 {
   "compilerOptions": {
     "target": "esnext",
