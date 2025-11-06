@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import { resolve } from 'path';
 import { readFile } from 'fs';
 import util from 'util';
-import { IRecipe } from './types';
+import { IApiRecipe } from './types';
 import morgan from 'morgan';
 
 const readFileAsync = util.promisify(readFile);
@@ -29,7 +29,7 @@ app.get(['/uniqueRecipes/*slug', '/recipes/*slug'], async (req, res) => {
     headers: { 'Express-Secret': expressSecret },
   });
   if (result.ok) {
-    const recipe = (await result.json()) as IRecipe;
+    const recipe = (await result.json()) as IApiRecipe;
     let index = await readFileAsync(resolve(staticDir, 'index.html'), 'utf-8');
 
     // replace title
