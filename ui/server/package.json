@@ -22,6 +22,7 @@
     "@types/morgan": "^1.9.10",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
+    "jiti": "^2.6.1",
     "prettier": "^3.6.2",
     "tsc-watch": "^5.0.3",
     "typescript": "^5.9.3",

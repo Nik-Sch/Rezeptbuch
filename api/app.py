@@ -522,7 +522,10 @@ class RecipeAPI(Resource):
 
     # only for express to load the preview
     def get(self, recipeId: int):
-        if "express-secret" in request.headers and request.headers["express-secret"] == os.environ["EXPRESS_SECRET"]:
+        if (
+            "express-secret" in request.headers
+            and request.headers["express-secret"] == os.environ["EXPRESS_SECRET"]
+        ):
             result = db.getRecipe(recipeId)
             if result is not None:
                 return result
