@@ -23,6 +23,20 @@ app.all('/api/*slug', (req: Request, res: Response) => {
   res.redirect(url);
 });
 
+app.get('/shoppingLists/*slug', async (req, res) => {
+  console.log(`${req.url}`);
+  const name = req.url.split('/').at(-1);
+  if (name) {
+    const index = (await readFileAsync(resolve(staticDir, 'index.html'), 'utf-8')).replaceAll(
+      /(<meta\s+(?:property|name)="[^"]*description"\s+content=")[^"]*(">)/g,
+      (_, p1, p2) => `${p1}Einkaufsliste ${decodeURI(name)}${p2}`,
+    );
+    res.send(index);
+  } else {
+    res.sendFile(resolve(staticDir, 'index.html'));
+  }
+});
+
 app.get(['/uniqueRecipes/*slug', '/recipes/*slug'], async (req, res) => {
   const url = `${apiUri}${req.url}`;
   const result = await fetch(url, {
@@ -62,7 +76,8 @@ app.get(['/uniqueRecipes/*slug', '/recipes/*slug'], async (req, res) => {
     if (recipe.image.length > 0) {
       index = index.replaceAll(
         /(<meta\s+(?:property|name)="[^"]*image"\s+content=")[^"]*(">)/g,
-        (_, p1, p2) => `${p1}/api/images/${recipe.image}${p2}`,
+        (_, p1, p2) =>
+          `${p1}https://${req.headers.host}/api/images/${recipe.image}?w=1500&h=1500${p2}`,
       );
     }
     res.send(index);
