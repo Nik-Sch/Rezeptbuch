@@ -39,7 +39,7 @@ import { WindowScroller, List } from 'react-virtualized';
 import i18n from '../../util/i18n';
 import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { UserMultiSelect } from '../helpers/UserMultiSelect';
-
+import Fuse, { FuseOptionKey } from 'fuse.js';
 const sortOptions: ISort[] = [
   { key: 'date', textKey: 'sortDate' },
   { key: 'title', textKey: 'sortTitle' },
@@ -218,14 +218,30 @@ export default function RecipeList(props: IDarkThemeProps) {
 
     const filterRecipe = (recipe?: IRecipe) => {
       return (
-        filterRecipeBySearch(recipe) && filterRecipeByCategory(recipe) && filterRecipeByUser(recipe)
+        filterRecipeByCategory(recipe) && filterRecipeByUser(recipe)
       );
     };
     window.clearTimeout(timeout.current);
     timeout.current = window.setTimeout(
       () => {
         if (recipes) {
-          setRecipesToShow(recipes.sort(sortRecipes).filter(filterRecipe));
+          const filtered = recipes.filter(filterRecipe);
+          if (searchString.trim().length > 0) {
+            const keys: FuseOptionKey<IRecipe>[] = ['title'];
+            if (searchInIngredients) {
+              keys.push({ name: 'ingredients', weight: 0.5 });
+            }
+            const fuse = new Fuse(filtered, {
+              keys,
+              distance: 1000,
+              threshold: 0.25,
+              includeScore: true
+            })
+            const fuzzied = fuse.search(searchString);
+            setRecipesToShow(fuzzied.map((r) => r.item));
+          } else {
+            setRecipesToShow(filtered.sort(sortRecipes))
+          }
         }
       },
       mobile ? 100 : 0,
