@@ -1,0 +1,11 @@
+.main-content {
+  .notification-asker {
+    margin: 15px;
+    width: auto;
+    .title-wrapper {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+}

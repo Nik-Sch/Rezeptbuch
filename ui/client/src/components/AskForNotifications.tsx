@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { subscribeUser, useSWSubscribed } from '../serviceWorkerRegistration';
 import { usePersistentState } from './helpers/CustomHooks';
 
+import './AskForNotifications.scss';
+
 export default function AskForNotifications() {
   const [t] = useTranslation();
 
