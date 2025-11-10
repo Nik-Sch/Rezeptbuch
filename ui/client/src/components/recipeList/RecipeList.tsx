@@ -160,25 +160,19 @@ export default function RecipeList(props: IDarkThemeProps) {
   useEffect(() => {
     const counts: Counts = {};
     for (const category of categories) {
-      counts[category.id] = recipes
-        .filter(filterRecipeBySearch)
-        .filter(filterRecipeByUser)
-        .filter((r) => r?.category.id === category.id).length;
+      counts[category.id] = recipesToShow.filter((r) => r?.category.id === category.id).length;
     }
     setCategoryCounts(counts);
-  }, [categories, filterRecipeBySearch, filterRecipeByUser, recipes]);
+  }, [categories, recipesToShow]);
 
   // userCounts
   useEffect(() => {
     const counts: Counts = {};
     for (const user of users) {
-      counts[user.id] = recipes
-        .filter(filterRecipeBySearch)
-        .filter(filterRecipeByCategory)
-        .filter((r) => r?.user.id === user.id).length;
+      counts[user.id] = recipesToShow.filter((r) => r?.user.id === user.id).length;
     }
     setUserCounts(counts);
-  }, [filterRecipeByCategory, filterRecipeBySearch, recipes, users]);
+  }, [recipesToShow, users]);
 
   // #27 (scroll to top on filter)
   useEffect(() => {
