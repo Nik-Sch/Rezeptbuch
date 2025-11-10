@@ -217,9 +217,7 @@ export default function RecipeList(props: IDarkThemeProps) {
     };
 
     const filterRecipe = (recipe?: IRecipe) => {
-      return (
-        filterRecipeByCategory(recipe) && filterRecipeByUser(recipe)
-      );
+      return filterRecipeByCategory(recipe) && filterRecipeByUser(recipe);
     };
     window.clearTimeout(timeout.current);
     timeout.current = window.setTimeout(
@@ -235,12 +233,12 @@ export default function RecipeList(props: IDarkThemeProps) {
               keys,
               distance: 1000,
               threshold: 0.25,
-              includeScore: true
-            })
+              includeScore: true,
+            });
             const fuzzied = fuse.search(searchString);
             setRecipesToShow(fuzzied.map((r) => r.item));
           } else {
-            setRecipesToShow(filtered.sort(sortRecipes))
+            setRecipesToShow(filtered.sort(sortRecipes));
           }
         }
       },
