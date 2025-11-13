@@ -11,8 +11,6 @@ import {
   Tooltip,
   DialogBody,
   DialogFooter,
-  Callout,
-  Collapse,
 } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
@@ -362,22 +360,15 @@ export default function RecipeList(props: IDarkThemeProps) {
 
   const filterActive = filteredCategories.length > 0 || filteredUsers.length > 0;
 
-  const mobileFilter = (
-    <Collapse isOpen={filterIsOpen} className={classNames('mobile-header-menu', Classes.CARD, Classes.ELEVATION_2)}>
-      <div className="sort-filter">{sortAndFilter}</div>
-    </Collapse>
-  );
-
   const mobileHeader = (
-    <MobileHeader darkThemeProps={props} navigationLinks={navigationLinks} additionalCollapse={mobileFilter}>
+    <MobileHeader darkThemeProps={props} navigationLinks={navigationLinks}>
       <>
         <Icon
           className={classNames(Classes.BUTTON, Classes.MINIMAL)}
           icon={filterActive ? 'filter-keep' : 'filter'}
-          intent={filterIsOpen ? 'primary' : 'none'}
+          intent={filterActive ? 'primary' : 'none'}
           size={24}
           onClick={() => {
-            
             setFilterIsOpen(!filterIsOpen);
             if (!filterIsOpen) {
               // going to open filter
@@ -416,12 +407,6 @@ export default function RecipeList(props: IDarkThemeProps) {
     </Dialog>
   );
 
-  // const mobileFilter = (
-  //   <Callout title={t('filter')} icon={filterActive ? 'filter-keep' : 'filter'}>
-  //       <div className="sort-filter">{sortAndFilter}</div>
-  //   </Callout>
-  // );
-
   if (typeof sortingOrder.sortValue === 'undefined') {
     setSortingOrder(defaultSortOrder);
     return <></>;
@@ -430,12 +415,11 @@ export default function RecipeList(props: IDarkThemeProps) {
   return (
     <>
       {mobile && mobileHeader}
-      {/* {mobile && mobileFilterDialog} */}
+      {mobile && mobileFilterDialog}
       <div className="body">
         {!mobile && sideMenu}
         <div className="main-content">
           {isNotificationAvailable() && <AskForNotifications />}
-          {/* {mobile && filterIsOpen && mobileFilter} */}
           {recipes.length === 0 && recipesToShow.length === 0 && (
             <H3 className="error">{t('noRecipes')}</H3>
           )}
