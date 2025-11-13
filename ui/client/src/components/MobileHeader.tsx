@@ -35,6 +35,7 @@ export interface IHeaderProps {
   className?: string;
   darkThemeProps: IDarkThemeProps;
   navigationLinks?: INavigationLink[];
+  additionalCollapse?: React.ReactNode;
 }
 
 export default function MobileHeader(props: IHeaderProps) {
@@ -73,6 +74,7 @@ export default function MobileHeader(props: IHeaderProps) {
             </>
           )}
         </Collapse>
+        {props.additionalCollapse}
       </header>
       {menuIsOpen && (
         <div
