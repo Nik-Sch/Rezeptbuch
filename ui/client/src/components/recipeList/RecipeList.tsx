@@ -104,7 +104,7 @@ export default function RecipeList(props: IDarkThemeProps) {
   );
   const [recipesToShow, setRecipesToShow] = useState<IRecipe[]>([]);
   const [filterIsOpen, setFilterIsOpen] = useState(false);
-  const timeout = useRef<number>();
+  const timeout = useRef<number | undefined>(undefined);
   const mobile = useMobile();
   const status = getUserInfo();
   const hasWriteAccess = status?.write ?? false;

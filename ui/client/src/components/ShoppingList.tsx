@@ -91,7 +91,7 @@ function NewShoppingListItem(props: { onConfirm: (...value: string[]) => void })
     }
   };
 
-  const hoverTimeout = useRef<number>();
+  const hoverTimeout = useRef<number | undefined>(undefined);
   const hasValue = text.trim().length > 0;
 
   return (
@@ -180,7 +180,7 @@ function ShoppingListItem(props: IItemProps) {
     setText(props.item.text);
   }, [props.item.text]);
 
-  const hoverTimeout = useRef<number>();
+  const hoverTimeout = useRef<number | undefined>(undefined);
 
   return (
     <div

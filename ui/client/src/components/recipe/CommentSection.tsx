@@ -174,8 +174,8 @@ function Comment(props: ICommentProps) {
     </div>
   );
 
-  const mouseOverTimeout = useRef<number>();
-  const mouseInTimeout = useRef<number>();
+  const mouseOverTimeout = useRef<number | undefined>(undefined);
+  const mouseInTimeout = useRef<number | undefined>(undefined);
 
   const mouseOver = () => {
     window.clearTimeout(mouseOverTimeout.current);
@@ -325,7 +325,7 @@ function NewComment(props: { username: string; recipeId: number }) {
     setNewText('');
   };
 
-  const blurTimeout = useRef<number>();
+  const blurTimeout = useRef<number | undefined>(undefined);
 
   return (
     <div className="comment">

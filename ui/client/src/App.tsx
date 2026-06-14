@@ -15,7 +15,7 @@ import { localStorageDarkTheme } from './util/StorageKeys';
 import MobileHeader from './components/MobileHeader';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { AppToasterTop } from './util/toaster';
 import SideMenu, { INavigationLink } from './components/SideMenu';
 

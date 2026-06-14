@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IDarkThemeProps } from '../App';
 import MobileHeader from './MobileHeader';
@@ -43,6 +43,9 @@ export default function LoginPage(
   });
 
   const [login, setLogin] = useState(true); // 'login' | 'register'
+  // React 19 removed ReactDOM.findDOMNode, which react-transition-group falls
+  // back to without a nodeRef; provide one for the confirm-password transition.
+  const password2NodeRef = useRef<HTMLDivElement>(null);
   const [details, setDetails] = useState({ username: '', password: '', password2: '' });
   const [visited, setVisited] = useState({ username: false, password: false, password2: false });
   const usernameWarning = visited.username && details.username.trim() === '';
@@ -220,31 +223,33 @@ export default function LoginPage(
 
               <TransitionGroup>
                 {!login && (
-                  <CSSTransition timeout={300} classNames="fade">
-                    <FormGroup
-                      className="form-group"
-                      label={t('passwordRepeat')}
-                      labelFor="password2"
-                      helperText={password2Warning && password2WarningText}
-                      intent={password2Warning ? 'danger' : 'none'}
-                      disabled={isSubmitting}
-                    >
-                      <InputGroup
-                        id="password2"
-                        size={mobile ? 'large' : 'medium'}
-                        placeholder={t('password')}
-                        value={details.password2}
+                  <CSSTransition timeout={300} classNames="fade" nodeRef={password2NodeRef}>
+                    <div ref={password2NodeRef}>
+                      <FormGroup
+                        className="form-group"
+                        label={t('passwordRepeat')}
+                        labelFor="password2"
+                        helperText={password2Warning && password2WarningText}
                         intent={password2Warning ? 'danger' : 'none'}
                         disabled={isSubmitting}
-                        rightElement={lockButton2}
-                        type={showPassword2 ? 'text' : 'password'}
-                        onBlur={() => setVisited((visited) => ({ ...visited, password2: true }))}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                          const value = event.currentTarget.value;
-                          setDetails((details) => ({ ...details, password2: value }));
-                        }}
-                      />
-                    </FormGroup>
+                      >
+                        <InputGroup
+                          id="password2"
+                          size={mobile ? 'large' : 'medium'}
+                          placeholder={t('password')}
+                          value={details.password2}
+                          intent={password2Warning ? 'danger' : 'none'}
+                          disabled={isSubmitting}
+                          rightElement={lockButton2}
+                          type={showPassword2 ? 'text' : 'password'}
+                          onBlur={() => setVisited((visited) => ({ ...visited, password2: true }))}
+                          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                            const value = event.currentTarget.value;
+                            setDetails((details) => ({ ...details, password2: value }));
+                          }}
+                        />
+                      </FormGroup>
+                    </div>
                   </CSSTransition>
                 )}
               </TransitionGroup>
