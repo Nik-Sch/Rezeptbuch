@@ -19,10 +19,11 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: {
       // Screenshots capture the fixed viewport (not fullPage), so dimensions are
-      // always constant. A small tolerance absorbs sub-pixel/antialiasing noise
-      // between the locally-prebuilt and CI-freshly-built backend while still
-      // flagging real layout/style regressions from a dependency upgrade.
-      maxDiffPixelRatio: 0.02,
+      // always constant. The tolerance absorbs sub-pixel/antialiasing noise
+      // between the locally-prebuilt and CI-freshly-built backend (amplified on
+      // the high-DPR mobile project) while still flagging real layout/style
+      // regressions from a dependency upgrade, which are far larger.
+      maxDiffPixelRatio: 0.03,
       animations: 'disabled',
     },
   },
