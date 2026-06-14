@@ -1,0 +1,75 @@
+# Standalone backend stack for the e2e CI job.
+#
+# Brings the backend up from current source (api + proxy built fresh) against an
+# ephemeral, schema-seeded MariaDB. There is no in-repo DB schema normally (the
+# api restores it from a private backup repo at startup), so CI loads ci/schema.sql
+# + ci/seed.sql and points IMAGE_DIRECTORY at a pre-populated dir so the api skips
+# the backup-repo clone. The real React client is served separately by Vite; the
+# `ui` service here is only a placeholder so the nginx proxy's upstream resolves.
+#
+#   docker compose -f ci/docker-compose.ci.yml up -d --build
+services:
+  db:
+    image: mariadb:10.11.14
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ci_root_pw
+      MYSQL_DATABASE: recipes
+      MYSQL_USER: recipes
+      MYSQL_PASSWORD: ci_pw
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      # Reports healthy only after init scripts run and the server accepts connections.
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:8.2.2
+    command: --appendonly no
+
+  api:
+    image: rezeptbuch-api:latest
+    build:
+      context: ../api
+      dockerfile: Dockerfile-dev
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: recipes
+      MYSQL_PASSWORD: ci_pw
+      MYSQL_DATABASE: recipes
+      IMAGE_DIRECTORY: /usr/src/images
+      FLASK_KEY: ci-flask-key
+      EXPRESS_SECRET: ci-secret
+      PUSH_PUBLIC_KEY: ""
+      PUSH_PRIVATE_KEY: ""
+      BAK_PUSH_PUBLIC_KEY: ""
+      BAK_PUSH_PRIVATE_KEY: ""
+      BACKUP_REPO: "unused-in-ci"
+      DEBUG: "true"
+    restart: on-failure
+    volumes:
+      - ../api:/usr/src/app/
+      - ./images:/usr/src/images
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # Placeholder so the proxy's `ui` upstream resolves; the real client is served
+  # by Vite in CI, so this only needs to listen on :80.
+  ui:
+    image: nginx:alpine
+
+  rezeptbuch:
+    image: rezeptbuch-rezeptbuch:latest
+    build: ../proxy
+    ports:
+      - "3040:80"
+    depends_on:
+      - ui
+      - api
