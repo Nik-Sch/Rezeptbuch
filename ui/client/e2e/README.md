@@ -4,6 +4,8 @@
 critical flows (login, recipe list/detail, public shopping list, dark mode,
 language switch) and assert on behaviour **and** full-page screenshots. They were
 introduced as a safety net for the React 18 → 19 + Blueprint dependency upgrade.
+Covered flows: login, recipe list + search, recipe detail, public shopping list,
+image upload, dark-mode toggle and language switch — on both desktop and mobile.
 
 ## How it runs
 
