@@ -28,15 +28,23 @@ export default defineConfig({
   },
   use: {
     baseURL: BASE_URL,
-    viewport: { width: 1280, height: 800 }, // desktop layout (useMobile = false)
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
     video: 'off',
   },
+  // The app switches to its mobile layout when width or height <= 700px, so the
+  // two projects exercise the desktop (SideMenu) and mobile (MobileHeader) UIs.
+  // mobile.spec.ts covers the mobile layout; the rest target desktop.
   projects: [
     {
-      name: 'chromium',
+      name: 'desktop',
+      testIgnore: /mobile\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } },
+    },
+    {
+      name: 'mobile',
+      testMatch: /mobile\.spec\.ts/,
+      use: { ...devices['Pixel 5'], viewport: { width: 390, height: 844 } },
     },
   ],
 });

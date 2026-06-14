@@ -16,7 +16,11 @@ screenshots are byte-for-byte comparable with the committed baselines and CI.
   state to `e2e/.auth/state.json`.
 - `e2e/fixtures.ts` holds the seed data + constants. Seeding is idempotent.
 - Recipes are scoped per user, so the seeded data is fully deterministic and the
-  visual snapshots are stable.
+  visual snapshots are stable. Recipe dates (set server-side to "now") are masked
+  in screenshots — the magenta block marks the excluded region.
+- Two Playwright projects run the suite: **desktop** (1280×800, SideMenu layout)
+  for most specs, and **mobile** (390×844, MobileHeader/drawer layout) for
+  `mobile.spec.ts`. Each project keeps its own snapshot baselines.
 
 ## Running locally
 
