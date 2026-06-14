@@ -1,0 +1,6 @@
+# Playwright e2e artifacts (snapshot baselines under e2e/**/*-snapshots ARE committed)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/e2e/.auth/
