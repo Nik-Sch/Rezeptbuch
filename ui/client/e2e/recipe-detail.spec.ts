@@ -19,7 +19,6 @@ test.describe('recipe detail', () => {
     await expect(page).toHaveURL(/\/recipes\/\d+$/);
     await expect(page.getByText('200g flour')).toBeVisible();
     await expect(page).toHaveScreenshot('recipe-detail.png', {
-      fullPage: true,
       mask: [page.locator('.recipe-date')],
     });
   });

@@ -29,6 +29,6 @@ test.describe('login page', () => {
   test('visual: login page', async ({ page }) => {
     await page.goto('/login');
     await expect(page.locator('#username')).toBeVisible();
-    await expect(page).toHaveScreenshot('login-page.png', { fullPage: true });
+    await expect(page).toHaveScreenshot('login-page.png');
   });
 });

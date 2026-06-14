@@ -37,7 +37,6 @@ test.describe('app chrome', () => {
     await page.locator('.settings label').first().click(); // DarkModeSwitch
     await expect(page.locator('body')).toHaveClass(/dark/);
     await expect(page).toHaveScreenshot('recipe-list-dark.png', {
-      fullPage: true,
       mask: [page.locator('.recipe-date')],
     });
   });

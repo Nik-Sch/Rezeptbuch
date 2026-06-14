@@ -16,6 +16,6 @@ test.describe('public shopping list', () => {
   test('visual: public shopping list', async ({ page }) => {
     await page.goto(listPath);
     await expect(page.getByText('Milk')).toBeVisible();
-    await expect(page).toHaveScreenshot('shopping-list-public.png', { fullPage: true });
+    await expect(page).toHaveScreenshot('shopping-list-public.png');
   });
 });

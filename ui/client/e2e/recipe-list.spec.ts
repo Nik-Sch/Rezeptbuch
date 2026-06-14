@@ -24,7 +24,6 @@ test.describe('recipe list', () => {
     await page.goto('/');
     await expect(page.getByText('E2E Chocolate Cake')).toBeVisible();
     await expect(page).toHaveScreenshot('recipe-list.png', {
-      fullPage: true,
       mask: [page.locator('.recipe-date')], // creation dates vary per seed run
     });
   });

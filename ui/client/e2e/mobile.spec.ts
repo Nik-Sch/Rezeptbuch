@@ -10,14 +10,14 @@ test.describe('mobile - public', () => {
   test('login page renders', async ({ page }) => {
     await page.goto('/login');
     await expect(page.locator('#username')).toBeVisible();
-    await expect(page).toHaveScreenshot('mobile-login.png', { fullPage: true });
+    await expect(page).toHaveScreenshot('mobile-login.png');
   });
 
   test('public shopping list renders', async ({ page }) => {
     await page.goto(`/shoppingLists/${SEED_LIST_KEY}/${encodeURIComponent(SEED_LIST_NAME)}`);
     await expect(page.getByText('Milk')).toBeVisible();
     await expect(page.getByText('Eggs')).toBeVisible();
-    await expect(page).toHaveScreenshot('mobile-shopping-list-public.png', { fullPage: true });
+    await expect(page).toHaveScreenshot('mobile-shopping-list-public.png');
   });
 });
 
@@ -29,7 +29,6 @@ test.describe('mobile - authed', () => {
     await expect(page.getByText('E2E Chocolate Cake')).toBeVisible();
     await expect(page.getByText('E2E Tomato Soup')).toBeVisible();
     await expect(page).toHaveScreenshot('mobile-recipe-list.png', {
-      fullPage: true,
       mask: [page.locator('.recipe-date')],
     });
   });
@@ -40,7 +39,6 @@ test.describe('mobile - authed', () => {
     await expect(page).toHaveURL(/\/recipes\/\d+$/);
     await expect(page.getByText('200g flour')).toBeVisible();
     await expect(page).toHaveScreenshot('mobile-recipe-detail.png', {
-      fullPage: true,
       mask: [page.locator('.recipe-date')],
     });
   });
@@ -55,7 +53,6 @@ test.describe('mobile - authed', () => {
     await expect(page.locator('body')).toHaveClass(/dark/);
 
     await expect(page).toHaveScreenshot('mobile-menu-dark.png', {
-      fullPage: true,
       mask: [page.locator('.recipe-date')],
     });
   });
