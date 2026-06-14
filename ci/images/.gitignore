@@ -1,0 +1,5 @@
+# Mounted as the api's IMAGE_DIRECTORY in CI; the dir must exist (so the api
+# skips its backup-repo clone) but uploaded images are runtime artifacts.
+*
+!.gitignore
+!.keep
