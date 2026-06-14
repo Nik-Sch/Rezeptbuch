@@ -87,10 +87,10 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
   const [textAreaHeight, setTextAreaHeight] = useState<number>(0);
   const mobile = useMobile();
 
-  const textArea = useRef<HTMLTextAreaElement>();
-  const queryList = useRef<QueryList<IRecipe>>();
-  const contentElement = useRef<HTMLSpanElement>();
-  const triggerPosition = useRef<number>();
+  const textArea = useRef<HTMLTextAreaElement>(null);
+  const queryList = useRef<QueryList<IRecipe>>(null);
+  const contentElement = useRef<HTMLSpanElement>(null);
+  const triggerPosition = useRef<number | undefined>(undefined);
 
   const { changeValue, editable, value, className, ...textAreaProps } = props;
 
@@ -144,7 +144,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
   };
 
   const handleItemSelect = (item: IRecipe) => {
-    if (typeof textArea.current !== 'undefined') {
+    if (textArea.current) {
       const content = textArea.current.value;
       const result = findMatch(content, triggerPosition.current ?? 0);
       if (result) {

@@ -5,6 +5,7 @@ import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import App from './App';
 import logo from './static/logo-no-text.svg';
 import { hydrateRoot, createRoot } from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
 
 const container = document.getElementById('root');
 const fallback = (
@@ -24,9 +25,11 @@ const fallback = (
 
 const node = (
   <React.StrictMode>
-    <Suspense fallback={fallback}>
-      <App />
-    </Suspense>
+    <HelmetProvider>
+      <Suspense fallback={fallback}>
+        <App />
+      </Suspense>
+    </HelmetProvider>
   </React.StrictMode>
 );
 

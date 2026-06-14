@@ -24,7 +24,7 @@ from flask_compress import Compress
 from flask_httpauth import HTTPBasicAuth
 from flask_restful import Api, Resource, reqparse
 from flask_session import Session
-from passlib.hash import pbkdf2_sha256
+from passlib.hash import pbkdf2_sha256  # pyright: ignore[reportAttributeAccessIssue]
 from PIL import Image
 from pywebpush import webpush
 from rich.console import Console
