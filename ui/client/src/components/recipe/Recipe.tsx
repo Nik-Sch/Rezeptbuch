@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import recipesHandler, {
   IRecipe,
@@ -61,6 +61,9 @@ export default function Recipe(props: IDarkThemeProps) {
   const navigate = useNavigate();
 
   const [state, setState] = useState({ editing: id === '-1', loaded: false, dirty: false });
+  // Mirrors `state.editing` into a ref so the (stale-closure) SSE handler can read
+  // the current value without re-subscribing on every edit toggle.
+  const editingRef = useRef(state.editing);
   const [recipe, setRecipe] = useState<IRecipeWithIngredientId>(emptyRecipe);
   const [imagesToBeDeleted, setImagesToBeDeleted] = useState<string[]>([]);
   const [ingredientsText, setIngredientsText] = useState<string>(''); // for mobile
@@ -72,6 +75,10 @@ export default function Recipe(props: IDarkThemeProps) {
   const status = getUserInfo();
   const hasWriteAccess =
     typeof status !== 'undefined' && status.write && status.username === recipe.user.user;
+
+  useEffect(() => {
+    editingRef.current = state.editing;
+  }, [state.editing]);
 
   // unloading stuff
   useEffect(() => {
@@ -95,6 +102,13 @@ export default function Recipe(props: IDarkThemeProps) {
       document.title = t('newRecipe');
     } else {
       const handleRecipesChange = (recipes: IRecipe[]) => {
+        // A background SSE recipes update (e.g. another device changing any recipe)
+        // must not interrupt an open edit session: clobbering `editing`/`dirty`/`recipe`
+        // here would yank the user out of the editor and discard unsaved changes.
+        // Save/discard/create all leave edit mode explicitly, so they still flow through.
+        if (editingRef.current) {
+          return;
+        }
         if (typeof id === 'undefined') {
           console.error('hey, this should not happen');
           setError(true);
@@ -175,6 +189,10 @@ export default function Recipe(props: IDarkThemeProps) {
     if (typeof id === 'undefined' || recipe.id === -1) {
       const newId = await recipesHandler.addRecipe(newRecipe);
       if (newId) {
+        // Leave edit mode explicitly: the SSE handler (which used to do this on the
+        // first recipes push) now skips while `editing` is true, so the freshly created
+        // recipe would otherwise stay stuck in the editor after navigating to it.
+        setState((state) => ({ ...state, editing: false, dirty: false }));
         void navigate(`/recipes/${newId}`);
         AppToasterTop.show({ message: t('recipeCreated'), intent: 'success' });
       } else {

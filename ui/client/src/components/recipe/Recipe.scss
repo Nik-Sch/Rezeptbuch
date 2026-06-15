@@ -45,20 +45,40 @@
     .title-wrapper {
       width: 100%;
       display: flex;
-      justify-content: space-between;
+      // Wrap the buttons onto their own row once the title row gets too tight,
+      // rather than cropping them (the buttons never shrink).
+      flex-wrap: wrap;
       align-items: center;
+      gap: 10px;
       margin-bottom: 15px;
 
       .title {
+        // Grow to fill the row, but a flex item defaults to `min-width: auto`, which
+        // refuses to shrink below the title's content size; allow it to shrink so a
+        // long title wraps instead of pushing the buttons off-screen. The 50% basis
+        // keeps the buttons beside the title at normal widths and drops them below
+        // only when the remaining space can no longer hold them.
+        flex: 1 1 50%;
+        min-width: 0;
+        text-align: start;
         font-family: 'Montserrat Alternates', sans-serif;
         // undo callout heading css (_callout.scss:56)
         line-height: unset;
         margin-bottom: unset;
         margin-top: unset;
+
+        // Let a long title wrap cleanly onto multiple lines instead of being
+        // truncated with an ellipsis (overrides the `.recipe`-wide
+        // `overflow: hidden` rule above).
+        .#{bp.$bp-ns}-editable-text-content {
+          overflow: visible !important;
+          text-overflow: clip;
+          white-space: pre-wrap;
+        }
       }
       .edit-container {
-        flex-basis: 1;
         flex-shrink: 0;
+        margin-left: auto; // keep the buttons right-aligned, beside or below the title
       }
     }
     .user {

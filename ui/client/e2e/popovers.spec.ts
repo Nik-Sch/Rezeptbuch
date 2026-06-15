@@ -104,13 +104,22 @@ test.describe('popovers (desktop)', () => {
 
     const description = page.locator('.description textarea').first();
     await expect(description).toBeVisible();
-    await description.fill((await description.inputValue()) + '#'); // '#' opens the recipe autocomplete
+    // `#<query>` opens the recipe autocomplete filtered by title/id. Filter to a single
+    // recipe whose title only the seeded "E2E Chocolate Cake" matches, so the popover
+    // shows exactly one row regardless of any throwaway recipes other (parallel) tests
+    // create — otherwise the row count/width would be non-deterministic.
+    await description.fill((await description.inputValue()) + '#Chocolate');
 
-    await expect(page.locator('.description-select-popover')).toBeVisible();
-    await popoverScreenshot(page, 'popover-description-autocomplete.png', [
-      page.locator('.recipe-date'),
-      page.locator('.bp6-menu-item-label'),
-    ]);
+    const popover = page.locator('.description-select-popover');
+    await expect(popover).toBeVisible();
+    await expect(popover.getByText('E2E Chocolate Cake')).toBeVisible();
+    // Each row carries a `#<recipe-id>` label whose width depends on the id's digit
+    // count (the id drifts with the DB auto-increment and differs local vs CI). Hide it
+    // so the popover width is fixed by the title alone; its content isn't asserted.
+    await page.addStyleTag({
+      content: '.description-select-popover .bp6-menu-item-label { display: none !important; }',
+    });
+    await popoverScreenshot(page, 'popover-description-autocomplete.png');
   });
 
   // Site 5 — ImagePart edit popover (open-only; the seeded recipe carries the image).
