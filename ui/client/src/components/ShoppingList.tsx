@@ -16,7 +16,7 @@ import {
   Dialog,
   Radio,
   RadioGroup,
-  Popover,
+  PopoverNext,
   Tooltip,
   DialogBody,
   DialogFooter,
@@ -385,7 +385,7 @@ function ShoppingListSelect(props: {
           size="large"
         />
       </ShoppingListSelect>
-      <Popover
+      <PopoverNext
         disabled={mobile}
         isOpen={popoverOpen}
         onInteraction={(newState) => setPopoverOpen(newState)}
@@ -546,11 +546,29 @@ export default function ShoppingList(props: IDarkThemeProps) {
           const oldLists = Object.keys(state.lists).filter(
             (v) => !onlineLists.map((v) => v.id).includes(v),
           );
-          const newActive = oldLists.includes(state.active) ? userInfo.username : state.active;
+          // The resulting list keys after merging in the server's lists and
+          // dropping the ones no longer present.
+          const resultingKeys = Object.keys(state.lists)
+            .filter((k) => !oldLists.includes(k))
+            .concat(Object.keys(newLists));
+          // `active` must reference an existing list — otherwise the view crashes
+          // reading `lists[active].items`/`.name`. Prefer the current list, then the
+          // private (username) list, then any remaining list.
+          let newActive = oldLists.includes(state.active) ? userInfo.username : state.active;
+          if (!resultingKeys.includes(newActive)) {
+            newActive = resultingKeys.includes(userInfo.username)
+              ? userInfo.username
+              : (resultingKeys[0] ?? userInfo.username);
+          }
+          // If the user has no lists at all, keep a local private list so there is
+          // always a valid active list to render.
+          const ensurePrivate = resultingKeys.length === 0;
           setState((state) =>
             update(state, {
               lists: {
-                $merge: newLists,
+                $merge: ensurePrivate
+                  ? { ...newLists, [userInfo.username]: { items: [], name: undefined } }
+                  : newLists,
                 $unset: oldLists,
               },
               active: {

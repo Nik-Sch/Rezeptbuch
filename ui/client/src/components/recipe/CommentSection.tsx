@@ -10,7 +10,7 @@ import {
   H3,
   Dialog,
   AnchorButton,
-  Popover,
+  PopoverNext,
   Tooltip,
   DialogFooter,
   DialogBody,
@@ -90,10 +90,10 @@ function CommentControl(props: ICommentControlProps) {
           intent="primary"
           onClick={() => props.enableEditing()}
         />
-        <Popover
+        <PopoverNext
           isOpen={props.deleteOpen}
           popoverClassName={Classes.POPOVER_CONTENT_SIZING}
-          position="left"
+          placement="left"
           disabled={!online}
           content={deletePopoverContent}
           onClose={() => props.setDeleteOpen(false)}
@@ -239,10 +239,11 @@ function Comment(props: ICommentProps) {
           )}
           {mobile && props.username === props.comment.user.user && (
             <div className="more">
-              <Popover
-                minimal={true}
+              <PopoverNext
+                animation="minimal"
+                arrow={false}
                 content={mobileMorePopoverContent}
-                position="left-top"
+                placement="left-start"
                 disabled={!online}
               >
                 <Tooltip content={t('tooltipOffline')} disabled={online}>
@@ -253,7 +254,7 @@ function Comment(props: ICommentProps) {
                     style={{ transform: 'rotate(90deg)' }}
                   />
                 </Tooltip>
-              </Popover>
+              </PopoverNext>
             </div>
           )}
         </div>

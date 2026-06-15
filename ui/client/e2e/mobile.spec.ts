@@ -1,5 +1,5 @@
 import { test, expect } from './test';
-import { AUTH_FILE, SEED_LIST_KEY, SEED_LIST_NAME } from './fixtures';
+import { AUTH_FILE, IMAGED_RECIPE_TITLE, SEED_LIST_KEY, SEED_LIST_NAME } from './fixtures';
 
 // Runs under the `mobile` Playwright project (390x844), exercising the mobile
 // layout (MobileHeader + drawer) rather than the desktop SideMenu.
@@ -39,9 +39,27 @@ test.describe('mobile - authed', () => {
     await expect(page).toHaveURL(/\/recipes\/\d+$/);
     await expect(page.getByText('200g flour')).toBeVisible();
     await expect(page).toHaveScreenshot('mobile-recipe-detail.png', {
-      mask: [page.locator('.recipe-date')],
+      mask: [page.locator('.recipe-date'), page.locator('.comment .date')],
     });
   });
+
+  // Site 3 — comment more-menu popover (mobile only): the seeded comment is
+  // owned by the test user, so the rotated "more" button is shown.
+  test('visual: comment more-menu popover', async ({ page }) => {
+    await page.goto('/');
+    await page.getByText(IMAGED_RECIPE_TITLE).click();
+    await expect(page).toHaveURL(/\/recipes\/\d+$/);
+
+    await page.locator('.comment .more').getByRole('button').first().click();
+    const popover = page.locator('.bp6-popover').last();
+    await expect(popover.getByRole('button', { name: 'Edit' })).toBeVisible();
+    // Element-level screenshot of the popover (content + lack of arrow) — a full-page
+    // shot renders the portaled popover at the origin in headless Chromium.
+    await expect(popover).toHaveScreenshot('mobile-popover-comment-more.png');
+  });
+
+  // Note: the description autocomplete popover is covered by the desktop spec
+  // (same PopoverNext component); no separate mobile case to avoid duplicating it.
 
   test('menu drawer opens and dark-mode toggle works', async ({ page }) => {
     await page.goto('/');

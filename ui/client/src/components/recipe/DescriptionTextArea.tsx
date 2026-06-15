@@ -6,7 +6,7 @@ import {
   QueryList,
   ItemPredicate,
 } from '@blueprintjs/select';
-import { TextAreaProps, Classes, MenuItem, Position, Tooltip, Popover } from '@blueprintjs/core';
+import { TextAreaProps, Classes, MenuItem, Tooltip, PopoverNext } from '@blueprintjs/core';
 import classNames from 'classnames';
 
 import './DescriptionTextArea.scss';
@@ -241,16 +241,18 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
 
   const renderer = (listProps: QueryListRendererProps<IRecipe>) => {
     return (
-      <Popover
+      <PopoverNext
         autoFocus={false}
         enforceFocus={false}
+        shouldReturnFocusOnClose={false}
         isOpen={isOpen}
-        position={Position.BOTTOM_LEFT}
+        placement="bottom-start"
         className={classNames(listProps.className)}
         popoverClassName={classNames('description-select-popover')}
         onOpened={handlePopoverOpened}
         onClosing={() => textArea.current?.focus()}
-        minimal={true}
+        animation="minimal"
+        arrow={false}
         content={
           <div onKeyDown={listProps.handleKeyDown} onKeyUp={listProps.handleKeyUp}>
             {listProps.itemList}
@@ -280,7 +282,7 @@ export default function DescriptionTextArea(props: IDescriptionTextAreaProps) {
             style={{ height: textAreaHeight }}
           />
         </div>
-      </Popover>
+      </PopoverNext>
     );
   };
 

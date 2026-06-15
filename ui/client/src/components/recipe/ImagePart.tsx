@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Classes, Popover, Button, Dialog, ProgressBar, Intent, H5 } from '@blueprintjs/core';
+import { Classes, PopoverNext, Button, Dialog, ProgressBar, Intent, H5 } from '@blueprintjs/core';
 import { MyImage } from '../helpers/Image';
 import { AppToasterTop } from '../../util/toaster';
 import { useTranslation } from 'react-i18next';
@@ -126,7 +126,7 @@ export default function ImagePart(props: IImagePartProps) {
     } else {
       return (
         <div className={props.className}>
-          <Popover
+          <PopoverNext
             // wrapperTagName='div'
             // usePortal={false}
             popoverClassName={Classes.POPOVER_CONTENT_SIZING}
@@ -138,7 +138,7 @@ export default function ImagePart(props: IImagePartProps) {
                 setIsPopoverOpen(false);
               }
             }}
-            position="left"
+            placement="left"
             isOpen={isPopoverOpen}
             content={
               <div>
@@ -171,7 +171,7 @@ export default function ImagePart(props: IImagePartProps) {
                 onMouseOver: () => setIsPopoverOpen(true),
               }}
             />
-          </Popover>
+          </PopoverNext>
         </div>
       );
     }

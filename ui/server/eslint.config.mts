@@ -16,7 +16,7 @@ export default defineConfig([
       },
     },
     rules: {
-      "@typescript-eslint/no-deprecated": "warn"
+      "@typescript-eslint/no-deprecated": "error"
     }
   }
 ]);
