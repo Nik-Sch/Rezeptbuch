@@ -21,9 +21,9 @@
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "jiti": "^2.6.1",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.4",
     "tsc-watch": "^7.2.0",
-    "typescript-eslint": "^8.43.0"
+    "typescript-eslint": "^8.61.0"
   },
   "dependencies": {
     "@types/express": "^5.0.6",
@@ -31,6 +31,6 @@
     "express": "^5.2.1",
     "morgan": "^1.11.0",
     "node-fetch": "^3.3.2",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   }
 }
