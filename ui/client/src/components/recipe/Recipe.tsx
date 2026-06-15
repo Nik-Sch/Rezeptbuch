@@ -24,7 +24,7 @@ import {
   AnchorButton,
   Alert,
   Tooltip,
-  Popover,
+  PopoverNext,
   DialogFooter,
   DialogBody,
 } from '@blueprintjs/core';
@@ -740,10 +740,10 @@ function CancelButton(props: {
 }) {
   const [t] = useTranslation();
   return (
-    <Popover
+    <PopoverNext
       popoverClassName={Classes.POPOVER_CONTENT_SIZING}
       defaultIsOpen={false}
-      position="bottom"
+      placement="bottom"
       content={
         <div>
           <H5>{t('confirmCancelTitle')}</H5>
@@ -761,7 +761,7 @@ function CancelButton(props: {
       }
     >
       {props.popoverTarget}
-    </Popover>
+    </PopoverNext>
   );
 }
 
@@ -773,11 +773,11 @@ function DeleteButton(props: {
   const [t] = useTranslation();
 
   return (
-    <Popover
+    <PopoverNext
       popoverClassName={Classes.POPOVER_CONTENT_SIZING}
       defaultIsOpen={false}
       disabled={props.disabled}
-      position="bottom"
+      placement="bottom"
       content={
         <div>
           <H5>{t('confirmDeleteTitle')}</H5>
@@ -795,6 +795,6 @@ function DeleteButton(props: {
       }
     >
       {props.popoverTarget}
-    </Popover>
+    </PopoverNext>
   );
 }

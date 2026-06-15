@@ -19,7 +19,7 @@ test.describe('recipe detail', () => {
     await expect(page).toHaveURL(/\/recipes\/\d+$/);
     await expect(page.getByText('200g flour')).toBeVisible();
     await expect(page).toHaveScreenshot('recipe-detail.png', {
-      mask: [page.locator('.recipe-date')],
+      mask: [page.locator('.recipe-date'), page.locator('.comment .date')],
     });
   });
 });
