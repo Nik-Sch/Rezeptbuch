@@ -48,4 +48,5 @@ Jobs: `ui` (client+server lint/build/format), `python-api` (3.12/3.13 lint/type/
 
 ## Conventions
 - Branch + PR for changes; **don't merge** — the maintainer approves/merges.
-- Dependency-upgrade scope kept React-19-focused: react-router stays v6, i18next v25, TypeScript 5.9 (router v7 / i18next 26 / TS 6 are separate migrations).
+- Dependency upgrades done in waves: React 19 first, then react-router 7 / i18next 26 / TypeScript 6. Two upgrades remain deliberately deferred: **eslint stays 9** (eslint-plugin-react has no eslint-10-compatible release — eslint 10 crashes it via removed `context.getFilename()`), and the **Blueprint `Popover` → `PopoverNext`** migration (not a drop-in: `position`→`placement`, Floating UI vs react-popper; `@typescript-eslint/no-deprecated` is kept at `warn` for these 7 sites).
+- TS 6: `moduleResolution: "node"` is deprecated → client uses `bundler`, server uses `nodenext` (relative imports need `.js`, and `outDir` requires explicit `rootDir`).

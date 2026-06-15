@@ -210,7 +210,7 @@ function ShoppingListItem(props: IItemProps) {
             size={mobile ? 'large' : 'medium'}
             className="shopping-item-checkbox"
             checked={props.item.checked}
-            onChange={(event: React.FormEvent<HTMLInputElement>) => {
+            onChange={(event: React.SyntheticEvent<HTMLInputElement>) => {
               const v = event.currentTarget.checked;
               props.updateElement({ ...props.item, checked: v }, false);
             }}
@@ -686,7 +686,7 @@ export default function ShoppingList(props: IDarkThemeProps) {
         // set state doesn't work when navigating away
         void updateShoppingLists(listKey, listName ?? '', 'POST');
         localStorage.setItem(localStorageShoppingList, JSON.stringify(newState));
-        navigate('/shoppingList');
+        void navigate('/shoppingList');
       } else if (state.active !== listKey) {
         setState({
           active: listKey,

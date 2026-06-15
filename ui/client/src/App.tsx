@@ -1,9 +1,10 @@
-import React, { lazy, useEffect } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import './App.scss';
 import {
   Route,
   createBrowserRouter,
   Navigate,
+  Outlet,
   useLocation,
   createRoutesFromElements,
   RouterProvider,
@@ -85,7 +86,7 @@ function App() {
   const [t] = useTranslation();
 
   const [darkTheme, setDarkTheme] = usePersistentState(
-    window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches,
+    window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false,
     localStorageDarkTheme,
   );
   const handleThemeChange = (theme: boolean) => {
@@ -122,9 +123,20 @@ function App() {
     { path: '*', Component: NotFound, priv: false },
   ];
 
+  const fallback = <Fallback darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange} />;
+
+  // Pathless layout route: its <Suspense> renders inside the router context, so the
+  // fallback (which shows the nav chrome via <Link>) has access to router context while
+  // lazy route chunks load. (v7 removed RouterProvider's `fallbackElement`.)
   const router = createBrowserRouter(
     createRoutesFromElements(
-      <>
+      <Route
+        element={
+          <Suspense fallback={fallback}>
+            <Outlet />
+          </Suspense>
+        }
+      >
         <Route
           path="/login"
           element={
@@ -156,11 +168,9 @@ function App() {
             }
           />
         ))}
-      </>,
+      </Route>,
     ),
   );
-
-  const fallback = <Fallback darkTheme={darkTheme} onDarkThemeChanged={handleThemeChange} />;
 
   return (
     <div className={mobile ? 'mobile' : ''}>
@@ -168,7 +178,7 @@ function App() {
         <meta name="color-scheme" content={darkTheme ? 'dark' : 'light'} />
       </Helmet>
       <BlueprintProvider>
-        <RouterProvider router={router} fallbackElement={fallback} />
+        <RouterProvider router={router} />
       </BlueprintProvider>
     </div>
   );

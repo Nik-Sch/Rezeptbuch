@@ -154,7 +154,7 @@ export default function Recipe(props: IDarkThemeProps) {
     const newRecipe = {
       ...newRecipeWithIds,
       ingredients: recipe.ingredients.map((v) => v.ingredient),
-    } as IRecipe;
+    };
 
     if (mobile) {
       newRecipe.ingredients = ingredientsText.split('\n').filter((v) => v.trim().length > 0);
@@ -175,7 +175,7 @@ export default function Recipe(props: IDarkThemeProps) {
     if (typeof id === 'undefined' || recipe.id === -1) {
       const newId = await recipesHandler.addRecipe(newRecipe);
       if (newId) {
-        navigate(`/recipes/${newId}`);
+        void navigate(`/recipes/${newId}`);
         AppToasterTop.show({ message: t('recipeCreated'), intent: 'success' });
       } else {
         AppToasterTop.show({ message: t('recipeCreatedError'), intent: 'success' });
@@ -194,7 +194,7 @@ export default function Recipe(props: IDarkThemeProps) {
   const handleCancelClick = () => {
     if (!state.dirty) {
       if (typeof id === 'undefined' || recipe.id === -1) {
-        navigate('/');
+        void navigate('/');
       } else {
         setState((state) => ({ ...state, editing: false }));
       }
@@ -243,7 +243,7 @@ export default function Recipe(props: IDarkThemeProps) {
         setMobileDeleteIsOpen(false);
       }
       AppToasterTop.show({ message: t('recipeDeleted'), intent: 'success' });
-      navigate('/');
+      void navigate('/');
     } else {
       AppToasterTop.show({ message: t('recipeNotDeleted'), intent: 'warning' });
     }
@@ -277,7 +277,7 @@ export default function Recipe(props: IDarkThemeProps) {
 
   const addIngredientsToShoppingList = () => {
     addShoppingItems(recipe.ingredients.filter(showDot).map((v) => v.ingredient));
-    navigate('/shoppingList');
+    void navigate('/shoppingList');
   };
 
   const prompt = (

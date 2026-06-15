@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import { resolve } from 'path';
 import { readFile } from 'fs';
 import util from 'util';
-import { IApiRecipe } from './types';
+import { IApiRecipe } from './types.js';
 import morgan from 'morgan';
 
 const readFileAsync = util.promisify(readFile);

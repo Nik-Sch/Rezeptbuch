@@ -15,9 +15,6 @@ export default defineConfig([
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    settings: {
-      react: { version: 'detect' }
-    },
     rules: {
       "@typescript-eslint/no-deprecated": "warn"
     }

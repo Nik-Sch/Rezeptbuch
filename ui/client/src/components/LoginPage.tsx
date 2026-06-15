@@ -38,7 +38,7 @@ export default function LoginPage(
   useEffect(() => {
     if (typeof getUserInfo() !== 'undefined') {
       props.setAuthenticated(true);
-      navigate(from, { replace: true });
+      void navigate(from, { replace: true });
     }
   });
 
@@ -61,7 +61,7 @@ export default function LoginPage(
   const [showPassword2, setShowPassword2] = useState(false);
   const [wrongCredentials, setWrongCredentials] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     void (async () => {
       if (login) {
@@ -73,7 +73,7 @@ export default function LoginPage(
         const success = await loginToRecipes(details.username, details.password);
         if (success) {
           props.setAuthenticated(true);
-          navigate(from, { replace: true });
+          void navigate(from, { replace: true });
         } else {
           setWrongCredentials(true);
         }
@@ -93,7 +93,7 @@ export default function LoginPage(
           const success = await loginToRecipes(details.username, details.password);
           if (success) {
             props.setAuthenticated(true);
-            navigate(from, { replace: true });
+            void navigate(from, { replace: true });
           } else {
             AppToasterTop.show({ message: t('accountError'), intent: 'danger' });
           }

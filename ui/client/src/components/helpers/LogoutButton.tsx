@@ -26,7 +26,7 @@ export default function LogoutButton() {
           if (online) {
             void (async () => {
               await logout();
-              navigate('/login');
+              void navigate('/login');
             })();
           }
         }}
