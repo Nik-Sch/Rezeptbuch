@@ -40,8 +40,13 @@ export const SEED_RECIPES = [
 export const IMAGED_RECIPE_TITLE = SEED_RECIPES[0].title;
 export const SEED_COMMENT = 'E2E seed comment for popover tests.';
 
-/** Fixed share key + name for the public shopping-list route. */
-export const SEED_LIST_KEY = 'e2e-fixed-listkey-0001';
+/**
+ * Fixed share key + name for the public shopping-list route. The key must be a
+ * UUID: the client only ever creates shared lists via uuidv4(), and the API now
+ * requires shared-list ids to be UUID-shaped so they can never collide with a
+ * private list (keyed by the bare username).
+ */
+export const SEED_LIST_KEY = '00000000-0000-4000-8000-000000000001';
 export const SEED_LIST_NAME = 'E2E Groceries';
 
 export const SEED_LIST_ITEMS = [
