@@ -351,7 +351,10 @@ class Database:
         try:
             hash = pbkdf2_sha256.hash(pwd)
             cur = conn.cursor()
-            query = "INSERT INTO `user` (`user`, `encrypted`, `readOnly`) VALUES (%s, %s, '0');"
+            query = (
+                "INSERT INTO `user` (`user`, `encrypted`, `readOnly`, `groupId`) "
+                "VALUES (%s, %s, '0', 0);"
+            )
             if cur.execute(query, [username, hash]) == 1:
                 return True
         finally:
@@ -367,5 +370,15 @@ class Database:
             for res in cur.fetchall():
                 return res["readOnly"] == 0
             return False
+        finally:
+            conn.close()
+
+    def getUserGroups(self):
+        """Return a {username: groupId} map for scoping notifications by group."""
+        conn, _, _ = self.connect()
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT `user`, `groupId` FROM `user`;")
+            return {res["user"]: res["groupId"] for res in cur.fetchall()}
         finally:
             conn.close()

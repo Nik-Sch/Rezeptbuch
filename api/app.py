@@ -1,8 +1,10 @@
 import hashlib
+import hmac
 import io
 import json
 import logging
 import os
+import re
 import threading
 from datetime import timedelta
 from typing import Any, Literal, OrderedDict, cast
@@ -42,6 +44,7 @@ app.secret_key = bytes(os.environ["FLASK_KEY"], "utf-8").decode("unicode_escape"
 app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_REDIS"] = redis.Redis(host="redis", port=6379, db=2)
 app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
+app.config["SESSION_COOKIE_SECURE"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=365)
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 365 * 24 * 60 * 60
 
@@ -56,6 +59,13 @@ redisNotificationsDB = redis.StrictRedis(host="redis", port=6379, db=0)
 redisUniqueRecipeDB = redis.StrictRedis(host="redis", port=6379, db=1)
 redisShoppingListDB = redis.StrictRedis(
     host="redis", port=6379, db=2, decode_responses=True
+)
+
+# Shared shopping lists are referenced by a client-generated UUID. We match that
+# format so a shared id can never collide with a private list (keyed by the bare
+# username) or a flask-session key (prefixed "session:") in the same redis db.
+SHOPPING_LIST_ID_RE = re.compile(
+    r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", re.IGNORECASE
 )
 
 checksumRequestParser = reqparse.RequestParser()
@@ -239,9 +249,28 @@ def privateShoppingList():
         return unauthorized()
 
 
+def resolveShoppingListKey(list_id: str) -> str | None:
+    """Map a requested list id to its redis key, or None if access is denied.
+
+    - The caller's own private list (key == bare username) is only served to the
+      authenticated owner.
+    - Shared lists are public-by-link but namespaced under "shared:" so a shared
+      id can never address a private (bare-username) list or a flask-session key.
+    """
+    user_name = sessionGet("userName")
+    if user_name is not None and list_id == user_name:
+        return list_id
+    if SHOPPING_LIST_ID_RE.fullmatch(list_id):
+        return f"shared:{list_id}"
+    return None
+
+
 @app.route("/shoppingLists/<string:list_id>", methods=["GET", "POST", "PUT", "DELETE"])
 def publicShoppingList(list_id: str):
-    return handleShoppingList(list_id)
+    key = resolveShoppingListKey(list_id)
+    if key is None:
+        return unauthorized()
+    return handleShoppingList(key)
 
 
 @app.route("/webpush_public_key", methods=["GET"])
@@ -249,13 +278,18 @@ def get_push_public_key():
     return make_response(jsonify({"public_key": os.environ["PUSH_PUBLIC_KEY"]}), 200)
 
 
-def notifyNewRecipe(recipe: OrderedDict[str, Any], exclude: int):
+def notifyNewRecipe(recipe: OrderedDict[str, Any], exclude: int, author: str):
     logger.info(f"sending notifications, but not to {exclude=}")
+    groups = db.getUserGroups()
+    authorGroup = groups.get(author)
     for sub in redisNotificationsDB.scan_iter():
         try:
             if sub.decode() == exclude:
                 continue
             value = json.loads(redisNotificationsDB.get(sub))  # type: ignore
+            # only notify subscribers in the same group as the recipe's author
+            if groups.get(value.get("userName")) != authorGroup:
+                continue
             webpush(
                 subscription_info=value["sub"],
                 data=json.dumps(recipe),
@@ -480,7 +514,11 @@ class RecipeListAPI(Resource):
         if result is not None:
             t = threading.Thread(
                 target=notifyNewRecipe,
-                kwargs={"recipe": result, "exclude": sessionGet("id", -1)},
+                kwargs={
+                    "recipe": result,
+                    "exclude": sessionGet("id", -1),
+                    "author": userName,
+                },
             )
             t.start()
             return result
@@ -522,9 +560,9 @@ class RecipeAPI(Resource):
 
     # only for express to load the preview
     def get(self, recipeId: int):
-        if (
-            "express-secret" in request.headers
-            and request.headers["express-secret"] == os.environ["EXPRESS_SECRET"]
+        if "express-secret" in request.headers and hmac.compare_digest(
+            request.headers["express-secret"].encode(),
+            os.environ["EXPRESS_SECRET"].encode(),
         ):
             result = db.getRecipe(recipeId)
             if result is not None:
@@ -596,6 +634,9 @@ class CategoryListAPI(Resource):
 # images
 IMAGE_FOLDER = "../images/"
 
+# guard against decompression-bomb images (PIL raises DecompressionBombError above)
+Image.MAX_IMAGE_PIXELS = 64_000_000
+
 
 class ImageListAPI(Resource):
     def post(self):
@@ -626,7 +667,7 @@ class ImageListAPI(Resource):
                 response.status_code = 201
                 response.autocorrect_location_header = False
                 return response
-            except IOError as e:
+            except (IOError, Image.DecompressionBombError) as e:
                 logger.error(e)
                 return make_response(jsonify({"error": "File isn't an image"}), 400)
 
@@ -651,15 +692,18 @@ class ImageAPI(Resource):
                 im.save(output, format="JPEG")
             output.seek(0)
             return send_file(output, download_name="img.jpg", mimetype="image/jpeg")
-        except IOError:
+        except (IOError, Image.DecompressionBombError):
             abort(404)
 
     def delete(self, name: str):
         userName = sessionGet("userName")
         if userName is None:
             return unauthorized()
-        if os.path.exists(IMAGE_FOLDER + name):
-            os.remove(IMAGE_FOLDER + name)
+        if not db.hasWriteAccess(userName):
+            return make_response(jsonify({"error": "no write access"}), 403)
+        if not os.path.exists(IMAGE_FOLDER + name):
+            return make_response("", 404)
+        os.remove(IMAGE_FOLDER + name)
         return make_response(jsonify(), 200)
 
 

@@ -18,6 +18,7 @@
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^9.35.0",
+    "@types/escape-html": "^1.0.4",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "jiti": "^2.6.1",
@@ -28,6 +29,7 @@
   "dependencies": {
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
+    "escape-html": "^1.0.3",
     "express": "^5.2.1",
     "morgan": "^1.11.0",
     "node-fetch": "^3.3.2",
