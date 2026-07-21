@@ -125,3 +125,6 @@ jobs:
       - name: flake8
         run: poetry run flake8
         working-directory: api
+      - name: pytest
+        run: poetry run pytest
+        working-directory: api
