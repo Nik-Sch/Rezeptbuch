@@ -38,6 +38,11 @@ black = "^26.5.1"
 flake8 = "^7.3.0"
 flake8-bugbear = "^25.11.29"
 flake8-pyproject = "^1.2.4"
+pytest = "^8.3.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.isort]
 profile = "black"

@@ -101,6 +101,13 @@ def unauthorized():
     return make_response(jsonify({"message": "Unauthorized access"}), 401)
 
 
+@app.errorhandler(redis.RedisError)
+def handle_redis_error(error: redis.RedisError):
+    # 503 is retryable; a bare exception would surface as a hard 500
+    logger.exception("redis error")
+    return make_response(jsonify({"error": "Service temporarily unavailable"}), 503)
+
+
 @app.route("/test-uptime", methods=["GET"])
 @auth.login_required
 def test_uptime():
@@ -178,15 +185,26 @@ def listOfshoppingLists():
 
 
 def shoppinglist_stream(list_id: str):
-    data = redisShoppingListDB.hvals(list_id)
-    data = [json.loads(x) for x in data]  # type: ignore
-    yield "data: %s\n\n" % json.dumps(data)
+    # pubsub holds a pool connection for the SSE lifetime; finally returns it
+    # on client disconnect (GeneratorExit) or error, so the pool never leaks.
     pubsub = redisShoppingListDB.pubsub()
-    pubsub.subscribe(list_id)
-    for message in pubsub.listen():
-        if message["type"] == "message":
-            m = json.loads(message["data"])
-            yield "data: %s\n\n" % m["data"]
+    try:
+        data = redisShoppingListDB.hvals(list_id)
+        data = [json.loads(x) for x in data]  # type: ignore
+        yield "data: %s\n\n" % json.dumps(data)
+        pubsub.subscribe(list_id)
+        for message in pubsub.listen():
+            if message["type"] == "message":
+                m = json.loads(message["data"])
+                yield "data: %s\n\n" % m["data"]
+    except redis.RedisError:
+        # stream end triggers the browser EventSource to reconnect
+        logger.exception("shopping list stream failed for %s", list_id)
+    finally:
+        try:
+            pubsub.close()
+        except redis.RedisError:
+            pass
 
 
 def verifyShoppingListJson(requestJson: Any | None):
