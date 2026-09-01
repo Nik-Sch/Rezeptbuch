@@ -647,9 +647,14 @@ export default function ShoppingList(props: IDarkThemeProps) {
   useEffect(() => {
     if (online) {
       setSynced('initial-fetch');
-      let eventSource = new EventSource(getShoppingListUrl(state.active));
+      let eventSource: EventSource;
+      let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+      // exponential backoff on reconnect (EventSource hides the HTTP status);
+      // resets to instant on any received message
+      let retryDelay = 0;
 
       const onMessage = (v: MessageEvent) => {
+        retryDelay = 0;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const result = JSON.parse(v.data) as IShoppingItem[] | null;
         if (result) {
@@ -669,14 +674,18 @@ export default function ShoppingList(props: IDarkThemeProps) {
       };
       const onError = () => {
         eventSource.close();
+        reconnectTimer = setTimeout(connect, retryDelay + Math.random() * 500);
+        retryDelay = retryDelay === 0 ? 1000 : Math.min(retryDelay * 2, 30000);
+      };
+      const connect = () => {
         eventSource = new EventSource(getShoppingListUrl(state.active));
         eventSource.onmessage = onMessage;
         eventSource.onerror = onError;
       };
 
-      eventSource.onmessage = onMessage;
-      eventSource.onerror = onError;
+      connect();
       return () => {
+        clearTimeout(reconnectTimer);
         eventSource.close();
       };
     } else {
