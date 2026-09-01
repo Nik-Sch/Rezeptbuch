@@ -6,6 +6,12 @@ services:
     restart: always
     env_file:
       - db.env
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     networks:
       - rezeptbuch
 
@@ -15,6 +21,12 @@ services:
     volumes:
       - redisStorage:/data
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - rezeptbuch
 
@@ -29,9 +41,21 @@ services:
     env_file:
       - db.env
       - api/.env
+    # app.py opens its first db connection at import time, so a worker that boots
+    # before mariadb is accepting connections dies and restart-loops.
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # Unauthenticated and touches neither db nor redis: a liveness check for
+      # gunicorn itself, not for the backends above.
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost/webpush_public_key"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 60s
     networks:
       - rezeptbuch
 
@@ -39,9 +63,16 @@ services:
     build: ./ui
     restart: always
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     env_file:
       - ui/.env
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost/"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 30s
     networks:
       - rezeptbuch
 
@@ -50,7 +81,8 @@ services:
     container_name: rezeptbuch
     restart: always
     depends_on:
-      - ui
+      ui:
+        condition: service_healthy
     networks:
       - rezeptbuch
       - system-proxy_default

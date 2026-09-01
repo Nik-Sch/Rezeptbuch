@@ -10,6 +10,7 @@ from datetime import timedelta
 from typing import Any, Literal, OrderedDict, cast
 from uuid import uuid4
 
+import pymysql
 import redis
 from flask import (
     Flask,
@@ -39,10 +40,17 @@ assert "EXPRESS_SECRET" in os.environ, "Missing env variable EXPRESS_SECRET"
 assert "PUSH_PUBLIC_KEY" in os.environ, "Missing env variable PUSH_PUBLIC_KEY"
 assert "PUSH_PRIVATE_KEY" in os.environ, "Missing env variable PUSH_PRIVATE_KEY"
 
+# Idle pooled connections are revalidated instead of surfacing a stale socket as a
+# one-off request error; the keepalive makes a silently dropped peer visible.
+REDIS_KWARGS: dict[str, Any] = {
+    "socket_keepalive": True,
+    "health_check_interval": 30,
+}
+
 app = Flask(__name__)
 app.secret_key = bytes(os.environ["FLASK_KEY"], "utf-8").decode("unicode_escape")
 app.config["SESSION_TYPE"] = "redis"
-app.config["SESSION_REDIS"] = redis.Redis(host="redis", port=6379, db=2)
+app.config["SESSION_REDIS"] = redis.Redis(host="redis", port=6379, db=2, **REDIS_KWARGS)
 app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=365)
@@ -55,10 +63,18 @@ auth = HTTPBasicAuth()
 db = Database()
 
 Session(app)
-redisNotificationsDB = redis.StrictRedis(host="redis", port=6379, db=0)
-redisUniqueRecipeDB = redis.StrictRedis(host="redis", port=6379, db=1)
+redisNotificationsDB = redis.StrictRedis(host="redis", port=6379, db=0, **REDIS_KWARGS)
+redisUniqueRecipeDB = redis.StrictRedis(host="redis", port=6379, db=1, **REDIS_KWARGS)
+# Each live SSE stream holds one pooled connection for its lifetime. The cap turns a
+# runaway stream count into failures on this one pool rather than exhausting the
+# server-wide redis maxclients and taking every other request down with it.
 redisShoppingListDB = redis.StrictRedis(
-    host="redis", port=6379, db=2, decode_responses=True
+    host="redis",
+    port=6379,
+    db=2,
+    decode_responses=True,
+    max_connections=256,
+    **REDIS_KWARGS,
 )
 
 # Shared shopping lists are referenced by a client-generated UUID. We match that
@@ -106,6 +122,30 @@ def handle_redis_error(error: redis.RedisError):
     # 503 is retryable; a bare exception would surface as a hard 500
     logger.exception("redis error")
     return make_response(jsonify({"error": "Service temporarily unavailable"}), 503)
+
+
+@app.errorhandler(pymysql.Error)
+def handle_db_error(error: pymysql.Error):
+    # 503 is retryable; a bare exception would surface as a hard 500
+    logger.exception("database error")
+    return make_response(jsonify({"error": "Service temporarily unavailable"}), 503)
+
+
+_flask_restful_error_router = api.error_router
+
+
+def _error_router(original_handler: Any, e: Exception):
+    # flask-restful wraps flask's exception handling and turns anything raised
+    # inside a Resource into its own generic 500 before flask's errorhandlers get
+    # a look. Route just the backend-outage exceptions past it so /recipes and
+    # friends answer 503 like the plain routes do; everything else keeps
+    # flask-restful's error formatting.
+    if isinstance(e, (pymysql.Error, redis.RedisError)):
+        return original_handler(e)
+    return _flask_restful_error_router(original_handler, e)
+
+
+api.error_router = _error_router
 
 
 @app.route("/test-uptime", methods=["GET"])
@@ -184,6 +224,11 @@ def listOfshoppingLists():
     return make_response("", 200)
 
 
+# Below every reverse proxy read timeout in front of the api, so an idle stream is
+# never the reason a proxy cuts the connection.
+SSE_KEEPALIVE_SECONDS = 15.0
+
+
 def shoppinglist_stream(list_id: str):
     # pubsub holds a pool connection for the SSE lifetime; finally returns it
     # on client disconnect (GeneratorExit) or error, so the pool never leaks.
@@ -193,7 +238,16 @@ def shoppinglist_stream(list_id: str):
         data = [json.loads(x) for x in data]  # type: ignore
         yield "data: %s\n\n" % json.dumps(data)
         pubsub.subscribe(list_id)
-        for message in pubsub.listen():
+        while True:
+            # A bounded read rather than pubsub.listen(): a generator parked in
+            # listen() only learns the client is gone when it next yields, so a
+            # stream on a quiet list would hold its greenlet and pooled connection
+            # forever. The keepalive write fails promptly once nobody is reading,
+            # which raises GeneratorExit and runs the cleanup below.
+            message = pubsub.get_message(timeout=SSE_KEEPALIVE_SECONDS)
+            if message is None:
+                yield ": keepalive\n\n"
+                continue
             if message["type"] == "message":
                 m = json.loads(message["data"])
                 yield "data: %s\n\n" % m["data"]
