@@ -7,12 +7,6 @@ services:
     env_file:
       - db.env
     healthcheck:
-      # Checks the one thing the api needs at import: the app database answering a
-      # query over TCP. healthcheck.sh is not usable here -- it connects over TCP
-      # too, so socket auth never applies, and it has no credentials of its own
-      # unless the mysql@localhost account was created at first init.
-      # start_period is generous because InnoDB recovery on the real dataset is
-      # much slower than on the ephemeral CI database.
       test:
         - CMD-SHELL
         - mariadb -h 127.0.0.1 -u"$$MYSQL_USER" -p"$$MYSQL_PASSWORD" -e "select 1" "$$MYSQL_DATABASE" >/dev/null 2>&1
