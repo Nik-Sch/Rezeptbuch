@@ -7,11 +7,11 @@ services:
     env_file:
       - db.env
     healthcheck:
-      # --su-mysql runs the probe as the mysql unix user, which authenticates over
-      # the socket; without it the probe connects as root and needs credentials.
-      # start_period is generous because InnoDB recovery on the real dataset is
-      # much slower than on the ephemeral CI database.
-      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      # Probes as root, which mariadb lets authenticate over the unix socket
+      # without the password (--su-mysql instead fails: the mysql account gets no
+      # unix_socket auth here). start_period is generous because InnoDB recovery
+      # on the real dataset is much slower than on the ephemeral CI database.
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 10s
       retries: 30
