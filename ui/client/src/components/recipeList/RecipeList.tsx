@@ -15,7 +15,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { ISort, SortSelect } from '../helpers/SortSelect';
-import { useMobile, useSessionState, useOnline } from '../helpers/CustomHooks';
+import { useMobile, useSessionState, useOnline, useWindowDimensions } from '../helpers/CustomHooks';
 import RecipeListItem from './RecipeListItem';
 import SideMenu, { INavigationLink, Counts } from '../SideMenu';
 import MobileHeader from '../MobileHeader';
@@ -35,7 +35,7 @@ import {
   sessionStorageScrollPosition,
 } from '../../util/StorageKeys';
 import { AppToasterBottom } from '../../util/toaster';
-import { WindowScroller, List } from 'react-virtualized';
+import { List } from 'react-virtualized';
 import i18n from '../../util/i18n';
 import { CategoryMultiSelect } from '../helpers/CategoryMultiSelect';
 import { UserMultiSelect } from '../helpers/UserMultiSelect';
@@ -106,6 +106,7 @@ export default function RecipeList(props: IDarkThemeProps) {
   const [filterIsOpen, setFilterIsOpen] = useState(false);
   const timeout = useRef<number | undefined>(undefined);
   const mobile = useMobile();
+  const { width: windowWidth } = useWindowDimensions();
   const status = getUserInfo();
   const hasWriteAccess = status?.write ?? false;
 
@@ -426,30 +427,20 @@ export default function RecipeList(props: IDarkThemeProps) {
           {recipes.length > 0 && recipesToShow.length === 0 && (
             <H3 className="error">{t('noRecipesMatching')}</H3>
           )}
-          <WindowScroller>
-            {({ height, isScrolling, onChildScroll, scrollTop, width }) => {
-              const listWidth = mobile ? width - 40 : Math.min(width, 1200) - 280; // compensate for sidebar in desktop
-              return (
-                <List
-                  autoHeight={true}
-                  height={height}
-                  isScrolling={isScrolling}
-                  onScroll={onChildScroll}
-                  rowCount={recipesToShow.length}
-                  rowHeight={(mobile ? 175 : 150) + 20}
-                  scrollTop={scrollTop}
-                  width={listWidth}
-                  rowRenderer={({ index, style }) => (
-                    <RecipeListItem
-                      recipe={recipesToShow[index]}
-                      style={style}
-                      key={recipesToShow[index].id}
-                    />
-                  )}
-                />
-              );
-            }}
-          </WindowScroller>
+          <List
+            scrollElement="window"
+            rowCount={recipesToShow.length}
+            rowHeight={(mobile ? 175 : 150) + 20}
+            // compensate for sidebar in desktop
+            width={mobile ? windowWidth - 40 : Math.min(windowWidth, 1200) - 280}
+            rowRenderer={({ index, style }) => (
+              <RecipeListItem
+                recipe={recipesToShow[index]}
+                style={style}
+                key={recipesToShow[index].id}
+              />
+            )}
+          />
         </div>
       </div>
       {mobile && online && hasWriteAccess && (
