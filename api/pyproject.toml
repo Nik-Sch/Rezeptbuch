@@ -12,7 +12,7 @@ dependencies = [
     "flask-restful (>=0.3.10,<0.4.0)",
     "flask-httpauth (>=4.8.1,<5.0.0)",
     "flask-compress (>=1.24,<2.0)",
-    "pillow (>=12.3.0,<13.0.0)",
+    "pillow (>=13.0.0,<14.0.0)",
     "flask-session (>=0.8.0,<0.9.0)",
     "pywebpush (>=2.3.0,<3.0.0)",
     "redis (>=8.0.0,<9.0.0)",
@@ -32,13 +32,13 @@ build-backend = "poetry.core.masonry.api"
 package-mode = false
 
 [tool.poetry.group.dev.dependencies]
-pyright = "^1.1.410"
-isort = "^8.0.1"
-black = "^26.5.1"
-flake8 = "^7.3.0"
-flake8-bugbear = "^25.11.29"
+pyright = "^1.1.414"
+isort = "^9.0.2"
+black = "^26.10.1"
+flake8 = "^7.4.1"
+flake8-bugbear = "^26.9.30"
 flake8-pyproject = "^1.2.4"
-pytest = "^8.3.0"
+pytest = "^9.1.1"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

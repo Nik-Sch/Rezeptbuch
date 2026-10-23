@@ -33,7 +33,7 @@ The api restores its **DB schema from a private backup repo** (`$BACKUP_REPO`) o
   ```
   docker run --rm --network host -v "$PWD":/work -w /work \
     -e E2E_BASE_URL=http://localhost:5173 \
-    mcr.microsoft.com/playwright:v1.60.0-jammy npx playwright test [--update-snapshots]
+    mcr.microsoft.com/playwright:v1.64.1-jammy npx playwright test [--update-snapshots]
   ```
   Files are written as root → `sudo chown -R "$(id -u):$(id -g)" e2e` after.
 - `global-setup.ts` registers a test user + seeds recipes/shopping-list **via the API** (idempotent); auth state saved to `e2e/.auth/`.
@@ -49,4 +49,5 @@ Jobs: `ui` (client+server lint/build/format), `python-api` (3.12/3.13 lint/type/
 ## Conventions
 - Branch + PR for changes; **don't merge** — the maintainer approves/merges.
 - Dependency upgrades done in waves: React 19 first, then react-router 7 / i18next 26 / TypeScript 6, then Blueprint `Popover` → `PopoverNext` (Floating UI; `position`→`placement`, `minimal`→`animation="minimal"`+`arrow={false}`). One upgrade remains deliberately deferred: **eslint stays 9** (eslint-plugin-react has no eslint-10-compatible release — eslint 10 crashes it via removed `context.getFilename()`). `@typescript-eslint/no-deprecated` is now `error`.
+- `react-router` is a direct client dep only to keep it deduped: `react-router-prompt` peers on `react-router >=7`, so without it npm nests react-router 8 and the app crashes with `useBlocker must be used within a data router`. TS 7 is blocked too (typescript-eslint peers `typescript <6.1`).
 - TS 6: `moduleResolution: "node"` is deprecated → client uses `bundler`, server uses `nodenext` (relative imports need `.js`, and `outDir` requires explicit `rootDir`).

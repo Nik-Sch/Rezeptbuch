@@ -42,7 +42,7 @@ screenshots are byte-for-byte comparable with the committed baselines and CI.
    # from ui/client
    docker run --rm --network host -v "$PWD":/work -w /work \
      -e E2E_BASE_URL=http://localhost:5173 \
-     mcr.microsoft.com/playwright:v1.60.0-jammy \
+     mcr.microsoft.com/playwright:v1.64.1-jammy \
      npx playwright test
    ```
 
@@ -59,7 +59,7 @@ image CI uses**, otherwise they will mismatch on the runner:
 # from ui/client, with the stack + Vite running
 docker run --rm --network host -v "$PWD":/work -w /work \
   -e E2E_BASE_URL=http://localhost:5173 \
-  mcr.microsoft.com/playwright:v1.60.0-jammy \
+  mcr.microsoft.com/playwright:v1.64.1-jammy \
   npx playwright test --update-snapshots
 # files are written as root; fix ownership:
 sudo chown -R "$(id -u):$(id -g)" e2e
